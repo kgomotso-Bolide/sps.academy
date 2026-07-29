@@ -1,4 +1,4 @@
-/* Module cards: real photo banners (loaded over gradient fallback) + link each card to its module page */
+/* Course cards: real photo banners (loaded over gradient fallback) + link each card to its course page */
 (function(){
   var CARDS=[
     ["AI Fundamentals for the Workplace","ai-fundamentals","1677442136019-21780ecad995"],
