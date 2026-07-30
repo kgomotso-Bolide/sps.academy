@@ -29,7 +29,7 @@
     var t=h.textContent.trim(), hit=null;
     for(var i=0;i<CARDS.length;i++){ if(t.indexOf(CARDS[i][0])>-1){ hit=CARDS[i]; break; } }
     if(!hit) return;
-    var slug=hit[1], photo=hit[2], href="course.html?c="+slug;
+    var slug=hit[1], photo=hit[2], href="course?c="+slug;
     var inner=card.querySelector('.ccard-img-inner'), imgWrap=card.querySelector('.ccard-img');
     if(inner&&imgWrap){ var pre=new Image(); pre.onload=(function(inner,imgWrap,photo){return function(){inner.style.backgroundImage="url('"+img(photo)+"')";inner.style.backgroundColor="#15131a";imgWrap.classList.add('has-photo');};})(inner,imgWrap,photo); pre.src=img(photo); }
     if(!h.querySelector('a')) h.innerHTML='<a href="'+href+'" style="color:inherit">'+h.innerHTML+'</a>';
