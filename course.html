@@ -139,7 +139,11 @@
 </div>
 
 <script>
-  const SAMPLE="https://www.w3schools.com/html/mov_bbb.mp4"; // placeholder stream — swap per lesson
+  // Placeholder intro clip: "A Designer Interacting With a Chatbot" (Coverr).
+  // Coverr licence: free for commercial use, no attribution required. Self-hosted
+  // in resources/ so the site doesn't depend on a third-party CDN staying up.
+  // Swap per lesson by giving each lesson its own data-src.
+  const SAMPLE="resources/ai-course-intro.mp4";
   function img(id,w){return "https://images.unsplash.com/photo-"+id+"?auto=format&fit=crop&w="+(w||900)+"&q=70";}
   const POOL=["1677442136019-21780ecad995","1526374965328-7f61d4dc18c5","1488229297570-58520851e868","1531746790731-6c087fecd65a","1454165804606-c3d57bc86b40","1518186285589-2f7649de83e0"];
   const DUR=["8:40","9:15","10:05","7:50","11:20","9:30","8:10","10:40","9:55","12:05","8:35","11:10"];
