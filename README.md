@@ -70,7 +70,7 @@ qualification delivered through an accredited provider.
 company site then = copy the repo, edit one block, drop in the logo. *Status: proposed — not yet
 refactored; the current site has SPS values inline.*
 
-**Repo model:** one repo + GitHub Pages site per company (this one is `sibusis-code/sps.academy`).
+**Repo model:** one repo + GitHub Pages site per company (this one is `kgomotso-bolide/sps.academy`).
 
 ---
 
@@ -172,8 +172,8 @@ All course content lives in one place: the **`COURSES` catalog** inside `course.
 
 - **Static HTML/CSS/JS** — no framework, no backend, no database, no build.
 - **Hosting:** GitHub Pages (free), served from `main` branch root.
-  - Repo: `https://github.com/sibusis-code/sps.academy`
-  - Live: **https://sibusis-code.github.io/sps.academy/**
+  - Repo: `https://github.com/kgomotso-bolide/sps.academy`
+  - Live: **https://kgomotso-bolide.github.io/sps.academy/**
 - **Deploy = push.** Every push to `main` triggers a Pages rebuild (~1 min).
 
 ```bash
