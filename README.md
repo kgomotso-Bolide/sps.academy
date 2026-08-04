@@ -1,9 +1,10 @@
 # SPS · AI Skills Programme — Website Blueprint
 
-> **AI Skills for the Modern Workforce**
-> Professional online AI training for SPS teams, delivered in association with Centenary Networks,
-> a QCTO-accredited Skills Development Provider — plus a nationally accredited qualification for
-> technical staff who want to take it further.
+> **AI Skills, Built In-House**
+> SPS Academy is SPS's own training academy, for SPS staff: a catalogue of 800
+> qualifications and courses, fully funded by the company and delivered online. Accredited
+> qualifications are delivered in association with Centenary Networks, a QCTO-accredited
+> Skills Development Provider.
 
 This repository is the public-facing website for the programme. This README is the **blueprint**:
 it captures the positioning and messaging spine and documents how the site is built so anyone can
@@ -13,8 +14,11 @@ maintain or extend it.
 
 ## 1. The Spine (positioning — do not drift from this)
 
-**What we sell:** **courses.** Professional online AI short courses for teams, plus the nationally
-accredited **Occupational Certificate: Computer Technician** offered alongside them.
+**What this is:** an **in-house academy**, not a product being sold. The site speaks to SPS staff
+in SPS's voice: courses are **fully funded by SPS**, you **register your interest with HR**,
+and the primary action is **Upskill Yourself** rather than "Talk to Our Team". The catalogue runs to
+**800 qualifications and courses** (20 live on the site today), including the nationally accredited
+**Occupational Certificate: Computer Technician**.
 
 > ⚠️ **Do not reintroduce the "credit-bearing" framing.** An earlier revision positioned the product
 > as credit-bearing modules laddering toward a qualification, with B-BBEE Skills Development returns
@@ -25,25 +29,34 @@ accredited **Occupational Certificate: Computer Technician** offered alongside t
 
 The three supporting pillars on the home page:
 
-1. **Backed by an Accredited Provider** — the academy operates in association with Centenary Networks, a QCTO-accredited Skills Development Provider, so accredited qualifications carry real national recognition.
-2. **Built for Business** — investing in your people supports workforce transformation goals, turning staff development into measurable return.
-3. **Fully Online** — learn from anywhere in South Africa; flexible virtual delivery, no travel, no downtime.
+1. **800 Courses and Growing** — the catalogue spans technical, business, compliance, safety and admin, so this isn't only for the people whose jobs already touch AI.
+2. **Built Around Your Job** — every course is grounded in the work we actually do, so what you learn this week you can use next week.
+3. **Fully Online** — study from any site or from home; no travel, no lost shifts, training that fits around operational duties.
 
-**Audience:** SPS (Sustainable Power Solutions) — a **solar / energy business**. Framing is workforce
-development for an AI-disrupted sector, aimed at decision-makers and the technicians, installers and
-support teams who'll learn.
+> ⚠️ **Structure is shared with the Fungi and Equinix academies.** The three sites run the same pages,
+> components and JS; only brand, palette, logo and industry vocabulary differ. Change the structure
+> on one and it should be ported to the other two, or they drift apart.
 
-**The energy-sector line:** *"For a solar business, this means technicians, installers, and support
-teams building real technical and AI capability — practical courses that fit around the working day,
-and a credentialed path for the people who want to take it further as the sector goes digital."*
+**Audience:** SPS staff — a **solar / energy business**. Everyone from installers and PV technicians
+to field, sales, admin and management. No technical background assumed.
 
-**Primary calls to action:** `Explore Courses` · `Talk to Our Team`
+**The energy-sector line:** *"Installers, field teams, sales and support staff — all building real
+technical and AI capability. Practical courses that fit around the working day, and a credentialed
+path for anyone who wants to take it further as the energy sector goes digital."*
+
+**Industry vocabulary** (what changes from the Fungi original): metering → solar/PV. The Skills Gap
+roles are Solar Installer / PV Technician · Field Operations & Maintenance · Sales & Projects ·
+Customer Care · Data & Systems · Team Lead · Manager · Admin & Support. Same eight keys as the other
+two sites — `skills-gap.js`, `profile.html` and `profile-page.js` must agree on them.
+
+**Primary calls to action:** `Explore Courses` · `Upskill Yourself`
 
 ### Approved hero copy (current)
-- **Badge / eyebrow:** AI · Live & Hands-On — AI Skills · Online · South Africa
-- **Headline:** AI Skills for the *Modern Workforce*
-- **Subtext:** Professional online AI training for your teams — delivered by SPS, in association with
-  Centenary Networks, a QCTO-accredited Skills Development Provider.
+- **Badge / eyebrow:** AI · Live & Hands-On — Our In-House Academy · Online · For SPS Employees
+- **Headline:** AI Skills, Built *In-House*
+- **Subtext:** SPS Academy is our own training academy — open to you, funded by SPS, and delivered
+  online so it fits around your work. AI is where we started, and our catalogue now runs to 800
+  qualifications and courses across every part of the business.
 
 ---
 
@@ -101,21 +114,33 @@ don't reintroduce it.)
 
 ```
 sps/
-├── index.html              # Home (lean): hero, 3 pillars, popular-courses teaser, CTA
-├── courses.html            # Courses hub: full catalogue + accredited qualification
-├── about.html              # About: positioning, energy-sector line, accreditation
+├── index.html              # Home: hero + NQF explainer, 800-catalogue band, GM message,
+│                           #   3 pillars, course teaser, photo posters, CTA
+├── courses.html            # Courses hub: search + credential/subject filters, three bands
+│                           #   (ours · more AI · free international), accreditation badges
+├── about.html              # About: positioning, industry line, accreditation, photo posters
+├── skills-gap.html         # Skills Gap Analysis — 3-step self-assessment, runs in-browser
+├── profile.html            # Optional local profile (no account, localStorage only)
 ├── ai-in-action.html       # Interactive AI demo + impact stats
-├── contact.html            # Contact details + working enquiry form
+├── contact.html            # Contact details + working registration form
 ├── course.html             # ONE data-driven COURSE template — renders any course via ?c=<slug>
 ├── ai-fundamentals.html    # Legacy URL → redirects to course.html?c=ai-fundamentals
 ├── thanks.html             # Form submission confirmation page
 │
-├── styles.css              # SHARED stylesheet for every page (orange/green design system)
-├── site.js                 # SHARED: nav toggle, scroll shadow, scroll-reveal
+├── styles.css              # SHARED stylesheet for every page (brand tokens in :root)
+├── site.js                 # SHARED: nav toggle, scroll shadow, ?course= prefill
 ├── cards.js                # SHARED: course-card photo banners + links (Home + Courses)
+├── courses-index.js        # Courses page: search/filter, external cards, badge popovers
+├── profile.js              # SHARED: profile store, nav avatar, form prefill, save-a-course
+├── profile-page.js         # Profile page: hydrate form, skills snapshot, saved courses
+├── skills-gap.js           # Skills Gap model + rendering (also runs headless under Node)
 ├── assistant.js            # SHARED: client-side "Ask the Academy" AI assistant
-├── neural.js               # Home hero neural-network canvas
+├── neural.js               # Home hero neural-network canvas (motion PAUSED — see file)
 ├── demo.js                 # AI-in-Action typewriter demo + counters
+│
+├── images/gm-photo.svg     # PLACEHOLDER — General Manager portrait, awaiting the real photo
+├── images/poster-1.svg     # PLACEHOLDER — academy photograph 1
+├── images/poster-2.svg     # PLACEHOLDER — academy photograph 2
 │
 ├── sps-dark-logo.svg       # Brand mark
 ├── resources/*.pdf         # Downloadable PDF resources (placeholders, swappable)
@@ -220,8 +245,22 @@ accredited qualification.
 - [x] **Per-course outlines** — each of the 20 courses has its own tailored curriculum (`MOD_*` arrays in `course.html`).
 - [x] **Working contact form** — wired to **FormSubmit.co → accounts@cn.co.za** (redirects to `thanks.html`); real email/phone in place. *First submission triggers a one-time activation email to accounts@cn.co.za — click it to start receiving enquiries.*
 - [x] **AI assistant** — self-contained client-side helper (`Ask the Academy`) on every page: finds courses, explains how the training and accreditation work, routes to the team. No backend/API key (safe on static hosting); upgradeable to a live LLM later if a backend is added.
+- [x] **Ported the Fungi structure (4 Aug 2026)** — same pages, components and JS as the Fungi and
+  Equinix academies; only brand, palette, logo and industry vocabulary differ. Added Skills Gap,
+  Profile, the course search/filter index, the 800-catalogue band, the GM message and the poster band.
+- [x] **Internal voice** — the site speaks as SPS's own academy to SPS staff: "Fully funded by
+  SPS", "register your interest with HR", "Upskill Yourself". No group rates, no corporate quotes.
+- [ ] **GM name, photograph and message** — `images/gm-photo.svg` is a placeholder; the name reads
+  "Name to follow" and the quote is generic. Replace all three when SPS supplies them.
+- [ ] **Academy photographs** — `images/poster-1.svg` and `poster-2.svg` are placeholders on both the
+  home and about pages, with "Caption to follow" captions. Swap the images and rewrite the captions.
+- [ ] **Sign off the Skills Gap role targets** — the eight per-role targets in `skills-gap.js` were
+  written from this site's own description of the work and have **not** been reviewed by the people who
+  run those teams. The page says so; get them checked before anyone treats the output as authoritative.
+- [ ] **Load the remaining catalogue** — only 20 of the 800 are on the site, and the Skills Gap tool
+  only recommends from those 20. The copy is explicit about this and points staff at HR.
 - [ ] **Real content** — videos + PDFs + facilitator bios from SPS/Centenary.
-- [ ] **Energy-sector imagery** — tilt course/hero photography toward the energy industry (copy is already energy-framed).
+- [ ] **Real phone number** — `012 345 6789` is still a placeholder on the contact page and in the assistant.
 - [ ] **Custom domain** (e.g. `academy.sps…`) once decided.
 
 ---

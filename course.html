@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Course — SPS Academy</title>
-<meta name="description" content="Video-led online AI courses with downloadable workbooks and resources — by SPS Academy, in association with Centenary Networks.">
+<meta name="description" content="Video-led online courses with downloadable workbooks and resources, open to SPS employees through SPS Academy.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,8 +17,10 @@
       <a href="ai-in-action" data-nav="ai">AI in Action</a>
       <a href="about" data-nav="about">About</a>
       <a href="courses" data-nav="courses" class="active">Courses</a>
+      <a href="skills-gap" data-nav="skills">Skills Gap</a>
       <a href="contact" data-nav="contact">Contact</a>
-      <a href="contact" class="nav-cta">Talk to Our Team</a>
+      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
+      <a href="contact" class="nav-cta">Upskill Yourself</a>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   </div>
@@ -33,10 +35,11 @@
         <h1 id="c-h1"></h1>
         <p class="lead" id="c-lead"></p>
         <div class="actions">
-          <a href="contact" class="btn btn-primary" id="c-enrol">Talk to Our Team</a>
+          <a href="contact" class="btn btn-primary" id="c-enrol">Upskill Yourself</a>
           <button class="btn btn-light videoplay" data-src="SAMPLE" data-title="Course Introduction">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M8 5v14l11-7z"/></svg> Watch intro
           </button>
+          <button class="btn btn-light" id="c-save">Save to my profile</button>
         </div>
         <div class="ataglance" id="c-facts"></div>
       </div>
@@ -99,12 +102,12 @@
 <section>
   <div class="wrap">
     <div class="instructor reveal">
-      <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=70" alt="Course facilitator portrait">
+      <img class="logo" src="sps-dark-logo.svg" alt="SPS Academy">
       <div>
         <div class="ieyebrow">Your facilitator</div>
         <h3>Facilitated by the SPS Academy team</h3>
         <div class="role">AI Skills &amp; Workforce Development</div>
-        <p>Our courses are delivered by experienced facilitators in association with Centenary Networks, a QCTO-accredited Skills Development Provider. Lessons are practical and grounded in real South African workplace examples — designed so anyone can follow along, regardless of technical background.</p>
+        <p>Your courses are delivered by experienced facilitators. Lessons are practical and built around the work we do here — designed so anyone at SPS can follow along, whatever your technical background.</p>
       </div>
     </div>
   </div>
@@ -112,9 +115,9 @@
 
 <section class="enrol-band">
   <div class="wrap">
-    <h2>Ready to upskill your team?</h2>
-    <p>Enrol an individual or train a whole department. Speak to our team about group rates and tailored programmes.</p>
-    <a href="contact" class="btn btn-primary">Talk to Our Team</a>
+    <h2>Ready to get started?</h2>
+    <p>Register your interest with HR and we'll confirm your place on the next intake. Fully funded by SPS.</p>
+    <a href="contact" class="btn btn-primary">Upskill Yourself</a>
   </div>
 </section>
 
@@ -127,7 +130,7 @@
         <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
       </div>
     </div>
-    <p class="disclaimer">Professional AI courses are non-accredited short courses unless explicitly marked as an accredited qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
+    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue of 800 qualifications and courses is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification. Not all 800 are listed on this site yet. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
 
@@ -154,8 +157,8 @@
     "Health & Medicine":["See how AI is applied in clinical and research settings","Understand the data and models behind the tools","Explore real case studies and applications","Weigh the ethics, safety and limitations","Recognise where AI adds value in practice"],
     "Social Sciences":["Understand AI's impact on people and society","Explore policy, governance and regulation","Evaluate AI claims and risks critically","Apply responsible-use principles","Connect the ideas to real-world decisions"],
     "Compliance":["Recognise the key risks and obligations","Protect privacy and sensitive data","Spot and reduce bias and inaccuracy","Use AI safely in a professional setting","Help shape a simple, practical AI policy"],
-    "Leadership":["Set a clear AI vision for your organisation","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
-    "Accredited":["Build accredited, job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Earn a nationally recognised qualification","Open up clear career pathways"]
+    "Leadership":["Set a clear AI vision for your department","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
+    "Technical":["Build job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Come away with a qualification that is yours to keep","Open up clear career pathways"]
   };
 
   function defaultModules(){return [
@@ -235,7 +238,7 @@
     {t:"Building an Ethical Culture",lessons:["Policies & guardrails","Responsible procurement","Your ethical AI checklist"]}
   ];
   const MOD_IN_ACTION=[
-    {t:"Understanding AI in All Its Forms",lessons:["The AI toolbox","What AI can & can't do","Mapping AI to your organisation"]},
+    {t:"Understanding AI in All Its Forms",lessons:["The AI toolbox","What AI can & can't do","Mapping AI to your department"]},
     {t:"Strategy & Adoption",lessons:["Building an adoption roadmap","Data readiness","Risk & responsible adoption"]},
     {t:"People & Process",lessons:["Roles, skills & culture","Redesigning workflows","Change management"]},
     {t:"Delivering Impact",lessons:["Measuring outcomes","Scaling what works","Your organisational action plan"]}
@@ -293,15 +296,15 @@
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online · Self-paced",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
     "ai-tools-productivity":{title:"AI Tools for Productivity",cat:"Business",mode:"Online · Self-paced",level:"Beginner",img:"1581091226825-a6a2a5aee158",lead:"Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools and workflow automation."},
     "responsible-ai":{title:"Responsible & Ethical AI Use",cat:"Compliance",mode:"Online · Self-paced",level:"Intermediate",img:"1620712943543-bcc4688e7485",lead:"Using AI safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of AI in a professional setting."},
-    "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For decision-makers: identifying AI opportunities, managing AI-enabled teams, and leading responsible adoption across your organisation."},
+    "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
-    "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Accredited",mode:"Online",level:"NQF 5",accred:true,img:"1581092160562-40aa08e78837",lead:"A nationally accredited qualification covering the technical foundations of computer systems, hardware and support. Qualification ID 101408 · 282 credits · NQF Level 5, delivered in association with Centenary Networks (QCTO)."},
+    "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
-    "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for your organisation — moving AI from hype to impact."},
+    "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},
     "ai-medicine-foundations":{title:"AI in Medicine: Foundations and Applications",cat:"Health & Medicine",mode:"Online · Self-paced",level:"Intermediate",img:"1576091160550-2173dba999ef",lead:"Explore the foundational principles of artificial intelligence and its transformative applications in medicine and biomedical research."},
     "ai-ethics-business":{title:"AI Ethics in Business: Managing Bias and Ethical Usage",cat:"Business",mode:"Online Live",level:"Intermediate",img:"1488229297570-58520851e868",lead:"Prepare for the future and learn the best way to use new AI tools and capabilities responsibly, managing bias and ethical risk."},
-    "ai-in-action":{title:"AI in Action: Organizational Strategy for Responsible Adoption",cat:"Social Sciences",mode:"Online · Online Live",level:"Executive",img:"1504384308090-c894fdcc538d",lead:"AI in Action provides the insights and tools you'll need to understand and utilise AI in all its forms across your organisation."},
+    "ai-in-action":{title:"AI in Action: Organizational Strategy for Responsible Adoption",cat:"Social Sciences",mode:"Online · Online Live",level:"Executive",img:"1504384308090-c894fdcc538d",lead:"AI in Action provides the insights and tools you'll need to understand and utilise AI in all its forms across the business."},
     "cybersecurity":{title:"Cybersecurity: The Intersection of Policy and Technology",cat:"Social Sciences",mode:"Online · Online Live",level:"Executive",img:"1550751827-4bd374c3f58b",lead:"An executive program exploring how policy and technology, together, can address the critical threats of the cyber world."},
     "ai-medicine-nlp":{title:"AI in Medicine: Natural Language Processing",cat:"Health & Medicine",mode:"Online · Self-paced",level:"Advanced",img:"1518186285589-2f7649de83e0",lead:"Discover how natural language processing is applied in medicine — from clinical notes to the research literature."},
     "cs-for-lawyers":{title:"Computer Science for Lawyers",cat:"Social Sciences",mode:"Online · Self-paced",level:"Intermediate",img:"1589829545856-d10d557cf95f",lead:"A practical grounding in the computer science concepts every modern legal professional should understand."},
@@ -337,14 +340,17 @@
 
     // tags
     const tags=[];
-    if(c.accred)tags.push('<span class="accred">QCTO Accredited</span>');
+    if(c.acc==="local")tags.push('<span class="accred">Locally accredited · NQF 5</span>');
+    if(c.acc==="intl")tags.push('<span class="accred">Internationally accredited</span>');
     tags.push('<span>'+ESC(c.cat)+'</span>','<span>'+ESC(c.mode)+'</span>','<span>'+ESC(c.level)+'</span>');
     if(c.avail)tags.push('<span>'+ESC(c.avail)+'</span>');
     document.getElementById('c-tags').innerHTML=tags.join('');
 
     // facts
     let nLessons=0;modules.forEach(m=>nLessons+=m.lessons.length);
-    const facts=[["Duration",c.accred?"12 months":"6 weeks"],["Effort",c.accred?"Part-time":"3–4 hrs / week"],["Format","Video + workbooks"],["Lessons",nLessons+" videos"],["Resources","5 PDF downloads"]];
+    const facts=[["Duration",c.acc?"12 months":"6 weeks"],["Effort",c.acc?"Part-time":"3–4 hrs / week"],["Format","Video + workbooks"],["Lessons",nLessons+" videos"],["Resources","5 PDF downloads"]];
+    if(c.qid)facts.push(["SAQA qualification ID",c.qid]);
+    if(c.credits)facts.push(["Credits",c.credits]);
     document.getElementById('c-facts').innerHTML=facts.map(f=>'<div><span>'+f[0]+'</span><strong>'+f[1]+'</strong></div>').join('');
 
     // hero video
@@ -413,6 +419,7 @@
 
   render();
 </script>
+<script src="profile.js"></script>
 <script src="assistant.js"></script>
 </body>
 </html>

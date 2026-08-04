@@ -2,14 +2,14 @@
   (function(){
     const chat=document.getElementById('aiChat'),tabs=document.getElementById('aiTabs');if(!chat||!tabs)return;
     const SCENES=[
-      {u:"Draft a friendly email to a client letting them know their order ships Friday and apologising for the earlier delay.",
-       b:"<b>Subject: Your order ships Friday</b><br><br>Hi Thandi,<br><br>Good news — your order is packed and will ship this <b>Friday</b>. Apologies for the earlier delay; thank you for your patience. You'll receive tracking the moment it's on the way.<br><br>Warm regards,<br>The Team"},
-      {u:"Summarise this 12-page quarterly report into 3 key points for our leadership meeting.",
-       b:"Here are the 3 headlines from the report:<br><br>• <b>Revenue up 18%</b> QoQ, led by the new online channel.<br>• <b>Support costs down 22%</b> after automating routine queries.<br>• <b>Risk:</b> one supplier now accounts for 40% of stock — worth diversifying."},
-      {u:"I have 5,000 rows of sales data. Which regions are underperforming and why?",
-       b:"Analysis complete:<br><br>• <b>Western Cape & Gauteng</b> are on target.<br>• <b>Eastern Cape is 31% below forecast</b> — driven by two months of stock-outs.<br>• Recommended action: rebalance inventory and review the regional delivery lead time."},
-      {u:"Plan a 6-week project to roll out AI training across a 40-person team.",
-       b:"Here's a phased plan:<br><br>• <b>Wk 1–2:</b> Skills assessment + AI fundamentals for all staff.<br>• <b>Wk 3–4:</b> Role-based tool training (sales, ops, admin).<br>• <b>Wk 5:</b> Hands-on projects on real workflows.<br>• <b>Wk 6:</b> Review, measure time saved, set team standards."}
+      {u:"Draft an email to a customer whose system underproduced last month — two strings were offline and we've now repaired them.",
+       b:"<b>Subject: Your October generation — strings repaired</b><br><br>Hi Nomsa,<br><br>Your system generated less than usual in October because <b>two strings on the north array were offline</b> from the 8th, following an isolator fault. Our team repaired it on the 29th and the array is back at full output.<br><br>The shortfall works out to roughly <b>410 kWh</b>. Your maintenance plan covers the repair in full, and we'll keep a closer watch on that inverter for the next two cycles.<br><br>Kind regards,<br>SPS Customer Care"},
+      {u:"Summarise this month's performance report into 3 points for the ops meeting.",
+       b:"Three things worth raising:<br><br>• <b>Fleet performance ratio 81.4%</b> — up from 76% since the Rosslyn arrays were cleaned.<br>• <b>Two inverters at Midrand still derating</b> above 38 °C — worth checking ventilation before summer.<br>• <b>17 sites below 90% of modelled yield</b>, 12 of them soiling-related — a cleaning cycle would recover most of it."},
+      {u:"Here's 5,000 rows of half-hourly generation data. Which arrays look wrong?",
+       b:"Three anomalies stand out:<br><br>• <b>9 sites generating zero for 14+ days</b> in clear weather — likely tripped isolators or comms failures.<br>• <b>Inverter 3 at Centurion peaks at 62% of nameplate</b> every day from 11:00 — that pattern is shading, not a fault.<br>• <b>Kempton Park is 13% below</b> its neighbours on the same irradiance — check string voltages before you send anyone out."},
+      {u:"Plan a 6-week rollout to install rooftop PV across a 480-unit estate.",
+       b:"Here's a phased plan:<br><br>• <b>Wk 1:</b> Roof survey + structural sign-off; confirm DB positions and access windows.<br>• <b>Wk 2–4:</b> Two teams, 12 roofs a day, each commissioned and registered to the monitoring platform same-day.<br>• <b>Wk 5:</b> Resident onboarding — the app, generation reporting, WhatsApp help line.<br>• <b>Wk 6:</b> Reconcile modelled vs actual yield, close out snags, hand over to the maintenance desk."}
     ];
     let active=-1,timer=null;
     const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');

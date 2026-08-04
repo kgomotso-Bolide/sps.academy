@@ -2,26 +2,26 @@
 (function(){
   if(window.__aiwLoaded)return; window.__aiwLoaded=1;
   var css=
-  ".aiw-btn{position:fixed;right:20px;bottom:20px;z-index:300;display:inline-flex;align-items:center;gap:9px;background:#f37424;color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px/1 Inter,-apple-system,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 16px 36px -14px rgba(243,116,36,.6)}"+
+  ".aiw-btn{position:fixed;right:20px;bottom:20px;z-index:300;display:inline-flex;align-items:center;gap:9px;background:#f37424;color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px/1 Inter,-apple-system,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 16px 36px -14px rgba(0,161,198,.6)}"+
   ".aiw-btn:hover{background:#e35e16}.aiw-btn svg{width:18px;height:18px}.aiw-btn .dot{width:7px;height:7px;border-radius:50%;background:#4da446}"+
-  ".aiw-panel{position:fixed;right:20px;bottom:20px;z-index:301;width:min(384px,calc(100vw - 32px));height:min(564px,calc(100vh - 40px));background:#fff;border:1px solid #e7e4df;border-radius:16px;box-shadow:0 34px 80px -28px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden}"+
+  ".aiw-panel{position:fixed;right:20px;bottom:20px;z-index:301;width:min(384px,calc(100vw - 32px));height:min(564px,calc(100vh - 40px));background:#fff;border:1px solid #dfe7ea;border-radius:16px;box-shadow:0 34px 80px -28px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden}"+
   ".aiw-panel.open{display:flex}"+
-  ".aiw-head{background:#222021;color:#fff;padding:14px 15px;display:flex;align-items:center;gap:11px;flex:0 0 auto}"+
+  ".aiw-head{background:#10333f;color:#fff;padding:14px 15px;display:flex;align-items:center;gap:11px;flex:0 0 auto}"+
   ".aiw-head .av{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#f37424,#faa819);display:grid;place-items:center}.aiw-head .av svg{width:19px;height:19px}"+
   ".aiw-head h4{margin:0;font-size:15px;color:#fff;font-weight:700;line-height:1.1}.aiw-head p{margin:2px 0 0;font-size:11px;color:#b7b2ac}"+
   ".aiw-head .x{margin-left:auto;background:none;border:0;color:#b7b2ac;cursor:pointer;padding:4px;line-height:0}.aiw-head .x:hover{color:#fff}.aiw-head .x svg{width:18px;height:18px}"+
-  ".aiw-body{flex:1;overflow-y:auto;padding:15px;background:#f7f6f4;display:flex;flex-direction:column;gap:10px}"+
+  ".aiw-body{flex:1;overflow-y:auto;padding:15px;background:#f4f8fa;display:flex;flex-direction:column;gap:10px}"+
   ".aiw-msg{max-width:88%;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:13px;word-wrap:break-word}"+
-  ".aiw-msg.bot{background:#fff;border:1px solid #e7e4df;align-self:flex-start;color:#2b2b2b;border-bottom-left-radius:4px}"+
+  ".aiw-msg.bot{background:#fff;border:1px solid #dfe7ea;align-self:flex-start;color:#2b2b2b;border-bottom-left-radius:4px}"+
   ".aiw-msg.me{background:#f37424;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}"+
   ".aiw-msg.bot a{color:#e35e16;font-weight:700}.aiw-msg.bot b{color:#1c1c1f}"+
   ".aiw-cards{display:flex;flex-direction:column;gap:7px;align-self:flex-start;max-width:94%}"+
-  ".aiw-card{display:block;background:#fff;border:1px solid #e7e4df;border-left:3px solid #f37424;border-radius:10px;padding:9px 12px;text-decoration:none}.aiw-card:hover{border-color:#f37424}"+
+  ".aiw-card{display:block;background:#fff;border:1px solid #dfe7ea;border-left:3px solid #f37424;border-radius:10px;padding:9px 12px;text-decoration:none}.aiw-card:hover{border-color:#f37424}"+
   ".aiw-card b{display:block;font-size:13px;color:#1c1c1f;line-height:1.25}.aiw-card span{font-size:11px;color:#5c5c5c;text-transform:uppercase;letter-spacing:.05em}"+
   ".aiw-chipset{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:96%}"+
-  ".aiw-chip{background:#fff;border:1px solid #e7e4df;border-radius:30px;padding:7px 11px;font:600 12px Inter,sans-serif;color:#2b2b2b;cursor:pointer}.aiw-chip:hover{border-color:#f37424;color:#e35e16}"+
-  ".aiw-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e7e4df;background:#fff;flex:0 0 auto}"+
-  ".aiw-foot input{flex:1;border:1px solid #e7e4df;border-radius:9px;padding:10px 12px;font:14px Inter,sans-serif;color:#2b2b2b}.aiw-foot input:focus{outline:2px solid #f37424}"+
+  ".aiw-chip{background:#fff;border:1px solid #dfe7ea;border-radius:30px;padding:7px 11px;font:600 12px Inter,sans-serif;color:#2b2b2b;cursor:pointer}.aiw-chip:hover{border-color:#f37424;color:#e35e16}"+
+  ".aiw-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #dfe7ea;background:#fff;flex:0 0 auto}"+
+  ".aiw-foot input{flex:1;border:1px solid #dfe7ea;border-radius:9px;padding:10px 12px;font:14px Inter,sans-serif;color:#2b2b2b}.aiw-foot input:focus{outline:2px solid #f37424}"+
   ".aiw-foot button{background:#f37424;border:0;color:#fff;border-radius:9px;padding:0 14px;cursor:pointer;line-height:0}.aiw-foot button:hover{background:#e35e16}.aiw-foot button svg{width:18px;height:18px}"+
   ".aiw-typing span{display:inline-block;width:6px;height:6px;margin:0 1px;border-radius:50%;background:#b7b2ac;animation:aiwb 1s infinite}.aiw-typing span:nth-child(2){animation-delay:.15s}.aiw-typing span:nth-child(3){animation-delay:.3s}"+
   "@keyframes aiwb{0%,60%,100%{opacity:.3}30%{opacity:1}}"+
@@ -35,7 +35,7 @@
    {t:"Responsible & Ethical AI Use",slug:"responsible-ai",cat:"Compliance",kw:"responsible ethical ethics privacy bias safe compliance policy popia data"},
    {t:"AI for Leaders & Managers",slug:"ai-leaders",cat:"Leadership",kw:"leaders managers leadership management decision adoption teams executives boss"},
    {t:"AI & New Venture Creation",slug:"new-venture",cat:"Business",kw:"venture startup entrepreneur business innovation founder"},
-   {t:"Occupational Certificate: Computer Technician",slug:"computer-technician",cat:"Accredited · NQF 5",kw:"computer technician hardware systems networking support technical accredited certificate installer repair maintenance qualification"},
+   {t:"Occupational Certificate: Computer Technician",slug:"computer-technician",cat:"Technical",kw:"computer technician hardware systems networking support technical accredited certificate installer repair maintenance qualification"},
    {t:"Deploying TinyML",slug:"deploying-tinyml",cat:"Advanced · Computer Science",kw:"tinyml deploy microcontroller tensorflow embedded edge iot device sensors coding"},
    {t:"Fundamentals of TinyML",slug:"fundamentals-tinyml",cat:"Computer Science",kw:"tinyml fundamentals machine learning embedded basics iot sensors"},
    {t:"AI Strategy for Business Leaders",slug:"ai-strategy",cat:"Executive · Business",kw:"strategy business leaders value roi executive transformation hype impact"},
@@ -69,14 +69,15 @@
   function reply(q){
     var s=q.toLowerCase();
     function has(){for(var i=0;i<arguments.length;i++){if(s.indexOf(arguments[i])>=0)return true;}return false;}
-    if(/^(hi|hello|hey|howzit|good (morning|afternoon|day)|yo|hi there)\b/.test(s)) return [T("Hi! I'm the Academy assistant. I can help you <b>find a course</b>, explain how our training works, or connect you with the team. What are you after?"),CH(["Find a course","How does it work?","Course pricing","Talk to our team"])];
-    if(has("accredit","qcto","centenary","qualification","nqf","credential")) return [T("Our courses are delivered in association with <b>Centenary Networks</b>, a QCTO-accredited Skills Development Provider (Accreditation No. 07-QCTO/SDP180526182035). Alongside our professional AI short courses, we offer the nationally accredited <b>Occupational Certificate: Computer Technician</b>."),C([COURSES[5]])];
-    if(has("price","pricing","cost","fee","how much","rate","quote","afford")) return [T("Pricing is tailored to how many people you're enrolling. The quickest way is to <a href='contact'>talk to our team</a> for a quote, or email <a href='mailto:accounts@cn.co.za'>accounts@cn.co.za</a>."),CH(["Talk to our team"])];
-    if(has("contact","talk","human","agent","call","speak","reach","phone","email","enquire","enquiry")) return [T("You can reach the team at <a href='mailto:accounts@cn.co.za'>accounts@cn.co.za</a> or <a href='tel:0123456789'>012 345 6789</a>, or use the <a href='contact'>enquiry form</a> and we'll come back to you.")];
+    if(/^(hi|hello|hey|howzit|good (morning|afternoon|day)|yo|hi there)\b/.test(s)) return [T("Howzit! I'm the Academy assistant. I can help you <b>find a course</b>, explain how the academy works, or point you to HR to register. What are you after?"),CH(["Find a course","How does it work?","What does it cost?","Register my interest"])];
+    if(has("800","catalogue","catalog","new courses","what else","more courses","beyond ai","non-ai","other courses")) return [T("Big news — as of August 2026 the catalogue runs to <b>800 qualifications and courses</b>, covering technical, business, compliance, safety and admin, not just AI. What you see listed on this site is what's live so far; the rest is being loaded in. If you want something that isn't here yet, <a href='contact'>ask HR</a> — if it's in the catalogue, you can do it."),CH(["Find a course","Register my interest"])];
+    if(has("accredit","qcto","centenary","qualification","nqf","credential")) return [T("Accreditation details for the academy are set out in the footer of every page. If you're after a full qualification rather than a short course, the <b>Occupational Certificate: Computer Technician</b> is the formal technical route — or <a href='contact'>ask HR</a>, since the catalogue runs to 800 items and not all of them are on the site yet."),C([COURSES[5]])];
+    if(has("price","pricing","cost","fee","how much","rate","quote","afford","pay","free")) return [T("Nothing — every course is <b>fully funded by SPS</b>. You just need to <a href='contact'>register your interest</a> and square the timing with your line manager."),CH(["Register my interest"])];
+    if(has("contact","talk","human","agent","call","speak","reach","phone","email","enquire","enquiry","hr","register")) return [T("Send it through to <a href='mailto:accounts@cn.co.za'>accounts@cn.co.za</a> or call <a href='tel:0123456789'>012 345 6789</a>, or fill in the <a href='contact'>registration form</a> and they'll come back to you.")];
     if(has("download","pdf","workbook","resource","slides","material","handout")) return [T("Every course comes with downloadable <b>PDF resources</b> — workbooks, slides, cheat sheets and reading lists — on each course page under “Downloadable resources.”")];
     if(has("video","watch","stream","play")) return [T("Courses are <b>video-led</b> — short lessons you can stream on any device, at your own pace, plus downloadable resources. Open any course and press play."),CH(["Find a course"])];
     if(has("mobile","tablet","desktop","device","laptop")) return [T("Yes — the platform works on <b>mobile, tablet and desktop</b>. Videos stream and PDFs download on any device.")];
-    if(has("how do i start","how does it work","how it works","get started","begin","enrol","enroll","sign up","how do we")) return [T("It's simple: pick a <b>course</b>, and your people learn online at their own pace — fully virtual, no travel, fitted around the working day. Want a suggestion to start with?"),CH(["Find a course","Talk to our team"])];
+    if(has("how do i start","how does it work","how it works","get started","begin","enrol","enroll","sign up","how do we")) return [T("Pick a <b>course</b>, chat to your line manager about the timing, then register your interest with HR. You study online at your own pace — no travel, fitted around your shift. Want a suggestion to start with?"),CH(["Find a course","Register my interest"])];
     if(has("find","recommend","suggest","browse","which","what course","learn","interested","topic","looking for","explore","study")){
       var f1=search(s);
       if(f1.length) return [T("Here are courses that fit:"),C(f1)];
@@ -84,7 +85,7 @@
     }
     var f=search(s);
     if(f.length) return [T("Here's what matches:"),C(f)];
-    return [T("I can help you <b>find a course</b>, explain <b>how our training works</b>, or connect you with the <b>team</b>. Try a topic like “cybersecurity,” “AI for managers” or “TinyML.”"),CH(["Find a course","How does it work?","Course pricing","Talk to our team"])];
+    return [T("I can help you <b>find a course</b>, explain <b>how the academy works</b>, or point you to <b>HR</b> to register. Try a topic like “cybersecurity,” “AI for managers” or “TinyML.”"),CH(["Find a course","How does it work?","What does it cost?","Register my interest"])];
   }
 
   var ICON_SPARK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -92,7 +93,7 @@
   btn.innerHTML='<span class="dot"></span>'+ICON_SPARK+'Ask the Academy';
   var panel=document.createElement('div'); panel.className='aiw-panel'; panel.setAttribute('role','dialog');
   panel.innerHTML=
-   '<div class="aiw-head"><div class="av">'+ICON_SPARK+'</div><div><h4>Academy Assistant</h4><p>Find a course · pricing · enquiries</p></div>'+
+   '<div class="aiw-head"><div class="av">'+ICON_SPARK+'</div><div><h4>Academy Assistant</h4><p>Find a course · how it works · register</p></div>'+
    '<button class="x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>'+
    '<div class="aiw-body"></div>'+
    '<div class="aiw-foot"><input type="text" placeholder="Ask about our courses…" aria-label="Message"><button class="aiw-send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button></div>';
@@ -109,7 +110,7 @@
   }
   function send(text){ if(!text||!text.trim())return; addMsg('me',escapeHtml(text)); inp.value=''; botTurn(reply(text)); }
 
-  function open(){ panel.classList.add('open'); btn.style.display='none'; if(!seeded){ seeded=true; botTurn([T("Hi! I'm the Academy assistant. I can help you <b>find a course</b>, explain how our training works, or connect you with the team."),CH(["Find a course","How does it work?","Course pricing","Talk to our team"])]); } inp.focus(); }
+  function open(){ panel.classList.add('open'); btn.style.display='none'; if(!seeded){ seeded=true; botTurn([T("Howzit! I'm the Academy assistant. I can help you <b>find a course</b>, explain how the academy works, or point you to HR to register."),CH(["Find a course","How does it work?","What does it cost?","Register my interest"])]); } inp.focus(); }
   function close(){ panel.classList.remove('open'); btn.style.display=''; }
   btn.addEventListener('click',open);
   panel.querySelector('.x').addEventListener('click',close);

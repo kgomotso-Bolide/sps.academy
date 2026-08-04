@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Profile — SPS Academy</title>
+<meta name="description" content="An optional profile that saves your details on this device, so registration forms and the Skills Gap check fill themselves in. No account needed.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
+    <div class="nav-links" id="navLinks">
+      <a href="./" data-nav="home">Home</a>
+      <a href="ai-in-action" data-nav="ai">AI in Action</a>
+      <a href="about" data-nav="about">About</a>
+      <a href="courses" data-nav="courses">Courses</a>
+      <a href="skills-gap" data-nav="skills">Skills Gap</a>
+      <a href="contact" data-nav="contact">Contact</a>
+      <a href="profile" data-nav="profile" class="nav-profile active" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
+      <a href="contact" class="nav-cta">Upskill Yourself</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</nav>
+
+<section class="section-dark page-top">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Your Profile</span>
+      <h2 id="pf-greet">Save your details once</h2>
+      <p>Entirely optional — there's no account and no password, and nothing on this site is locked behind it. Fill it in and the registration form and the Skills Gap check will fill themselves in for you. Skip it and everything still works exactly as it does now.</p>
+    </div>
+    <div class="sg-assure reveal">
+      <span class="lbl">Where this is kept</span>
+      Your profile is saved in this browser on this device only. It is never uploaded, and nobody at SPS can see it — not HR, not your manager. <strong>If you're on a shared or site machine, use "Delete my profile" at the bottom when you're finished</strong>, or the next person to open this page will see your details.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sg-wrap">
+      <div id="pf-warn"></div>
+
+      <form class="sg-card reveal" id="pf-form" autocomplete="off">
+        <div class="sg-stepnum">About you</div>
+        <h3>Who you are</h3>
+        <p class="sg-intro">Every field is optional. Fill in as much or as little as you like — whatever you enter is what gets carried across to the forms.</p>
+
+        <div class="two">
+          <div class="field"><label for="pf-name">Full name</label><input type="text" id="pf-name" placeholder="Your name"></div>
+          <div class="field"><label for="pf-empno">Employee number</label><input type="text" id="pf-empno" placeholder="e.g. SP1234"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pf-dept">Department / team</label><input type="text" id="pf-dept" placeholder="e.g. Installations, Sales, Field Ops"></div>
+          <div class="field"><label for="pf-manager">Line manager</label><input type="text" id="pf-manager" placeholder="Manager's name"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pf-email">Work email</label><input type="email" id="pf-email" placeholder="you@company.co.za"></div>
+          <div class="field"><label for="pf-phone">Contact number</label><input type="tel" id="pf-phone" placeholder="+27"></div>
+        </div>
+
+        <div class="sg-stepnum" style="margin-top:30px">Your background</div>
+        <h3>Where you're coming from</h3>
+        <p class="sg-intro">These four feed straight into the Skills Gap check, so you only answer them once.</p>
+
+        <!-- values must match ROLES / YEARS / QUALS / BACKGROUNDS in skills-gap.js -->
+        <div class="two">
+          <div class="field"><label for="pf-role">Your role at SPS</label><select id="pf-role">
+            <option value="">Choose…</option>
+            <option value="install">Solar Installer / PV Technician</option>
+            <option value="field">Field Operations &amp; Maintenance</option>
+            <option value="sales">Sales &amp; Projects</option>
+            <option value="care">Customer Care</option>
+            <option value="datasys">Data &amp; Systems</option>
+            <option value="lead">Team Lead / Supervisor</option>
+            <option value="manager">Manager / Head of Department</option>
+            <option value="support">Admin &amp; Support</option>
+          </select></div>
+          <div class="field"><label for="pf-years">Years doing this kind of work</label><select id="pf-years">
+            <option value="">Choose…</option>
+            <option value="lt1">Less than a year</option>
+            <option value="1-2">1–2 years</option>
+            <option value="3-5">3–5 years</option>
+            <option value="6-10">6–10 years</option>
+            <option value="10+">More than 10 years</option>
+          </select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pf-qual">Highest qualification</label><select id="pf-qual">
+            <option value="">Choose…</option>
+            <option value="none">No formal qualification yet</option>
+            <option value="matric">Matric / NQF 4</option>
+            <option value="cert">Certificate / NQF 5</option>
+            <option value="diploma">National Diploma / NQF 6</option>
+            <option value="degree">Degree / NQF 7</option>
+            <option value="post">Postgraduate / NQF 8+</option>
+          </select></div>
+          <div class="field"><label for="pf-bg">What you did before</label><select id="pf-bg">
+            <option value="">Choose…</option>
+            <option value="energy">Solar / energy</option>
+            <option value="technical">Technical or a trade</option>
+            <option value="service">Retail or customer service</option>
+            <option value="office">Office / admin</option>
+            <option value="finance">Finance</option>
+            <option value="it">IT</option>
+            <option value="first">This is my first job</option>
+            <option value="other">Something else</option>
+          </select></div>
+        </div>
+
+        <div class="sg-nav">
+          <button type="submit" class="btn btn-primary" id="pf-save">Save my profile</button>
+          <span class="pf-saved" id="pf-saved" hidden>Saved</span>
+        </div>
+      </form>
+
+      <div class="sg-card reveal" id="pf-skills">
+        <div class="sg-stepnum">Your skills</div>
+        <h3>Skills snapshot</h3>
+        <div id="pf-skills-body"></div>
+      </div>
+
+      <div class="sg-card reveal" id="pf-courses">
+        <div class="sg-stepnum">Saved courses</div>
+        <h3>Courses you've bookmarked</h3>
+        <div id="pf-courses-body"></div>
+      </div>
+
+      <div class="sg-card reveal">
+        <div class="sg-stepnum">Managing your data</div>
+        <h3>It's yours, and only on this device</h3>
+        <p class="sg-intro">Nothing here has been uploaded. Deleting removes it from this browser immediately and cannot be undone — there is no copy anywhere else to restore from.</p>
+        <div class="sg-actions">
+          <button class="btn btn-ghost-dark" id="pf-print">Print / save as PDF</button>
+          <button class="btn btn-danger" id="pf-clear">Delete my profile</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section-soft">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">What it saves you</span>
+      <h2>Three fewer things to retype</h2>
+    </div>
+    <div class="features">
+      <div class="feat reveal">
+        <h3>Registering for a course</h3>
+        <p>Name, employee number, department, line manager, email and number all arrive filled in. You check them and send.</p>
+      </div>
+      <div class="feat reveal">
+        <h3>The Skills Gap check</h3>
+        <p>Step one is answered before you get there, and you can save your ratings so a repeat check next year starts from where you were.</p>
+      </div>
+      <div class="feat reveal">
+        <h3>Keeping a shortlist</h3>
+        <p>Hit save on any course page and it lands here, so the ones you're weighing up are in one place when you talk to your manager.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></div>
+      <div class="foot-nav">
+        <a href="./">Home</a>
+        <a href="ai-in-action">AI in Action</a>
+        <a href="about">About</a>
+        <a href="courses">Courses</a>
+        <a href="skills-gap">Skills Gap</a>
+        <a href="profile">Profile</a>
+        <a href="contact">Contact</a>
+      </div>
+    </div>
+    <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">
+      <strong>Accreditation</strong>
+      <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
+    </div>
+    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue of 800 qualifications and courses is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification. Not all 800 are listed on this site yet. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
+  </div>
+</footer>
+<script src="site.js"></script>
+<script src="profile.js"></script>
+<script src="profile-page.js"></script>
+<script src="assistant.js"></script>
+</body></html>

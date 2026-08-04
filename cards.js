@@ -25,6 +25,7 @@
   var img=function(id){return "https://images.unsplash.com/photo-"+id+"?auto=format&fit=crop&w=720&q=70";};
   var ARROW=' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;color:var(--accent)"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   document.querySelectorAll('.ccard').forEach(function(card){
+    if(card.dataset.href) return;   // external course — courses-index.js links it out
     var h=card.querySelector('h4'); if(!h) return;
     var t=h.textContent.trim(), hit=null;
     for(var i=0;i<CARDS.length;i++){ if(t.indexOf(CARDS[i][0])>-1){ hit=CARDS[i]; break; } }

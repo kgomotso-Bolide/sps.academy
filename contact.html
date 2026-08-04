@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact — SPS Academy</title>
-<meta name="description" content="Talk to our team about enrolling a single employee or upskilling an entire division with professional online AI training.">
+<title>Register Your Interest — SPS Academy</title>
+<meta name="description" content="Register your interest with HR for a SPS Academy course, or ask a question about the next intake.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,8 +16,10 @@
       <a href="ai-in-action" data-nav="ai">AI in Action</a>
       <a href="about" data-nav="about">About</a>
       <a href="courses" data-nav="courses">Courses</a>
+      <a href="skills-gap" data-nav="skills">Skills Gap</a>
       <a href="contact" data-nav="contact" class="active">Contact</a>
-      <a href="contact" class="nav-cta">Talk to Our Team</a>
+      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
+      <a href="contact" class="nav-cta">Upskill Yourself</a>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   </div>
@@ -25,34 +27,42 @@
 <section class="section-soft page-top" id="contact">
   <div class="wrap">
     <div class="sec-head reveal">
-      <span class="eyebrow">Get in Touch</span>
-      <h2>Let's talk about building your team's AI capability</h2>
-      <p>Whether you're enrolling a single employee or upskilling an entire division, our team will help you find the right course.</p>
+      <span class="eyebrow">Upskill Yourself</span>
+      <h2>Ready to join the next intake?</h2>
+      <p>Fill in the form below and HR will confirm your place on the next intake. Have a word with your line manager first so the two of you can plan the cover — then send this through.</p>
     </div>
     <div class="contact-grid">
       <div class="contact-info reveal">
-        <p><span class="lbl">Email</span><a href="mailto:accounts@cn.co.za">accounts@cn.co.za</a></p>
+        <p><span class="lbl">Academy &amp; registrations</span><a href="mailto:accounts@cn.co.za">accounts@cn.co.za</a></p>
         <p><span class="lbl">Phone</span><a href="tel:0123456789">012 345 6789</a></p>
         <p><span class="lbl">Office hours</span>Monday–Friday, 08:00–17:00 SAST</p>
-        <p><span class="lbl">Delivery</span>Online · Nationwide, South Africa</p>
+        <p><span class="lbl">Course cost</span>Fully funded by SPS</p>
+        <p><span class="lbl">Delivery</span>Online · from any SPS site or from home</p>
       </div>
+      <!-- FormSubmit needs a one-time activation per address: the first submission after
+           this goes live sends a confirmation email to accounts@cn.co.za. Until
+           someone clicks that link, registrations are NOT delivered. -->
       <form class="form reveal" action="https://formsubmit.co/accounts@cn.co.za" method="POST">
-        <input type="hidden" name="_subject" value="New enquiry from SPS Academy website">
+        <input type="hidden" name="_subject" value="SPS Academy — staff course registration">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_next" value="https://kgomotso-bolide.github.io/sps.academy/thanks">
         <input type="hidden" name="_captcha" value="false">
         <input type="text" name="_honey" style="display:none">
         <div class="two">
           <div class="field"><label>Full name</label><input type="text" name="Name" placeholder="Your name" required></div>
-          <div class="field"><label>Company / organisation</label><input type="text" name="Company" placeholder="Organisation"></div>
+          <div class="field"><label>Employee number</label><input type="text" name="Employee number" placeholder="e.g. SP1234"></div>
         </div>
         <div class="two">
-          <div class="field"><label>Email address</label><input type="email" name="Email" placeholder="you@company.co.za" required></div>
-          <div class="field"><label>Phone number</label><input type="tel" name="Phone" placeholder="+27"></div>
+          <div class="field"><label>Department / team</label><input type="text" name="Department" placeholder="e.g. Installations, Sales, Field Ops"></div>
+          <div class="field"><label>Line manager</label><input type="text" name="Line manager" placeholder="Manager's name"></div>
         </div>
-        <div class="field"><label>Number of staff to train (optional)</label><input type="text" name="Staff to train" placeholder="e.g. 12"></div>
-        <div class="field"><label>Message</label><textarea name="Message" rows="4" placeholder="Tell us what you're looking for"></textarea></div>
-        <button type="submit" class="btn btn-primary" style="width:100%">Talk to Our Team</button>
+        <div class="two">
+          <div class="field"><label>Work email</label><input type="email" name="Email" placeholder="you@company.co.za" required></div>
+          <div class="field"><label>Contact number</label><input type="tel" name="Phone" placeholder="+27"></div>
+        </div>
+        <div class="field"><label>Which course are you interested in?</label><input type="text" name="Course" placeholder="e.g. AI Fundamentals for the Workplace"></div>
+        <div class="field"><label>Anything else we should know?</label><textarea name="Message" rows="4" placeholder="Shift patterns, questions about the course, anything HR should factor in"></textarea></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Register My Interest</button>
       </form>
     </div>
   </div>
@@ -67,6 +77,8 @@
         <a href="ai-in-action">AI in Action</a>
         <a href="about">About</a>
         <a href="courses">Courses</a>
+        <a href="skills-gap">Skills Gap</a>
+        <a href="profile">Profile</a>
         <a href="contact">Contact</a>
       </div>
     </div>
@@ -74,9 +86,10 @@
       <strong>Accreditation</strong>
       <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
     </div>
-    <p class="disclaimer">Professional AI courses listed are non-accredited short courses unless explicitly marked as an accredited qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
+    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue of 800 qualifications and courses is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification. Not all 800 are listed on this site yet. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
 <script src="site.js"></script>
+<script src="profile.js"></script>
 <script src="assistant.js"></script>
 </body></html>
