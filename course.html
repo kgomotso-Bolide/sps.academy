@@ -158,6 +158,7 @@
     "Social Sciences":["Understand AI's impact on people and society","Explore policy, governance and regulation","Evaluate AI claims and risks critically","Apply responsible-use principles","Connect the ideas to real-world decisions"],
     "Compliance":["Recognise the key risks and obligations","Protect privacy and sensitive data","Spot and reduce bias and inaccuracy","Use AI safely in a professional setting","Help shape a simple, practical AI policy"],
     "Leadership":["Set a clear AI vision for your department","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
+    "Project Management":["Plan, schedule and budget a project end to end","Define scope and manage change without losing control","Identify, rate and mitigate project risk","Lead a project team and keep stakeholders aligned","Build the portfolio of evidence the qualification requires"],
     "Technical":["Build job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Come away with a qualification that is yours to keep","Open up clear career pathways"]
   };
 
@@ -292,6 +293,14 @@
     {t:"Safety & Deployment",lessons:["Evidence, bias & safety","Clinical integration","The road ahead"]}
   ];
 
+  const MOD_PROJECT_MGMT=[
+    {t:"Project Management Foundations",lessons:["What a project is, and what it isn't","The project life cycle","Roles, governance and the project charter"]},
+    {t:"Scope, Schedule and Cost",lessons:["Defining scope and the work breakdown","Estimating and building the schedule","Budgets, cash flow and cost control"]},
+    {t:"Risk, Quality and Procurement",lessons:["Identifying and rating risk","Quality planning and assurance","Procurement, contracts and suppliers"]},
+    {t:"People and Communication",lessons:["Stakeholders and their expectations","Leading a project team","Reporting, meetings and difficult conversations"]},
+    {t:"Delivery and Close-out",lessons:["Tracking progress and managing change","Handover and acceptance","Close-out, lessons learned and the portfolio of evidence"]}
+  ];
+
   const COURSES={
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online · Self-paced",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
     "ai-tools-productivity":{title:"AI Tools for Productivity",cat:"Business",mode:"Online · Self-paced",level:"Beginner",img:"1581091226825-a6a2a5aee158",lead:"Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools and workflow automation."},
@@ -299,6 +308,10 @@
     "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
     "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
+    /* qid/credits are deliberately absent until the SAQA ID and credit count for
+       this qualification are confirmed — the template only renders those two facts
+       when they are supplied, and guessing them would be a regulated claim. */
+    "project-management":{title:"Occupational Certificate: Project Management",cat:"Project Management",mode:"Online",level:"NQF 5",acc:"local",img:"1454165804606-c3d57bc86b40",lead:"The full project-management qualification — scope, schedule, cost, risk and delivery, covered properly. The formal route for anyone running projects at SPS.",modules:MOD_PROJECT_MGMT},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
     "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},

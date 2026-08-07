@@ -254,6 +254,21 @@ accredited qualification.
   "Name to follow" and the quote is generic. Replace all three when SPS supplies them.
 - [ ] **Academy photographs** — `images/poster-1.svg` and `poster-2.svg` are placeholders on both the
   home and about pages, with "Caption to follow" captions. Swap the images and rewrite the captions.
+- [x] **Project Management NQF 5 added (4 Aug 2026)** — the accredited qualification from Kgomotso's
+  Skills Development Plan, wired the same way as Computer Technician: `course.html` catalogue entry
+  (`?c=project-management`) with a five-module curriculum, cards on home and courses, assistant entry,
+  and a Skills Gap recommendation for sales / team-lead / manager roles. Five SPS staff are being
+  enrolled; the site holds no names — HR and the provider handle the enrolment itself.
+- [ ] **Confirm the Project Management SAQA ID, credit count and registered title** — the catalogue
+  entry deliberately omits `qid` and `credits` (the course template renders those two facts only when
+  supplied) and uses the wording from the email, "Occupational Certificate: Project Management".
+  Accreditation is a regulated claim, so these were not guessed. Fill them in once Busi or the
+  provider confirms them, and check the title matches the SAQA register exactly.
+- [ ] **Port the `formalFor` change back to Fungi and Equinix** — adding a second formal qualification
+  showed up a flaw in `skills-gap.js`: the credential boost assumed there was only ever one, so it
+  pitched the project-management certificate to installers as "the full technical route". Each formal
+  course now names the roles it fits (`formalFor`) and its own noun (`formalNoun`). The other two sites
+  still have the single-qualification version.
 - [ ] **Sign off the Skills Gap role targets** — the eight per-role targets in `skills-gap.js` were
   written from this site's own description of the work and have **not** been reviewed by the people who
   run those teams. The page says so; get them checked before anyone treats the output as authoritative.

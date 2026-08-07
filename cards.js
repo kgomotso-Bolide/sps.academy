@@ -7,6 +7,7 @@
     ["AI for Leaders & Managers","ai-leaders","1552664730-d307ca884978"],
     ["AI & New Venture Creation","new-venture","1559136555-9303baea8ebd"],
     ["Occupational Certificate: Computer Technician","computer-technician","1581092160562-40aa08e78837"],
+    ["Occupational Certificate: Project Management","project-management","1454165804606-c3d57bc86b40"],
     ["Deploying TinyML","deploying-tinyml","1593376853899-fbb47a057fa0"],
     ["Fundamentals of TinyML","fundamentals-tinyml","1518770660439-4636190af475"],
     ["AI Strategy for Business Leaders","ai-strategy","1542744173-8e7e53415bb0"],

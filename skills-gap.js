@@ -88,7 +88,10 @@
     {s:'competing-age-ai',        n:'Competing in the Age of AI',                   c:'Business',           w:{lead:3,report:1}},
     {s:'leadership-emerging-tech',n:'Leadership in Emerging Technology',            c:'Social Sciences',    w:{lead:3,resp:2,tech:1}},
     {s:'cybersecurity',           n:'Cybersecurity: Policy &amp; Technology',           c:'Social Sciences',    w:{resp:3,tech:2}},
-    {s:'computer-technician',     n:'Occupational Certificate: Computer Technician',c:'Technical',           w:{tech:4,admin:1}, formal:true},
+    {s:'computer-technician',     n:'Occupational Certificate: Computer Technician',c:'Technical',           w:{tech:4,admin:1},
+     formal:true, formalFor:['install','field','datasys'], formalNoun:'technical'},
+    {s:'project-management',      n:'Occupational Certificate: Project Management', c:'Project Management',  w:{lead:3,admin:3,report:2,comms:1},
+     formal:true, formalFor:['sales','lead','manager'],     formalNoun:'project-management'},
     {s:'fundamentals-tinyml',     n:'Fundamentals of TinyML',                       c:'Computer Science',   w:{tech:3,data:2}},
     {s:'deploying-tinyml',        n:'Deploying TinyML',                             c:'Computer Science',   w:{tech:4,data:2}},
     {s:'agentic-ai',              n:'Agentic AI Foundations',                       c:'Computer Science',   w:{ai:2,tech:2,resp:1}},
@@ -137,22 +140,26 @@
     }).filter(function(x){return x.score>0;});
 
     /* Experience and qualification don't change what you're missing — they
-       change which route to closing it makes sense. Someone with years on the
-       tools and no certificate needs the credential, not another short course. */
-    var techRole=['install','field','datasys'].indexOf(a.role)>=0;
+       change which route to closing it makes sense. Someone with years of doing
+       the job and no certificate needs the credential, not another short course.
+
+       Each formal qualification names the roles it is the right route for. Without
+       that, adding a second one meant the project-management certificate was
+       pitched to installers as "the full technical route". */
     var underQualified=qual.nqf<=4;
     var experienced=yrs.v>=4;
 
     scored.forEach(function(x){
       if(x.c.formal){
-        if(techRole&&underQualified){
+        var fits=(x.c.formalFor||[]).indexOf(a.role)>=0;
+        if(fits&&underQualified){
           x.score*=1.8;
           x.why=experienced
-            ? 'You have the years on the tools but nothing on paper to show for them. This is the qualification that closes that.'
-            : 'The full technical route — it builds the base the rest of your role sits on, and it is yours to keep.';
-        } else if(techRole){
+            ? 'You have the years of doing it but nothing on paper to show for them. This is the qualification that closes that.'
+            : 'The full '+x.c.formalNoun+' route — it builds the base the rest of your role sits on, and it is yours to keep.';
+        } else if(fits){
           x.score*=1.15;
-          x.why='Puts the technical side of your role on a formal footing rather than adding another short course.';
+          x.why='Puts the '+x.c.formalNoun+' side of your role on a formal footing rather than adding another short course.';
         }
       }
       if(a.bg==='first'&&x.c.s==='ai-fundamentals'){
