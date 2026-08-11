@@ -51,6 +51,12 @@ section{padding:80px 0}
 .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
 .sec-head .eyebrow{display:block;margin-bottom:12px}
 .sec-head h2{font-size:clamp(28px,3.6vw,42px);margin:0 0 16px}
+/* A heading written as a full sentence rather than a headline phrase. It needs
+   a wider measure and a step down the scale to avoid stacking into five dense
+   lines — but it stays larger than the section headings under it, or the page
+   opens on its quietest line. Pair .lede-h with .sec-head-wide on the parent. */
+.sec-head-wide{max-width:880px}
+.sec-head h2.lede-h{font-size:clamp(25px,3.2vw,38px);line-height:1.2;text-wrap:balance}
 .sec-head p{color:var(--ink-soft);font-size:17px}
 .section-dark .sec-head p{color:#c9c5c0}
 .page-top{padding-top:132px}
@@ -356,6 +362,39 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 /* .ccard-body is a flex column, so the badge stretched the full card width
    until it was told to hug its own content. */
 .ccard-body .acc-badge{margin-bottom:9px;align-self:flex-start;width:-moz-fit-content;width:fit-content}
+
+/* RECOGNITION OF PRIOR LEARNING */
+.dgrid.two-up{grid-template-columns:repeat(2,1fr)}   /* four cards read better 2×2 than 3+1 */
+/* RPL note on an accredited course page — sits in the dark hero */
+.c-rplnote{margin-top:22px;padding:16px 20px;border-left:3px solid var(--accent-green);
+  background:rgba(255,255,255,.06);border-radius:0 10px 10px 0;font-size:14px;line-height:1.7;
+  color:#d3cfca;max-width:620px}
+.c-rplnote strong{color:#fff}
+.c-rplnote a{color:var(--accent-green);font-weight:700;text-decoration:underline}
+.rpl-steps{counter-reset:rpl;list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.rpl-steps li{counter-increment:rpl;position:relative;padding:18px 22px 18px 66px;background:#fff;
+  border:1px solid var(--line);border-radius:13px}
+.rpl-steps li::before{content:counter(rpl);position:absolute;left:20px;top:18px;width:30px;height:30px;
+  border-radius:50%;background:var(--green-tint);color:var(--green-deep);font-weight:800;font-size:13.5px;
+  display:grid;place-items:center}
+.rpl-steps b{display:block;font-size:16px;color:var(--grey);margin-bottom:4px}
+.rpl-steps span{font-size:14.5px;color:var(--ink-soft);line-height:1.65}
+.rpl-quote{border-left:3px solid var(--green);padding:4px 0 4px 20px;margin:22px 0;max-width:760px;
+  font-size:16px;line-height:1.7;color:var(--ink-soft)}
+.rpl-quote cite{display:block;margin-top:9px;font-size:13px;font-style:normal;font-weight:700;color:var(--grey)}
+
+/* The RPL prompt that appears inside a Skills Gap result */
+/* .sg-card is defined further down and its `border` shorthand would otherwise
+   win on source order, so this needs both class names to raise specificity. */
+.sg-card.sg-rpl{border-left:4px solid var(--green)}
+.sg-rpl .rpl-flag{display:inline-flex;align-items:center;gap:7px;background:var(--green-tint);
+  color:#2a7a37;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;
+  padding:5px 12px;border-radius:20px;margin-bottom:13px}
+.sg-rpl .rpl-flag svg{width:13px;height:13px}
+.sg-rpl ul{margin:6px 0 0;padding-left:20px}
+.sg-rpl li{font-size:14.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:6px}
+.sg-rpl li b{color:var(--grey)}
+.sg-rpl h4{font-size:15px;color:var(--grey);margin:22px 0 6px}
 
 /* PROVIDER / COST LINE — international cards only.
    Cost is the first thing anyone wants to know about an outside course, so it

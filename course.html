@@ -42,6 +42,7 @@
           <button class="btn btn-light" id="c-save">Save to my profile</button>
         </div>
         <div class="ataglance" id="c-facts"></div>
+        <div id="c-rpl"></div>
       </div>
       <div id="c-herobox"></div>
     </div>
@@ -130,7 +131,7 @@
         <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
       </div>
     </div>
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue of 800 qualifications and courses is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification. Not all 800 are listed on this site yet. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
+    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue of 800 qualifications and courses is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification. Not all 800 are listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
 
@@ -408,6 +409,14 @@
       if(c.credits)facts.push(["Credits",c.credits]);
     }
     document.getElementById('c-facts').innerHTML=facts.map(f=>'<div><span>'+f[0]+'</span><strong>'+f[1]+'</strong></div>').join('');
+
+    // RPL only means something against a qualification that carries credits
+    document.getElementById('c-rpl').innerHTML = c.acc==="local"
+      ? '<div class="c-rplnote"><strong>Already doing this work?</strong> You may not have to start from '+
+        'the beginning. Recognition of Prior Learning can award credits towards this qualification for '+
+        'competence you can already prove — or admit you to it even if you don\'t meet the usual entry '+
+        'requirements. <a href="rpl">How RPL works</a></div>'
+      : '';
 
     // hero video
     document.getElementById('c-herobox').innerHTML=

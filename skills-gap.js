@@ -45,13 +45,15 @@
     {k:'support', n:'Admin &amp; Support',               t:{ai:4,data:3,tech:1,comms:3,report:2,admin:4,resp:3,lead:1}}
   ];
 
+  /* l = the form used mid-sentence. Hand-written for the same reason SKILLS
+     needs one: lowercasing "Matric / NQF 4" produces "matric / nqf 4". */
   var QUALS=[
-    {k:'none',   n:'No formal qualification yet', nqf:0},
-    {k:'matric', n:'Matric / NQF 4',              nqf:4},
-    {k:'cert',   n:'Certificate / NQF 5',         nqf:5},
-    {k:'diploma',n:'National Diploma / NQF 6',    nqf:6},
-    {k:'degree', n:'Degree / NQF 7',              nqf:7},
-    {k:'post',   n:'Postgraduate / NQF 8+',       nqf:8}
+    {k:'none',   n:'No formal qualification yet', nqf:0, l:'nothing formal'},
+    {k:'matric', n:'Matric / NQF 4',              nqf:4, l:'Matric'},
+    {k:'cert',   n:'Certificate / NQF 5',         nqf:5, l:'a Certificate at NQF 5'},
+    {k:'diploma',n:'National Diploma / NQF 6',    nqf:6, l:'a National Diploma'},
+    {k:'degree', n:'Degree / NQF 7',              nqf:7, l:'a degree'},
+    {k:'post',   n:'Postgraduate / NQF 8+',       nqf:8, l:'a postgraduate qualification'}
   ];
 
   var YEARS=[
@@ -183,7 +185,121 @@
                       .sort(function(a,b){return b.self-a.self;});
 
     return {role:role,rows:rows,gaps:gaps,strengths:strengths,recs:scored.slice(0,4),
-            qual:qual,yrs:yrs};
+            qual:qual,yrs:yrs,rpl:rplCase(rows,qual,yrs)};
+  }
+
+  /* ---------- Recognition of Prior Learning ----------
+     RPL is for people whose demonstrated competence has run ahead of their
+     paper qualification — which is exactly the shape this tool already
+     measures. Rather than ask four more questions, read it off the answers
+     we have: what they rate themselves at, how long they've done the work,
+     and what they hold on paper.
+
+     Deliberately cautious. A false "you have a strong case" sends someone
+     into an assessment they'll fail, so the strong tier needs real evidence
+     behind it: years AND breadth AND depth. The QCTO recognises three
+     purposes (access, credit, admission to the final assessment) and we name
+     the ones that actually apply rather than listing all three every time. */
+  function rplCase(rows,qual,yrs){
+    if(qual.nqf>4) return null;               // already past the level RPL routes into
+
+    var confident=rows.filter(function(r){return r.self>=3;});      // "Confident" or better
+    var expert   =rows.filter(function(r){return r.self>=4;});      // "Could teach it"
+    var atTarget =rows.filter(function(r){return r.self>=r.target;});
+    var noPaper  =qual.nqf===0;
+
+    var years=yrs.v;
+    var strong = years>=8 && confident.length>=3 && atTarget.length>=4;
+    var likely = years>=4 && confident.length>=2;
+
+    /* Someone with no formal qualification at all has an access case on the
+       strength of the qualification's entry requirements alone — that route
+       does not depend on how they rated themselves. */
+    if(!strong && !likely && !noPaper) return null;
+
+    var purposes=[];
+    /* Access only applies when there is genuinely nothing on paper. Matric is
+       normally the entry requirement for an NQF 5 qualification, so telling a
+       matric holder they need RPL to get in would be plainly wrong. */
+    if(noPaper) purposes.push({
+      t:'Access',
+      d:'Getting you admitted to a qualification whose formal entry requirements you don\'t currently meet.'
+    });
+    if(likely||strong) purposes.push({
+      t:'Credit',
+      d:'Formal credits for what you can already prove, so you only study what is genuinely new to you.'
+    });
+    if(strong) purposes.push({
+      t:'Straight to the final assessment',
+      d:'Admission directly to the external exam that awards the certificate, without repeating the coursework.'
+    });
+
+    /* Evidence suggestions drawn from what they said they are good at, so the
+       list is theirs rather than generic. */
+    var ev=[];
+    var byK={}; rows.forEach(function(r){byK[r.k]=r;});
+    if(byK.tech&&byK.tech.self>=3) ev.push('Job cards, fault reports and hand-over sheets from installs and repairs you signed off');
+    if(byK.data&&byK.data.self>=3) ev.push('Yields, exports or spreadsheets you built that other people rely on');
+    if(byK.report&&byK.report.self>=3) ev.push('Reports you produced, and what was decided off the back of them');
+    if(byK.comms&&byK.comms.self>=3) ev.push('Customer correspondence or complaint resolutions you handled end to end');
+    if(byK.admin&&byK.admin.self>=3) ev.push('Records showing you running your own workload — job tracking, systems, sign-offs');
+    if(byK.lead&&byK.lead.self>=3) ev.push('Who you have trained or supervised, and for how long');
+    ev.push('A letter from your supervisor confirming what you have been trusted to do unsupervised');
+    ev.push('Certificates from any in-house or supplier training, even if it was never accredited');
+
+    var line;
+    var onPaper=noPaper?'you have <b>nothing formal</b> on paper'
+                       :'on paper you hold <b>'+qual.l+'</b>';
+    if(strong){
+      line='You have <b>'+yrs.n.toLowerCase()+'</b> in this kind of work, you are at or above target on '+
+           atTarget.length+' of '+rows.length+' areas'+
+           (expert.length?', and you rate yourself able to teach '+expert.length+' of them':'')+
+           ' — and '+onPaper+'. '+
+           'That distance between what you can do and what you hold on paper is the whole reason RPL exists.';
+    } else if(likely){
+      line='You have <b>'+yrs.n.toLowerCase()+'</b> behind you and rate yourself confident in '+
+           confident.length+' area'+(confident.length>1?'s':'')+', and '+onPaper+
+           '. That is worth a conversation — some of what you already do may count for credits.';
+    } else {
+      line='You don\'t hold a formal qualification yet, and that normally blocks entry to an accredited one. '+
+           'RPL for access exists specifically to get round that: you are admitted on what you can demonstrate '+
+           'rather than on a school certificate.';
+    }
+
+    return {tier:strong?'strong':(likely?'likely':'access'),line:line,purposes:purposes,evidence:ev};
+  }
+
+
+  /* The RPL block only appears when the answers actually support it. Showing
+     it to everyone would turn it into wallpaper and send people who have no
+     case into an assessment they aren't ready for. */
+  function renderRpl(a){
+    var r=a.rpl; if(!r) return '';
+    var head=r.tier==='strong' ? 'You look like a strong RPL candidate'
+           : r.tier==='likely' ? 'RPL is worth asking about'
+                               : 'RPL for access may be your route in';
+    return '<div class="sg-card sg-rpl">'+
+      '<span class="rpl-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" '+
+        'stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z"/>'+
+        '<path d="m9 12 2 2 4-4"/></svg>Recognition of Prior Learning</span>'+
+      '<h3>'+head+'</h3>'+
+      '<p class="sg-lede">'+r.line+'</p>'+
+      '<h4>What it could do for you</h4>'+
+      '<ul>'+r.purposes.map(function(p){
+        return '<li><b>'+p.t+'</b> — '+p.d+'</li>';
+      }).join('')+'</ul>'+
+      '<h4>Evidence you probably already have</h4>'+
+      '<ul>'+r.evidence.map(function(e){return '<li>'+e+'</li>';}).join('')+'</ul>'+
+      '<div class="sg-actions">'+
+        '<a class="btn btn-primary" href="rpl">How RPL works</a>'+
+        '<a class="btn btn-ghost-dark" href="contact?course='+
+          encodeURIComponent('Recognition of Prior Learning — enquiry')+'">Ask HR about RPL</a>'+
+      '</div>'+
+      '<p class="sg-priv">This is a prompt to go and ask, not an assessment. Whether you are awarded '+
+      'anything depends on evidence assessed against the qualification standard, and on the accreditation '+
+      'scope held for it. Print this page and take it with you — the evidence list above is a decent '+
+      'starting point for the conversation.</p>'+
+    '</div>';
   }
 
   /* ---------- Rendering ---------- */
@@ -324,6 +440,8 @@
       '</div>'+
       '<p class="sg-priv" id="sgPriv">Your answers were never uploaded. Unless you save them to your profile they disappear when you close the tab — and even saved, they only ever sit in this browser on this device. Print this page if you want to take it to your manager.</p>'+
     '</div>';
+
+    html+=renderRpl(a);
     return html;
   }
 
