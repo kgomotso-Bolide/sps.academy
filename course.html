@@ -36,7 +36,7 @@
         <p class="lead" id="c-lead"></p>
         <div class="actions">
           <a href="contact" class="btn btn-primary" id="c-enrol">Upskill Yourself</a>
-          <button class="btn btn-light videoplay" data-src="SAMPLE" data-title="Course Introduction">
+          <button class="btn btn-light videoplay" id="c-watch" data-src="SAMPLE" data-title="Course Introduction">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M8 5v14l11-7z"/></svg> Watch intro
           </button>
           <button class="btn btn-light" id="c-save">Save to my profile</button>
@@ -53,7 +53,7 @@
     <div class="sec-head reveal">
       <span class="eyebrow">What you'll learn</span>
       <h2>Skills you'll walk away with</h2>
-      <p>Every course pairs short, practical video lessons with a downloadable workbook so you can apply what you learn straight away.</p>
+      <p id="c-learnnote">Every course pairs short, practical video lessons with a downloadable workbook so you can apply what you learn straight away.</p>
     </div>
     <ul class="learn reveal" id="c-learn"></ul>
   </div>
@@ -64,13 +64,13 @@
     <div class="sec-head reveal">
       <span class="eyebrow">Course content</span>
       <h2 id="c-modtitle">Video lessons &amp; modules</h2>
-      <p>Click any module to expand it, then play a lesson. Each module includes a downloadable PDF workbook.</p>
+      <p id="c-modnote">Click any module to expand it, then play a lesson. Each module includes a downloadable PDF workbook.</p>
     </div>
     <div class="modules reveal" id="c-modules"></div>
   </div>
 </section>
 
-<section>
+<section id="c-gallery-sec">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Video highlights</span>
@@ -94,7 +94,7 @@
       <a class="dcard" href="resources/ai-tools-cheatsheet.pdf" download><span class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="ext">PDF</span></span><div class="dmeta"><h4>Tools Cheat Sheet</h4><p>One-page reference of recommended tools.</p><span class="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg> Download PDF</span></div></a>
       <a class="dcard" href="resources/ai-prompting-guide.pdf" download><span class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="ext">PDF</span></span><div class="dmeta"><h4>Quick-Start Guide</h4><p>Practical patterns, templates and examples.</p><span class="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg> Download PDF</span></div></a>
       <a class="dcard" href="resources/ai-reading-list.pdf" download><span class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="ext">PDF</span></span><div class="dmeta"><h4>Recommended Reading</h4><p>Curated articles and further resources.</p><span class="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg> Download PDF</span></div></a>
-      <div class="dcard" style="background:var(--orange-tint);border-color:var(--orange)"><span class="fic" style="background:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span><div class="dmeta"><h4>Certificate of Completion</h4><p>Earn a certificate when you finish all modules.</p><span class="dl" style="color:var(--orange-deep)">Included with enrolment</span></div></div>
+      <div class="dcard" id="c-certcard" style="background:var(--orange-tint);border-color:var(--orange)"><span class="fic" style="background:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span><div class="dmeta"><h4>Certificate of Completion</h4><p>Earn a certificate when you finish all modules.</p><span class="dl" style="color:var(--orange-deep)">Included with enrolment</span></div></div>
     </div>
   </div>
 </section>
@@ -158,7 +158,7 @@
     "Social Sciences":["Understand AI's impact on people and society","Explore policy, governance and regulation","Evaluate AI claims and risks critically","Apply responsible-use principles","Connect the ideas to real-world decisions"],
     "Compliance":["Recognise the key risks and obligations","Protect privacy and sensitive data","Spot and reduce bias and inaccuracy","Use AI safely in a professional setting","Help shape a simple, practical AI policy"],
     "Leadership":["Set a clear AI vision for your department","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
-    "Project Management":["Plan, schedule and budget a project end to end","Define scope and manage change without losing control","Identify, rate and mitigate project risk","Lead a project team and keep stakeholders aligned","Build the portfolio of evidence the qualification requires"],
+    "Project Management":["Initiate, plan, execute and close a project end to end","Build a scope statement, schedule and cost projection","Manage risk, quality and procurement on a live project","Lead a project team and handle stakeholder communication","Build the portfolio of evidence the qualification requires"],
     "Technical":["Build job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Come away with a qualification that is yours to keep","Open up clear career pathways"]
   };
 
@@ -293,12 +293,46 @@
     {t:"Safety & Deployment",lessons:["Evidence, bias & safety","Clinical integration","The road ahead"]}
   ];
 
-  const MOD_PROJECT_MGMT=[
-    {t:"Project Management Foundations",lessons:["What a project is, and what it isn't","The project life cycle","Roles, governance and the project charter"]},
-    {t:"Scope, Schedule and Cost",lessons:["Defining scope and the work breakdown","Estimating and building the schedule","Budgets, cash flow and cost control"]},
-    {t:"Risk, Quality and Procurement",lessons:["Identifying and rating risk","Quality planning and assurance","Procurement, contracts and suppliers"]},
-    {t:"People and Communication",lessons:["Stakeholders and their expectations","Leading a project team","Reporting, meetings and difficult conversations"]},
-    {t:"Delivery and Close-out",lessons:["Tracking progress and managing change","Handover and acceptance","Close-out, lessons learned and the portfolio of evidence"]}
+  /* The registered curriculum for SAQA 101869, taken from the provider's QCTO
+     pack (Form 3 Programme Implementation + Form 4 Learning Material Matrix,
+     curriculum code 121905000). Credits sum to the 240 the documents state:
+     knowledge 80, practical 100, workplace 60. Do not edit these by hand —
+     they are the registered qualification, not marketing copy. */
+  const QCTO_PROJECT_MANAGER=[
+    {c:"Knowledge Modules",cr:80,note:"The theory, assessed per module.",mods:[
+      ["KM-01","Introductory studies for Project Managers",4],
+      ["KM-02","Project Integration Management",4],
+      ["KM-03","Project Scope Management",8],
+      ["KM-04","Project Time Management",8],
+      ["KM-05","Project Cost Management",8],
+      ["KM-06","Project Quality Management",8],
+      ["KM-07","Project Human Resource Management",8],
+      ["KM-08","Project Communications Management",8],
+      ["KM-09","Project Risk Management",8],
+      ["KM-10","Project Procurement Management",8],
+      ["KM-11","Project Stakeholder Management",8]
+    ]},
+    {c:"Practical Modules",cr:100,note:"Applied project work, done under supervision.",mods:[
+      ["PM-01","Initiate a project",4],
+      ["PM-02","Plan and develop a project management approach and scope statement",8],
+      ["PM-03","Plan and develop a project time line and schedule",8],
+      ["PM-04","Plan for and project the cost of a project",8],
+      ["PM-05","Plan project management systems",8],
+      ["PM-06","Monitor and control the scope of a project",8],
+      ["PM-07","Control the project delivery schedules and costs",8],
+      ["PM-08","Control the project quality",8],
+      ["PM-09","Manage and control the human resources of a project",8],
+      ["PM-10","Conduct and control project communication and stakeholder interaction",8],
+      ["PM-11","Manage and control project risks",8],
+      ["PM-12","Manage and control project procurement activities",8],
+      ["PM-13","Manage and control project close-out activities",8]
+    ]},
+    {c:"Workplace Modules",cr:60,note:"Logged on real projects, evidenced in your portfolio.",mods:[
+      ["WM-01","Attend to project initiation management processes",10],
+      ["WM-02","Attend to project planning processes",20],
+      ["WM-03","Attend to project execution and control processes",20],
+      ["WM-04","Attend to project close out processes",10]
+    ]}
   ];
 
   const COURSES={
@@ -308,10 +342,7 @@
     "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
     "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
-    /* qid/credits are deliberately absent until the SAQA ID and credit count for
-       this qualification are confirmed — the template only renders those two facts
-       when they are supplied, and guessing them would be a regulated claim. */
-    "project-management":{title:"Occupational Certificate: Project Management",cat:"Project Management",mode:"Online",level:"NQF 5",acc:"local",img:"1454165804606-c3d57bc86b40",lead:"The full project-management qualification — scope, schedule, cost, risk and delivery, covered properly. The formal route for anyone running projects at SPS.",modules:MOD_PROJECT_MGMT},
+    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
     "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},
@@ -349,7 +380,9 @@
     document.getElementById('c-crumb').textContent=c.title;
     document.getElementById('c-h1').textContent=c.title;
     document.getElementById('c-lead').textContent=c.lead;
-    document.getElementById('c-modtitle').textContent="Video lessons across "+modules.length+" modules";
+    document.getElementById('c-modtitle').textContent=c.qcto
+      ? nMods(c)+" modules across three components"
+      : "Video lessons across "+modules.length+" modules";
 
     // tags
     const tags=[];
@@ -361,9 +394,19 @@
 
     // facts
     let nLessons=0;modules.forEach(m=>nLessons+=m.lessons.length);
-    const facts=[["Duration",c.acc?"12 months":"6 weeks"],["Effort",c.acc?"Part-time":"3–4 hrs / week"],["Format","Video + workbooks"],["Lessons",nLessons+" videos"],["Resources","5 PDF downloads"]];
-    if(c.qid)facts.push(["SAQA qualification ID",c.qid]);
-    if(c.credits)facts.push(["Credits",c.credits]);
+    let facts;
+    if(c.qcto){
+      /* Only what the QCTO documents actually state. Duration is left out on
+         purpose — the provider sets it, and Form 3 ships with that field blank. */
+      facts=[["NQF level",c.level.replace(/^NQF\s*/,'')],["Credits",c.credits],
+             ["SAQA qualification ID",c.qid],["Curriculum code",c.code],
+             ["Modules",nMods(c)+" across 3 components"],
+             ["Certified by","External assessment (EISA)"]];
+    } else {
+      facts=[["Duration",c.acc?"12 months":"6 weeks"],["Effort",c.acc?"Part-time":"3–4 hrs / week"],["Format","Video + workbooks"],["Lessons",nLessons+" videos"],["Resources","5 PDF downloads"]];
+      if(c.qid)facts.push(["SAQA qualification ID",c.qid]);
+      if(c.credits)facts.push(["Credits",c.credits]);
+    }
     document.getElementById('c-facts').innerHTML=facts.map(f=>'<div><span>'+f[0]+'</span><strong>'+f[1]+'</strong></div>').join('');
 
     // hero video
@@ -392,7 +435,32 @@
         '<div class="mt"><h4>'+ESC(m.t)+'</h4><div class="meta">'+m.lessons.length+' lessons · ~'+mins+' min · workbook included</div></div>'+CHEV+'</button>'+
         '<div class="module-body">'+rows+'</div></div>';
     }).join('');
-    document.getElementById('c-modules').innerHTML=modHtml;
+    document.getElementById('c-modules').innerHTML=c.qcto?qctoHtml(c):modHtml;
+
+    /* A registered qualification has no sample lessons to show, and its
+       certificate comes from the external assessment rather than from
+       finishing a playlist — so both of those blocks step aside. */
+    if(c.qcto){
+      document.getElementById('c-gallery-sec').hidden=true;
+      /* the intro clip is a stock placeholder — offering it as this
+         qualification's introduction would misrepresent it.
+         Removed rather than hidden: .btn sets display:inline-flex, which
+         beats the `hidden` attribute's UA rule and leaves it on screen. */
+      document.getElementById('c-watch').remove();
+      document.getElementById('c-herobox').querySelector('.vbadge').remove();
+      document.getElementById('c-herobox').querySelector('.play').remove();
+      document.getElementById('c-herobox').querySelector('.vlabel').remove();
+      document.getElementById('c-herobox').querySelector('.videobox').classList.remove('videoplay');
+      document.getElementById('c-learnnote').textContent=
+        'Knowledge modules build the theory, practicals apply it, and the workplace modules are logged on real projects — the three together are what the qualification assesses.';
+      const cert=document.getElementById('c-certcard');
+      cert.querySelector('h4').textContent='Nationally recognised certificate';
+      cert.querySelector('p').textContent='Awarded by the QCTO on completion of the external assessment.';
+      cert.querySelector('.dl').textContent='SAQA ID '+c.qid;
+      document.getElementById('c-modnote').textContent=
+        'Each module is assessed in its own right. The qualification itself is awarded only after the External Integrated Summative Assessment set by the QCTO.';
+      return bind();
+    }
 
     // gallery (first 6 lessons)
     document.getElementById('c-gallery').innerHTML=flat.slice(0,6).map((l,i)=>{
@@ -403,6 +471,23 @@
     }).join('');
 
     bind();
+  }
+
+  function nMods(c){ return c.qcto.reduce((t,g)=>t+g.mods.length,0); }
+
+  /* Modules carry a code and a credit value, so they are listed rather than
+     played — same accordion, no play buttons and no invented run times. */
+  function qctoHtml(c){
+    return c.qcto.map((g,gi)=>
+      '<div class="module'+(gi===0?' open':'')+'">'+
+        '<button class="module-head"><span class="module-num">'+(gi+1)+'</span>'+
+        '<div class="mt"><h4>'+ESC(g.c)+'</h4><div class="meta">'+g.mods.length+' modules · '+g.cr+' credits · '+ESC(g.note)+'</div></div>'+CHEV+'</button>'+
+        '<div class="module-body">'+ g.mods.map(m=>
+          '<div class="lesson" style="cursor:default">'+
+            '<span class="lname">'+ESC(m[1])+'</span>'+
+            '<span class="lmeta"><span class="ltag">'+c.code+'-'+m[0]+'</span>'+
+            '<span class="ldur">'+m[2]+' cr</span></span></div>'
+        ).join('') +'</div></div>').join('');
   }
 
   /* interactions */

@@ -90,7 +90,7 @@
     {s:'cybersecurity',           n:'Cybersecurity: Policy &amp; Technology',           c:'Social Sciences',    w:{resp:3,tech:2}},
     {s:'computer-technician',     n:'Occupational Certificate: Computer Technician',c:'Technical',           w:{tech:4,admin:1},
      formal:true, formalFor:['install','field','datasys'], formalNoun:'technical'},
-    {s:'project-management',      n:'Occupational Certificate: Project Management', c:'Project Management',  w:{lead:3,admin:3,report:2,comms:1},
+    {s:'project-management',      n:'Occupational Certificate: Project Manager', c:'Project Management',  w:{lead:3,admin:3,report:2,comms:1},
      formal:true, formalFor:['sales','lead','manager'],     formalNoun:'project-management'},
     {s:'fundamentals-tinyml',     n:'Fundamentals of TinyML',                       c:'Computer Science',   w:{tech:3,data:2}},
     {s:'deploying-tinyml',        n:'Deploying TinyML',                             c:'Computer Science',   w:{tech:4,data:2}},

@@ -36,7 +36,7 @@
    {t:"AI for Leaders & Managers",slug:"ai-leaders",cat:"Leadership",kw:"leaders managers leadership management decision adoption teams executives boss"},
    {t:"AI & New Venture Creation",slug:"new-venture",cat:"Business",kw:"venture startup entrepreneur business innovation founder"},
    {t:"Occupational Certificate: Computer Technician",slug:"computer-technician",cat:"Technical",kw:"computer technician hardware systems networking support technical accredited certificate installer repair maintenance qualification"},
-   {t:"Occupational Certificate: Project Management",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders delivery accredited qualification nqf 5 portfolio evidence"},
+   {t:"Occupational Certificate: Project Manager",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders procurement quality delivery accredited qualification nqf 5 240 credits saqa 101869 qcto portfolio evidence eisa"},
    {t:"Deploying TinyML",slug:"deploying-tinyml",cat:"Advanced · Computer Science",kw:"tinyml deploy microcontroller tensorflow embedded edge iot device sensors coding"},
    {t:"Fundamentals of TinyML",slug:"fundamentals-tinyml",cat:"Computer Science",kw:"tinyml fundamentals machine learning embedded basics iot sensors"},
    {t:"AI Strategy for Business Leaders",slug:"ai-strategy",cat:"Executive · Business",kw:"strategy business leaders value roi executive transformation hype impact"},

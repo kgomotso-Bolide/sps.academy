@@ -259,11 +259,24 @@ accredited qualification.
   (`?c=project-management`) with a five-module curriculum, cards on home and courses, assistant entry,
   and a Skills Gap recommendation for sales / team-lead / manager roles. Five SPS staff are being
   enrolled; the site holds no names — HR and the provider handle the enrolment itself.
-- [ ] **Confirm the Project Management SAQA ID, credit count and registered title** — the catalogue
-  entry deliberately omits `qid` and `credits` (the course template renders those two facts only when
-  supplied) and uses the wording from the email, "Occupational Certificate: Project Management".
-  Accreditation is a regulated claim, so these were not guessed. Fill them in once Busi or the
-  provider confirms them, and check the title matches the SAQA register exactly.
+- [x] **Project Management confirmed against the QCTO pack (11 Aug 2026)** — the provider supplied the
+  full curriculum pack, so the placeholder entry was replaced with the registered qualification:
+  **Occupational Certificate: Project Manager**, SAQA ID **101869**, NQF **5**, **240 credits**,
+  curriculum code **121905000**. Note the registered title is *Project Manager*, not the
+  *Project Management* the email used. The 28 modules (11 knowledge / 13 practical / 4 workplace) are
+  transcribed from Form 3 and Form 4 and their credits reconcile to 240 — treat `QCTO_PROJECT_MANAGER`
+  in `course.html` as the registered curriculum, not as copy to reword.
+  A course carrying a `qcto` block renders differently: modules are listed with code and credit value
+  instead of invented run times, the sample-video gallery and intro clip are removed, and the
+  certificate card cites the external assessment rather than "finish all modules".
+- [ ] **Learner material stays off the public site** — the pack includes facilitator guides, learner
+  guides, workbooks **and summative assessment memos**. The memos are marking guides. None of it
+  belongs in `resources/`, which is world-readable on GitHub Pages. The PDFs currently offered on the
+  Project Manager page are still the generic AI placeholders; if real material is ever published it
+  needs the provider's written go-ahead and a check for what must stay behind a login.
+- [ ] **Entry requirements and purpose statement** — still unread. They are in `Qualification
+  Document.pdf` in the provider's pack, which would not render for text extraction here. Worth adding
+  to the course page once someone reads them off.
 - [ ] **Port the `formalFor` change back to Fungi and Equinix** — adding a second formal qualification
   showed up a flaw in `skills-gap.js`: the credential boost assumed there was only ever one, so it
   pitched the project-management certificate to installers as "the full technical route". Each formal
