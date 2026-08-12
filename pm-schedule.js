@@ -21,6 +21,12 @@
   /* Set this only when Centenary confirms real programme dates. */
   var OFFICIAL_DATES = null;
 
+  /* The intake start date, confirmed by Centenary Networks on 12 Aug 2026.
+     This is theirs; the per-module dates below it are still ours, so the page
+     goes on saying the plan is indicative. Two different claims, and collapsing
+     them would put the provider's name on our arithmetic. */
+  var OFFICIAL_START = '2026-09-10';
+
   /* Calendar identity. This ends up inside the .ics file the learner downloads,
      so it has to name the academy they actually study with — the one field in
      here that is not brand-neutral. Change both when porting to another site. */
@@ -222,6 +228,7 @@
 
   var API = {
     OFFICIAL_DATES: OFFICIAL_DATES,
+    OFFICIAL_START: OFFICIAL_START,
     SESSION_DAYS: SESSION_DAYS,
     DAY_NAMES: DAY_NAMES,
     planModules: planModules,

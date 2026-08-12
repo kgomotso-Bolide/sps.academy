@@ -48,8 +48,8 @@
       <div class="two">
         <div class="field">
           <label for="pStart">Start date</label>
-          <input type="date" id="pStart" value="2026-09-01">
-          <span class="sg-hint">The first working day of the programme.</span>
+          <input type="date" id="pStart" value="2026-09-10">
+          <span class="sg-hint">The intake starts <strong>10 September 2026</strong>, confirmed by Centenary Networks. Change it only if you are planning around a later start.</span>
         </div>
         <div class="field">
           <label for="pHours">Hours per week</label>
@@ -211,11 +211,17 @@
         '<td class="num">'+S.human(r.to)+'</td></tr>').join('')+
       '</tbody>';
 
-    /* The provider has not confirmed a calendar, and saying so on every render
-       is the difference between a planning aid and an implied commitment. */
+    /* The provider has confirmed the START date but not a module-by-module
+       calendar, and those are two different claims. Saying so on every render is
+       the difference between a planning aid and an implied commitment — so the
+       confirmed part is named as theirs and the rest stays marked as ours. */
+    const onStart = S.OFFICIAL_START && $('pStart').value === S.OFFICIAL_START;
     $('pCaveat').innerHTML = plan.official
       ? '<strong>These are Centenary\'s confirmed programme dates.</strong>'
-      : '<strong>Indicative dates.</strong> Centenary Networks sets the official programme calendar — '+
+      : (onStart
+          ? '<strong>The 10 September start is confirmed by Centenary Networks. The module dates below it are not.</strong> '
+          : '')+
+        '<strong>Indicative dates.</strong> Centenary Networks sets the official programme calendar — '+
         'the registered curriculum documents deliberately leave duration blank, because the provider '+
         'decides it. Use this to agree a realistic pace and to book the time; confirm the real dates '+
         'with the provider before they go into a workplace skills plan or a learner agreement.';

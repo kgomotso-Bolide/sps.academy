@@ -344,6 +344,49 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .statrow .s-num{font-size:clamp(27px,3.8vw,38px);font-weight:800;color:var(--green-deep);letter-spacing:-.02em;line-height:1}
 .statrow .s-lbl{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
 .tag-new{display:inline-block;margin-bottom:10px;padding:5px 12px;border-radius:20px;background:var(--orange-deep);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+
+/* ---- Intake band -----------------------------------------------------------
+   A dated intake is the only thing on this page with a deadline attached, so it
+   sits directly under the hero and is the one dark band above the fold — the
+   announce band below it is a light tint, so the two never compete.
+
+   The date is set as a display figure rather than written into a sentence. The
+   whole job of this band is that somebody scrolling past registers the day.
+
+   White on --dark (#222021 here) is ~15:1, and the muted body text is held at
+   .8 alpha, which is still ~11:1 — well clear on all three brands. The eyebrow
+   uses --orange-light rather than --orange because the deeper brand oranges
+   drop under 4.5:1 against this ground at 10.5px. */
+.intake{background:var(--dark);color:#fff;padding:44px 0}
+.intake-grid{display:grid;grid-template-columns:176px 1fr;gap:38px;align-items:center}
+.intake-when{text-align:center;border-right:1px solid rgba(255,255,255,.16);padding-right:34px}
+.intake-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange-light);margin-bottom:12px}
+.intake-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--orange-light);box-shadow:0 0 0 3px rgba(255,255,255,.14)}
+.intake-day{font-size:clamp(56px,8vw,82px);font-weight:800;line-height:.84;letter-spacing:-.045em;color:#fff}
+.intake-mon{font-size:14px;font-weight:700;color:rgba(255,255,255,.74);margin-top:9px}
+.intake-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;padding:5px 12px;border-radius:30px;margin-bottom:14px}
+.intake-body h2{font-size:clamp(22px,2.9vw,31px);color:#fff;line-height:1.16;margin-bottom:11px;letter-spacing:-.015em}
+.intake-body p{color:rgba(255,255,255,.8);font-size:15.5px;line-height:1.65;max-width:60ch;margin-bottom:17px}
+.intake-facts{display:flex;flex-wrap:wrap;gap:8px 10px;list-style:none;margin:0 0 22px;padding:0}
+.intake-facts li{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.86);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:5px 13px}
+.intake .btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.42)}
+.intake .btn-ghost:hover{background:rgba(255,255,255,.11);border-color:#fff}
+@media(max-width:760px){
+  .intake{padding:34px 0}
+  .intake-grid{grid-template-columns:1fr;gap:22px}
+  .intake-when{text-align:left;border-right:0;padding-right:0;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.16)}
+  .intake-day{font-size:60px}
+}
+
+/* The start date where it also has to appear: on the qualification's own page,
+   just under the hero actions. Same information, quieter treatment — someone
+   reading this page has already chosen the course. */
+.c-starts{display:flex;align-items:center;gap:11px;margin-top:18px;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:14.5px;max-width:520px}
+/* display:flex beats the UA rule for [hidden], so an empty box would otherwise
+   sit in the hero of every course that has no date. Same trap as .btn. */
+.c-starts[hidden]{display:none}
+.c-starts svg{width:18px;height:18px;flex:0 0 18px;color:var(--orange-light)}
+.c-starts strong{font-weight:700}
 .corp .tag-new+h3{margin-bottom:8px}
 
 /* ACCREDITATION BADGE + FRAMEWORK POPOVER

@@ -41,6 +41,7 @@
           </button>
           <button class="btn btn-light" id="c-save">Save to my profile</button>
         </div>
+        <div class="c-starts" id="c-starts" hidden></div>
         <div class="ataglance" id="c-facts"></div>
         <div id="c-lock"></div>
         <div id="c-rpl"></div>
@@ -348,7 +349,7 @@
     "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
     "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
-    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
+    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",starts:"10 September 2026",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
     "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},
@@ -415,6 +416,7 @@
     }
     document.getElementById('c-facts').innerHTML=facts.map(f=>'<div><span>'+f[0]+'</span><strong>'+f[1]+'</strong></div>').join('');
 
+
     // RPL only means something against a qualification that carries credits
     const rplNote = c.acc==="local"
       ? '<div class="c-rplnote"><strong>Already doing this work?</strong> You may not have to start from '+
@@ -459,6 +461,28 @@
       enrol.setAttribute('aria-disabled','true');
       const watch=document.getElementById('c-watch');
       if(watch)watch.remove();
+    }
+
+    /* A confirmed intake date, when the provider has given one. It sits in the
+       hero beside the enrol button rather than down in the facts grid, because
+       it is the one fact that expires — and it turns that button from an
+       invitation into a deadline. Runs after the lock check on purpose: a
+       closed course must not advertise a start date, and must keep the "Not
+       open yet" button the block above just set.
+
+       Only set `starts` on a course whose date came from the provider. Our own
+       planning arithmetic does not belong here — that lives on /pm-schedule,
+       which says in as many words that it is indicative. */
+    if(c.starts && !locked){
+      const cal='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+        'stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/>'+
+        '<path d="M16 3v4M8 3v4M3 11h18"/></svg>';
+      const st=document.getElementById('c-starts');
+      st.innerHTML=cal+'<span>Starts <strong>'+ESC(c.starts)+'</strong> · registration is open now</span>';
+      st.hidden=false;
+      const enrol=document.getElementById('c-enrol');
+      enrol.textContent='Register Now';
+      enrol.href='contact?course='+encodeURIComponent(c.title);
     }
 
     // hero video
