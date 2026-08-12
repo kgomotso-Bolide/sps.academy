@@ -1,9 +1,11 @@
 /* ---- Course locks ---------------------------------------------------------
-   While the Project Management materials are being prepared, that route is the
-   only one open. Everything else in the catalogue stays *visible* and locked
-   rather than hidden: the breadth of the catalogue is the point of the courses
-   page, and removing the cards would make the academy look empty rather than
-   focused.
+   Narrows the catalogue to a named set of courses — used while the material for
+   a route is being prepared. Everything else stays *visible* and locked rather
+   than hidden: the breadth of the catalogue is the point of the courses page,
+   and removing the cards would make the academy look empty rather than focused.
+
+   Whether it is on right now is LOCKS_ON, below. The three academies set it
+   independently: this is a business decision per site, not shared behaviour.
 
    THIS IS THE ONLY PLACE TO CHANGE WHEN A COURSE REOPENS.
      - OPEN_TITLES  unlocks a catalogue card (matched against its <h4>)
@@ -14,8 +16,14 @@
    Note the two lists are deliberately not derived from one another. Locking is
    a business decision per course, and a mechanical link between "has a page"
    and "is open" is exactly the kind of cleverness that reopens something by
-   accident. */
+   accident.
+
+   LOCKS_ON is the switch. Off, the whole catalogue is open and the lists below
+   are ignored — they are left intact on purpose, so turning it back on restores
+   exactly the state it had before without anyone having to remember it. */
 (function () {
+  var LOCKS_ON = true;
+
   var OPEN_TITLES = [
     'Occupational Certificate: Project Manager',
     'Google Project Management Certificate'
@@ -35,13 +43,17 @@
   var API = {
     openTitles: OPEN_TITLES,
     openSlugs: OPEN_SLUGS,
-    slugOpen: function (slug) { return OPEN_SLUGS.indexOf(slug) > -1; },
+    on: LOCKS_ON,
+    slugOpen: function (slug) { return !LOCKS_ON || OPEN_SLUGS.indexOf(slug) > -1; },
     cardOpen: function (card) {
+      if (!LOCKS_ON) return true;
       var h = card.querySelector('h4');
       return h ? titleOpen(h.textContent) : true;
     }
   };
-  window.SPS_LOCKS = API;
+  window.COURSE_LOCKS = API;
+
+  if (!LOCKS_ON) return;
 
   /* Decorate the locked cards. This runs before cards.js and courses-index.js,
      which both bail out on data-locked rather than wiring up a click. */

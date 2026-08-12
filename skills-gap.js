@@ -425,7 +425,7 @@
            what closes your gap is useful even if you can't start it this month. What
            changes is that it stops pretending to be a door: no link, and the arrow
            gives way to the reason. */
-        var open=!window.SPS_LOCKS||SPS_LOCKS.slugOpen(x.c.s);
+        var open=!window.COURSE_LOCKS||COURSE_LOCKS.slugOpen(x.c.s);
         var body='<div class="sg-rank">'+(i+1)+'</div>'+
           '<div class="sg-recbody">'+
             '<div class="sg-reccat">'+x.c.c+(open?'':' <span class="sg-reclock">Not open yet</span>')+'</div>'+
@@ -437,14 +437,14 @@
           ? '<a class="sg-rec'+(x.c.formal?' accred':'')+'" href="course?c='+x.c.s+'">'+body+'</a>'
           : '<div class="sg-rec locked'+(x.c.formal?' accred':'')+'">'+body+'</div>';
       }).join('')+'</div>'+
-      (a.recs.length&&window.SPS_LOCKS&&!a.recs.some(function(x){return SPS_LOCKS.slugOpen(x.c.s);})
+      (a.recs.length&&window.COURSE_LOCKS&&!a.recs.some(function(x){return COURSE_LOCKS.slugOpen(x.c.s);})
         ? '<p class="sg-intro" style="margin-top:14px">None of these are open for enrolment yet — we\'re concentrating on the Project Manager qualification while its material is prepared. Register your interest anyway: that is how HR knows what to open next.</p>'
         : '')+
       (a.recs.length?'':'<p class="sg-intro">Nothing is showing a meaningful gap — talk to your manager about a stretch goal instead.</p>')+
       '<div class="sg-actions">'+
         '<a class="btn btn-primary" href="contact?course='+encodeURIComponent(strip(a.recs.length?a.recs[0].c.n:''))+'">'+
           (!a.recs.length ? 'Register for a course'
-            : (!window.SPS_LOCKS||SPS_LOCKS.slugOpen(a.recs[0].c.s)) ? 'Register for the first one'
+            : (!window.COURSE_LOCKS||COURSE_LOCKS.slugOpen(a.recs[0].c.s)) ? 'Register for the first one'
             : 'Register your interest')+'</a>'+
         (PROF?'<button class="btn btn-ghost-dark" id="sgSave">Save to my profile</button>':'')+
         '<button class="btn btn-ghost-dark" id="sgPrint">Print / save as PDF</button>'+

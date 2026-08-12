@@ -445,7 +445,7 @@
        legacy /ai-fundamentals redirect — but it must not offer enrolment. The
        curriculum below stays readable on purpose: seeing what is coming is
        useful, signing up for something that isn't running is not. */
-    const locked = !!(window.SPS_LOCKS && !SPS_LOCKS.slugOpen(getSlug()));
+    const locked = !!(window.COURSE_LOCKS && !COURSE_LOCKS.slugOpen(getSlug()));
     if(locked){
       document.getElementById('c-lock').innerHTML=
         '<div class="c-rplnote is-lock"><strong>This course isn\'t open yet.</strong> '+
