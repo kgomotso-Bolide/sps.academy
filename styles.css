@@ -370,6 +370,51 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
    until it was told to hug its own content. */
 .ccard-body .acc-badge{margin-bottom:9px;align-self:flex-start;width:-moz-fit-content;width:fit-content}
 
+/* ---- Progress tracking ----
+   Self-reported study progress. Green throughout, because on this site green is
+   the accreditation/credit colour and progress belongs in that family — but the
+   copy around it always says what it is and is not. */
+.topic-tick{display:flex;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid var(--line);
+  background:var(--bg-soft);cursor:pointer;font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+.topic-tick:hover{color:var(--green-deep)}
+.topic-tick input{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex:0 0 auto;margin:0}
+.topic-tick input:checked+span{color:var(--green-deep)}
+
+.prog{border:1px solid var(--line);border-radius:16px;background:#fff;padding:24px 26px;margin-bottom:26px}
+.prog-top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:14px}
+.prog-lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink-soft);font-weight:700;margin-bottom:5px}
+.prog-top strong{font-size:19px;color:var(--grey)}
+.prog-pct{font-size:28px;font-weight:800;color:var(--green-deep);line-height:1;letter-spacing:-.02em}
+.prog-bar{height:9px;border-radius:20px;background:var(--bg-soft);border:1px solid var(--line);overflow:hidden}
+.prog-bar i{display:block;height:100%;background:var(--green);border-radius:20px;transition:width .3s}
+.prog-bar.sm{height:7px;min-width:90px}
+.prog-act{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.prog-note{margin-top:14px;font-size:13px;color:var(--ink-soft);line-height:1.6}
+
+.pill{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:4px 10px;border-radius:20px;background:var(--bg-soft);color:var(--ink-soft);white-space:nowrap}
+/* --green-deep on --green-tint is only ~3.4:1 here, under the 4.5:1 small text
+   needs, so the done pill uses the darkened green the RPL badge established. */
+.pill.done{background:var(--green-tint);color:#2a7a37}
+.pill.going{background:var(--orange-tint);color:var(--orange-deep)}
+
+/* The countersignature only exists on paper — on screen it would read as a form
+   nobody can fill in. */
+.signblock{display:none}
+@media print{
+  .signblock{display:block;margin-top:26px;padding-top:20px;border-top:2px solid #333;page-break-inside:avoid}
+  .signblock h3{font-size:15px;margin-bottom:8px}
+  .signblock p{font-size:12px;color:#333;margin-bottom:18px;max-width:none}
+  .sigrow{display:grid;grid-template-columns:2fr 1fr;gap:30px;margin-bottom:26px}
+  .sigrow span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:26px}
+  .sigrow i{display:block;border-bottom:1px solid #333}
+  #pgForm,.sg-actions,.topic-tick,.prog-act{display:none!important}
+  .prog-bar i{background:#666}
+  .ptable{font-size:11px}
+  .scrollx{overflow:visible;border:0}
+}
+
 /* ---- Study plan: stat row + schedule table ----
    The table has seven columns of real data, so on a phone it scrolls inside its
    own container rather than squeezing — the page itself must never scroll

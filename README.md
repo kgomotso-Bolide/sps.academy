@@ -128,6 +128,8 @@ sps/
 │                           #   the 11 via ?m=KM-02
 ├── pm-modules.js           # The 11 knowledge modules: topics, weightings, what each
 │                           #   covers, the defining idea. PUT DRIVE LINKS IN `DOCS` HERE.
+├── pm-progress.html        # Learner progress report: submit to HR, print for manager signature
+├── pm-progress.js          # Progress store (lives inside the profile, browser-only)
 ├── pm-schedule.html        # Study planner: pace → module dates → calendar invites
 ├── pm-schedule.js          # Pacing maths + RFC 5545 .ics generation. Set OFFICIAL_DATES
 │                           #   here once Centenary confirms a real programme calendar.
@@ -306,7 +308,8 @@ accredited qualification.
 - [x] **Project Management pathway (11 Aug 2026)** — `pm-pathway.html`, plus the Google Project
   Management Certificate as an `acc:"intl"` card on `courses.html`. Written because the business was
   working from the figure "Google covers 76% of the local course", which is a misreading: the mapping
-  gives **74% of the 80-credit knowledge component**, which is **~25% of the 240-credit qualification**.
+  gave **74% of the 80-credit knowledge component**, which is **~25% of the 240-credit qualification**.
+  *(Superseded 12 Aug 2026: the page now carries Centenary's own 50% figure — see below.)*
   The page states that plainly and deliberately shows **no per-module percentage** — exemption is
   granted per whole module, so it lists the 7 modules (52 credits) that are exemption candidates and
   the 4 (28 credits) that are taught here regardless. Three claims on the page must not be softened:
@@ -363,15 +366,35 @@ accredited qualification.
     hours — ~1.9 years at 8 h/week, ~1.2 years at 15. That is 80 of 240 credits. If the real
     programme is meant to be shorter, the notional-hours figure and the provider's actual duration
     need reconciling before anyone commits to dates.
-- [ ] **Tracking / completion reporting** — still unbuilt, and it is what SPS actually asked for
-  first. There is no backend: no accounts, no progress, no completion records. Note for the client
-  conversation: a website can track *progress*; only Centenary can issue competence records, and
-  only the QCTO awards the qualification after the EISA.
-- [ ] **Reconcile the Google overlap figure with Kgomotso** — `pm-pathway.html` says ~74% of the
-  theory / ~25% of the qualification (our credit-weighted mapping). Kgomotso told SPS in writing
-  that "50% of the course content matches the Google Career Certificates". Those disagree in front
-  of the client, and the provider's number governs because exemption is Centenary's decision. Ask
-  what the 50% is 50% *of*, and which modules she would exempt, then carry her figure.
+- [x] **Progress tracking (12 Aug 2026)** — `pm-progress.js` + `pm-progress.html`, answering
+  Babalwa's "how will this be tracked… without placing a strain on HR or the provider". Learners
+  tick topics off on the module pages; progress is stored under `pmProgress` **inside the existing
+  profile object**, so the profile's "clear" wipes it too — the right behaviour on a shared site
+  machine. The progress page shows all 11 modules, submits a dated structured record to HR through
+  the existing FormSubmit endpoint, and prints with a **manager countersignature block** (print-only
+  CSS — on screen it would read as a form nobody can fill in).
+  - **Deliberately no backend.** Five learners; and the completion documents HR needs for reporting
+    come from Centenary, not from us — a database would produce dashboards while the compliance
+    artefact still arrives by email. Storing employee learning records on our own infrastructure
+    would also make someone a responsible party under POPIA for data SPS already holds lawfully.
+    Revisit at ~20 learners, multiple concurrent qualifications, or a roll-out to the other sites;
+    the submitted records are structured plain text so they migrate cleanly.
+  - Every surface says what it is: self-reported study, **not** an assessment result. Competence is
+    Centenary's decision after assessment; the qualification is the QCTO's after the EISA.
+  - Bug caught in testing and fixed: the hidden form fields were filled at paint time, so a learner
+    who ticked topics in another tab could submit a stale record. The payload is now rebuilt on
+    submit, and the page repaints on `visibilitychange`/`pageshow`/`focus`.
+- [x] **Google overlap figure now Centenary's (12 Aug 2026)** — the page previously led with our own
+  credit-weighted mapping (74% of the knowledge component, ~25% of the qualification). Kgomotso told
+  SPS in writing that "50% of the course content matches the Google Career Certificates", and the
+  provider's number governs because exemption is Centenary's decision. The page now carries **50%,
+  explicitly attributed to Centenary**, rather than restating it as ours — we still do not know what
+  the 50% is 50% *of*, and attribution is both honest and stronger. Our module-level split survives
+  as supporting detail ("where it lands squarely" / "where it does not reach"), with the competing
+  52-credit aggregate removed so two different arithmetics are not on the page at once.
+  - Still worth asking her: what is the denominator, and which modules would she actually exempt?
+    If 50% means half the *qualification*, that implies Google reaches practical or workplace
+    credits, which is not how the qualification is built.
 - [ ] **PMI claims** — Kgomotso told SPS candidates will be registered with PMI and that the Google
   certificates are "accredited by" PMI. Nothing about PMI is on the site yet, and that wording needs
   tightening before it is repeated: PMI does not accredit Google Career Certificates. Confirm
