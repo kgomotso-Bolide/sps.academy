@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My progress — Project Manager NQF 5 — SPS Academy</title>
-<meta name="description" content="Track your way through the eleven knowledge modules of the Occupational Certificate: Project Manager, print a report for your manager to sign, and send a dated record to HR.">
+<meta name="description" content="Track your way through the eleven knowledge modules of the Occupational Certificate: Project Manager, print a report for your manager to sign, and send a dated record to the academy.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -30,7 +30,7 @@
     <div class="sec-head sec-head-wide reveal">
       <span class="eyebrow">Project Manager NQF 5</span>
       <h2 class="lede-h">Where you are, and something you can hand to your manager</h2>
-      <p>Tick topics off as you work through them and this keeps count. When you have finished a module, print the report for your manager to sign and send HR a dated record — so your progress is on file without anyone having to chase you for it.</p>
+      <p>Tick topics off as you work through them and this keeps count. When you have finished a module, print the report for your manager to sign and send the academy a dated record — so your progress is on file without anyone having to chase you for it.</p>
     </div>
     <div class="sg-assure reveal">
       <span class="lbl">Where this is stored</span>
@@ -54,10 +54,10 @@
 
       <div class="sg-card reveal" style="max-width:900px;margin:36px auto 0">
         <div class="sg-stepnum">Send it in</div>
-        <h3>Put your progress on file with HR</h3>
-        <p class="sg-intro">This sends HR a dated summary of where you are. It is the record that means nobody has to chase you for an update, and the one HR can report from. Send it whenever you finish a module — or sooner if you are stuck.</p>
+        <h3>Put your progress on file</h3>
+        <p class="sg-intro">This sends the academy a dated summary of where you are. It goes to Centenary Networks, the accredited provider. It is the record that means nobody has to chase you for an update, and the one your progress is reported from. Send it whenever you finish a module — or sooner if you are stuck.</p>
 
-        <form class="form" id="pgForm" action="https://formsubmit.co/accounts@cn.co.za" method="POST">
+        <form class="form" id="pgForm" action="https://formsubmit.co/kgomotso@centenarynetworks.com" method="POST">
           <input type="hidden" name="_subject" value="SPS Academy — Project Manager NQF 5 progress update">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_next" value="https://kgomotso-bolide.github.io/sps.academy/thanks">
@@ -74,8 +74,8 @@
             <div class="field"><label>Work email</label><input type="email" name="Email" placeholder="you@company.co.za" required></div>
             <div class="field"><label>Line manager</label><input type="text" name="Line manager" placeholder="Manager's name"></div>
           </div>
-          <div class="field"><label>Anything HR should know?</label><textarea name="Message" rows="3" placeholder="Falling behind, shift changes, something blocking you — say so here rather than going quiet"></textarea></div>
-          <button type="submit" class="btn btn-primary" style="width:100%">Send my progress to HR</button>
+          <div class="field"><label>Anything we should know?</label><textarea name="Message" rows="3" placeholder="Falling behind, shift changes, something blocking you — say so here rather than going quiet"></textarea></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Send my progress</button>
         </form>
       </div>
 
@@ -189,7 +189,7 @@
 
   /* Progress is usually ticked off on the module pages, in another tab. Two
      things follow from that, and both matter because the submitted record is
-     the artefact HR reports from:
+     the artefact the provider reports from:
        1. repaint whenever this page comes back into view, so the screen is not
           showing yesterday's numbers;
        2. rebuild the payload at the moment of submit, which is the only time it
