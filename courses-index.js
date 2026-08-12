@@ -112,6 +112,7 @@
    recognises, so it leaves these alone. */
 (function(){
   [].slice.call(document.querySelectorAll('.ccard[data-href]')).forEach(function(c){
+    if(c.dataset.locked) return;   // locked by locks.js — don't link it out either
     var url=c.dataset.href, h=c.querySelector('h4');
     if(h&&!h.querySelector('a')){
       h.innerHTML='<a href="'+url+'" target="_blank" rel="noopener noreferrer" '+

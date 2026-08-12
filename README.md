@@ -122,6 +122,11 @@ sps/
 ├── skills-gap.html         # Skills Gap Analysis — 3-step self-assessment, runs in-browser
 ├── rpl.html                # Recognition of Prior Learning: the three QCTO purposes,
 │                           #   portfolio of evidence, the process, and what RPL is not
+├── locks.js                # WHICH COURSES ARE OPEN — single source of truth. Edit this
+│                           #   file (OPEN_TITLES / OPEN_SLUGS) to reopen a course.
+├── pm-pathway.html         # Google PM Certificate ↔ the NQF 5 Project Manager qualification:
+│                           #   which knowledge modules it covers, which are taught here,
+│                           #   and how the 240 credits are actually earned
 ├── profile.html            # Optional local profile (no account, localStorage only)
 ├── ai-in-action.html       # Interactive AI demo + impact stats
 ├── contact.html            # Contact details + working registration form
@@ -291,6 +296,39 @@ accredited qualification.
   is normally the NQF 5 entry requirement — telling a Matric holder they need RPL to get in would be
   wrong. Linked from every footer, from the accreditation explainer on `courses.html`, and from any
   course flagged `acc:"local"`.
+- [x] **Project Management pathway (11 Aug 2026)** — `pm-pathway.html`, plus the Google Project
+  Management Certificate as an `acc:"intl"` card on `courses.html`. Written because the business was
+  working from the figure "Google covers 76% of the local course", which is a misreading: the mapping
+  gives **74% of the 80-credit knowledge component**, which is **~25% of the 240-credit qualification**.
+  The page states that plainly and deliberately shows **no per-module percentage** — exemption is
+  granted per whole module, so it lists the 7 modules (52 credits) that are exemption candidates and
+  the 4 (28 credits) that are taught here regardless. Three claims on the page must not be softened:
+  the mechanism is RPL for credit and **not** SAQA's foreign-qualification evaluation (Google is not a
+  national awarding body); the exemption decision rests with Centenary and the QCTO, never with us;
+  and the EISA cannot be exempted by anything. The pathway hangs off a `pathway:{}` field on the course
+  record rather than off `acc:"local"`, because the mapping is specific work per qualification.
+  Reuses `.module`/`.lesson` as static always-open markup — no new CSS.
+- [x] **Course locks (11 Aug 2026)** — only the Project Manager route is open for enrolment while
+  its material is prepared. `locks.js` is the **single source of truth**: `OPEN_TITLES` unlocks a
+  catalogue card, `OPEN_SLUGS` unlocks the course page behind it, and reopening a course means
+  editing that file and nothing else. Currently open: the Occupational Certificate: Project Manager
+  and the Google Project Management Certificate that feeds it — 26 of the 28 cards are locked.
+  Locked courses stay **visible**: the breadth of the catalogue is the point of the courses page,
+  so they get a padlock badge, a greyed banner and "Opening later" rather than being hidden.
+  `cards.js` and `courses-index.js` both bail out on `data-locked`, so a locked card is never wired
+  to a link; `course.html` refuses enrolment on a locked slug (bookmarks and the legacy
+  `/ai-fundamentals` redirect still land somewhere sensible); and the Skills Gap keeps recommending
+  locked courses but marks them and drops the link, since knowing what closes your gap is useful
+  even when you can't start it yet. Copy on `index.html` and `courses.html` was rewritten — it
+  previously said "Everything here is open to you", which the locks made false.
+  - Note: the lock is JS-driven. With JS disabled the catalogue has no working links at all
+    (`cards.js` is what adds them), so nothing can be enrolled in — it fails safe — but the static
+    "Available Now" label would still show. Worth fixing in markup if a no-JS audience ever matters.
+- [ ] **Prepare the Project Manager learning material** — the 11 knowledge modules currently render
+  as a title/code/credit list only. Real content is the next piece of work.
+- [ ] **Confirm the QCTO accreditation number** — the site footer carries `07-QCTO/SDP180526182035`
+  (valid 15 May 2026 – 14 May 2031); `Centenary_Course_Options_DRAFT.pdf` (29 Jul 2026) carries
+  `07-QCTO/SDP120426174903`. Only one can be current, and it is on every page.
 - [ ] **Sign off the Skills Gap role targets** — the eight per-role targets in `skills-gap.js` were
   written from this site's own description of the work and have **not** been reviewed by the people who
   run those teams. The page says so; get them checked before anyone treats the output as authoritative.

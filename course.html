@@ -42,6 +42,7 @@
           <button class="btn btn-light" id="c-save">Save to my profile</button>
         </div>
         <div class="ataglance" id="c-facts"></div>
+        <div id="c-lock"></div>
         <div id="c-rpl"></div>
       </div>
       <div id="c-herobox"></div>
@@ -142,6 +143,8 @@
   </div>
 </div>
 
+<!-- must load before the render below, which asks it whether this course is open -->
+<script src="locks.js"></script>
 <script>
   // Placeholder intro clip: "A Designer Interacting With a Chatbot" (Coverr).
   // Coverr licence: free for commercial use, no attribution required. Self-hosted
@@ -343,7 +346,7 @@
     "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
     "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
-    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
+    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"It covers about three-quarters of the theory in this qualification — seven of the eleven knowledge modules, worth 52 credits, are candidates for exemption. It carries no NQF credits on its own, so those credits are claimed through RPL.",cta:"How the two fit together"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
     "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},
@@ -411,18 +414,50 @@
     document.getElementById('c-facts').innerHTML=facts.map(f=>'<div><span>'+f[0]+'</span><strong>'+f[1]+'</strong></div>').join('');
 
     // RPL only means something against a qualification that carries credits
-    document.getElementById('c-rpl').innerHTML = c.acc==="local"
+    const rplNote = c.acc==="local"
       ? '<div class="c-rplnote"><strong>Already doing this work?</strong> You may not have to start from '+
         'the beginning. Recognition of Prior Learning can award credits towards this qualification for '+
         'competence you can already prove — or admit you to it even if you don\'t meet the usual entry '+
         'requirements. <a href="rpl">How RPL works</a></div>'
       : '';
 
+    /* Some qualifications have an international course that covers part of the
+       theory, mapped module by module. That mapping is specific work per
+       qualification, so it hangs off the course record rather than being
+       assumed for anything carrying acc:"local". */
+    const pathNote = c.pathway
+      ? '<div class="c-rplnote"><strong>'+ESC(c.pathway.lead)+'</strong> '+ESC(c.pathway.body)+
+        ' <a href="'+c.pathway.href+'">'+ESC(c.pathway.cta)+'</a></div>'
+      : '';
+
+    document.getElementById('c-rpl').innerHTML = rplNote + pathNote;
+
+    /* A locked course still renders — people arrive on bookmarks and on the
+       legacy /ai-fundamentals redirect — but it must not offer enrolment. The
+       curriculum below stays readable on purpose: seeing what is coming is
+       useful, signing up for something that isn't running is not. */
+    const locked = !!(window.SPS_LOCKS && !SPS_LOCKS.slugOpen(getSlug()));
+    if(locked){
+      document.getElementById('c-lock').innerHTML=
+        '<div class="c-rplnote is-lock"><strong>This course isn\'t open yet.</strong> '+
+        'We\'re concentrating on the Project Manager qualification while its material is '+
+        'prepared, so enrolment for everything else is closed for now. You can still see '+
+        'what the course covers below. <a href="course?c=project-management">See what is open</a></div>';
+      const enrol=document.getElementById('c-enrol');
+      enrol.textContent='Not open yet';
+      enrol.removeAttribute('href');
+      enrol.classList.add('is-locked');
+      enrol.setAttribute('aria-disabled','true');
+      const watch=document.getElementById('c-watch');
+      if(watch)watch.remove();
+    }
+
     // hero video
     document.getElementById('c-herobox').innerHTML=
       '<button class="videobox videoplay" data-src="SAMPLE" data-title="'+ESC(c.title)+' — Introduction" style="background-image:url(\''+img(c.img,900)+'\')">'+
       '<span class="vbadge">Sample preview</span><span class="play">'+PLAY+'</span>'+
       '<span class="vlabel">Watch the course introduction</span></button>';
+    if(locked) stripHeroPlay();   // nothing to play on a course that isn't running
 
     // learn
     const learn=LEARN[c.cat]||LEARN["Business"];
@@ -455,11 +490,9 @@
          qualification's introduction would misrepresent it.
          Removed rather than hidden: .btn sets display:inline-flex, which
          beats the `hidden` attribute's UA rule and leaves it on screen. */
-      document.getElementById('c-watch').remove();
-      document.getElementById('c-herobox').querySelector('.vbadge').remove();
-      document.getElementById('c-herobox').querySelector('.play').remove();
-      document.getElementById('c-herobox').querySelector('.vlabel').remove();
-      document.getElementById('c-herobox').querySelector('.videobox').classList.remove('videoplay');
+      const w=document.getElementById('c-watch');
+      if(w)w.remove();
+      stripHeroPlay();
       document.getElementById('c-learnnote').textContent=
         'Knowledge modules build the theory, practicals apply it, and the workplace modules are logged on real projects — the three together are what the qualification assesses.';
       const cert=document.getElementById('c-certcard');
@@ -480,6 +513,21 @@
     }).join('');
 
     bind();
+  }
+
+  /* Turn the hero image back into a plain picture. Two callers want this — a
+     registered qualification (no sample clip to show) and a locked course (no
+     content to play) — and a course could in principle be both, so every
+     removal here is null-safe rather than assuming it runs once. */
+  function stripHeroPlay(){
+    const box=document.getElementById('c-herobox');
+    if(!box) return;
+    ['.vbadge','.play','.vlabel'].forEach(sel=>{
+      const el=box.querySelector(sel);
+      if(el) el.remove();
+    });
+    const vb=box.querySelector('.videobox');
+    if(vb) vb.classList.remove('videoplay');
   }
 
   function nMods(c){ return c.qcto.reduce((t,g)=>t+g.mods.length,0); }

@@ -363,6 +363,25 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
    until it was told to hug its own content. */
 .ccard-body .acc-badge{margin-bottom:9px;align-self:flex-start;width:-moz-fit-content;width:fit-content}
 
+/* ---- Locked courses ----
+   Only the Project Management route is open while its material is prepared.
+   Locked cards stay on the page — the breadth of the catalogue is the point of
+   it — but must read as "not yet" rather than as broken. So: the banner goes
+   grey, the title drops from the orange link colour to body ink, and every
+   hover affordance is switched off, because a card that lifts under the cursor
+   is promising a click it will not honour. */
+.ccard.locked{opacity:.78}
+.ccard.locked:hover{transform:none;box-shadow:none}
+.ccard.locked:hover .ccard-img-inner{transform:none}
+.ccard.locked .ccard-img-inner{filter:grayscale(.85)}
+.ccard.locked h4{color:var(--grey)}
+.ccard.locked .ccard-foot .avail{color:var(--ink-soft)}
+.lock-badge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  width:-moz-fit-content;width:fit-content;margin-bottom:9px;padding:5px 11px;border-radius:20px;
+  background:var(--bg-soft);border:1px solid var(--line);color:var(--grey);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.lock-badge svg{width:12px;height:12px;flex:0 0 auto}
+
 /* RECOGNITION OF PRIOR LEARNING */
 .dgrid.two-up{grid-template-columns:repeat(2,1fr)}   /* four cards read better 2×2 than 3+1 */
 /* RPL note on an accredited course page — sits in the dark hero */
@@ -371,6 +390,12 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   color:#d3cfca;max-width:620px}
 .c-rplnote strong{color:#fff}
 .c-rplnote a{color:var(--accent-green);font-weight:700;text-decoration:underline}
+/* Same note, different news. The green rule reads as an opportunity; a course
+   that isn't running is neutral information, so it takes a plain light rule. */
+.c-rplnote.is-lock{border-left-color:rgba(255,255,255,.45)}
+.c-rplnote.is-lock a{color:#fff}
+/* An <a> with its href removed is inert already; this stops it looking clickable. */
+.btn.is-locked{opacity:.5;pointer-events:none}
 .rpl-steps{counter-reset:rpl;list-style:none;margin:0;padding:0;display:grid;gap:14px}
 .rpl-steps li{counter-increment:rpl;position:relative;padding:18px 22px 18px 66px;background:#fff;
   border:1px solid var(--line);border-radius:13px}
@@ -552,6 +577,16 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .sg-rec h4{font-size:16.5px;color:var(--grey);margin-bottom:5px;line-height:1.35}
 .sg-rec p{font-size:13.5px;color:var(--ink-soft);line-height:1.55}
 .sg-recgo{font-size:19px;color:var(--orange-deep)}
+/* A locked recommendation is still worth reading, so it keeps its rank and its
+   reasoning and only loses the affordance — no hover lift, no arrow. */
+.sg-rec.locked{cursor:default;opacity:.82;grid-template-columns:38px 1fr}
+.sg-rec.locked:hover{border-color:var(--line);transform:none;box-shadow:none}
+/* Sits inside .sg-reccat rather than in the arrow column: that column is 20px
+   wide and is hidden altogether under 620px, which would drop the one word
+   that matters on a phone. */
+.sg-reclock{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:20px;
+  background:var(--bg-soft);border:1px solid var(--line);color:var(--ink-soft);
+  font-size:10px;font-weight:700;letter-spacing:.07em}
 .sg-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
 .sg-priv{margin-top:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
 .sg-caveat{max-width:820px;margin:34px auto 0;padding:18px 22px;background:#fff;border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.7;color:var(--ink-soft)}
