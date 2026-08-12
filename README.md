@@ -266,6 +266,11 @@ accredited qualification.
   Profile, the course search/filter index, the 800-catalogue band, the GM message and the poster band.
 - [x] **Internal voice** — the site speaks as SPS's own academy to SPS staff: "Fully funded by
   SPS", "register your interest with HR", "Upskill Yourself". No group rates, no corporate quotes.
+- [x] **Intake announced: 10 September 2026 (12 Aug 2026)** — Centenary confirmed the start date, so it's
+  on the landing page as a dark band under the hero, on the catalogue card, on the qualification page
+  (via a `starts` field on the course record) and as the planner default. The date is the provider's;
+  the per-module dates on `pm-schedule` are still ours, and that page now names the difference rather
+  than blurring it. `OFFICIAL_DATES` stays null — we have a start, not a programme calendar.
 - [ ] **GM name, photograph and message** — `images/gm-photo.svg` is a placeholder; the name reads
   "Name to follow" and the quote is generic. Replace all three when SPS supplies them.
 - [ ] **Academy photographs** — `images/poster-1.svg` and `poster-2.svg` are placeholders on both the
