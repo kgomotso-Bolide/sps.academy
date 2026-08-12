@@ -39,11 +39,16 @@
         <p><span class="lbl">Course cost</span>Fully funded by SPS</p>
         <p><span class="lbl">Delivery</span>Online · from any SPS site or from home</p>
       </div>
-      <!-- FormSubmit needs a one-time activation per address: the first submission after
-           this goes live sends a confirmation email to accounts@cn.co.za. Until
-           someone clicks that link, registrations are NOT delivered. -->
-      <form class="form reveal" action="https://formsubmit.co/accounts@cn.co.za" method="POST">
+      <!-- FormSubmit needs a one-time activation PER ADDRESS. The recipient changed on
+           12 Aug 2026, so the next submission sends a fresh confirmation email to
+           kgomotso@centenarynetworks.com. Until she clicks that link, registrations are
+           NOT delivered — not to her and not to the CC. Send one test registration and
+           check it arrived before telling anyone the form is open. -->
+      <form class="form reveal" action="https://formsubmit.co/kgomotso@centenarynetworks.com" method="POST">
         <input type="hidden" name="_subject" value="SPS Academy — staff course registration">
+        <!-- Registrations go to Centenary (Kgomotso) and are copied to the address
+             that used to receive them, so nothing that worked before stops working. -->
+        <input type="hidden" name="_cc" value="accounts@cn.co.za">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_next" value="https://kgomotso-bolide.github.io/sps.academy/thanks">
         <input type="hidden" name="_captcha" value="false">
