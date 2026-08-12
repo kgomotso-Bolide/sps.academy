@@ -21,6 +21,12 @@
   /* Set this only when Centenary confirms real programme dates. */
   var OFFICIAL_DATES = null;
 
+  /* Calendar identity. This ends up inside the .ics file the learner downloads,
+     so it has to name the academy they actually study with — the one field in
+     here that is not brand-neutral. Change both when porting to another site. */
+  var BRAND = 'SPS Academy';
+  var UID_HOST = 'sps.academy';
+
   var DAY_MS = 86400000;
   var DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var ICS_DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
@@ -161,7 +167,7 @@
     var L = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//SPS Academy//Project Manager NQF 5//EN',
+      'PRODID:-//' + BRAND + '//Project Manager NQF 5//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:PUBLISH',
       'X-WR-CALNAME:' + esc('Project Manager NQF 5 — study plan'),
@@ -174,7 +180,7 @@
     /* one all-day block per module */
     plan.rows.forEach(function (r, i) {
       L.push('BEGIN:VEVENT');
-      L.push('UID:' + r.id.toLowerCase() + '-block-' + uidSeed + '@sps.academy');
+      L.push('UID:' + r.id.toLowerCase() + '-block-' + uidSeed + '@' + UID_HOST);
       L.push('DTSTAMP:' + stamp());
       L.push('DTSTART;VALUE=DATE:' + ymd(r.from));
       L.push('DTEND;VALUE=DATE:' + ymd(addDays(r.to, 1)));   // DTEND is exclusive
@@ -196,7 +202,7 @@
     var endEx = addDays(plan.end, 1);
 
     L.push('BEGIN:VEVENT');
-    L.push('UID:study-sessions-' + uidSeed + '@sps.academy');
+    L.push('UID:study-sessions-' + uidSeed + '@' + UID_HOST);
     L.push('DTSTAMP:' + stamp());
     L.push('DTSTART:' + localDT(firstSession, hh, mm));
     L.push('DTEND:' + localDT(firstSession, hh, mm + durMin));

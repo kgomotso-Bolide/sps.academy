@@ -1,6 +1,6 @@
 /* ---- Project Manager NQF 5: progress tracking ----------------------------
 
-   SPS asked (Babalwa, 11 Aug) how a self-paced programme gets tracked so people
+   The client asked how a self-paced programme gets tracked so people
    finish on time and there is something to report on, "without placing a strain
    on HR or the provider". This is the answer that needs no backend.
 
@@ -21,7 +21,7 @@
      come from the provider, not from us — a database would produce dashboards
      while the compliance artefact still arrives by email. Storing employee
      learning records on our own infrastructure would also make someone a
-     responsible party under POPIA for data SPS already holds lawfully in its own
+     responsible party under POPIA for data the employer already holds lawfully in its
      HR systems. Revisit at ~20 learners or when this rolls to the other sites;
      the submitted records are structured so they migrate cleanly.
 
@@ -31,12 +31,32 @@
 (function () {
   var FIELD = 'pmProgress';
 
+  /* Each academy exposes its profile under its own global — SPSProfile,
+     FungiProfile, EquinixProfile — because the sites were branded separately.
+     Hardcoding one name silently disabled progress on the other two: available()
+     returned false and the ticks removed themselves, with no error to notice.
+     So find whichever object on `window` actually implements the profile API. */
+  var cached = null;
+  function profile() {
+    if (cached) return cached;
+    for (var k in window) {
+      if (!/Profile$/.test(k)) continue;
+      var o;
+      try { o = window[k]; } catch (e) { continue; }   // cross-origin frames throw
+      if (o && typeof o.get === 'function' && typeof o.save === 'function' &&
+          typeof o.available === 'function') { cached = o; return o; }
+    }
+    return null;
+  }
+
   function store() {
-    return (window.SPSProfile && window.SPSProfile.get && window.SPSProfile.get()[FIELD]) || {};
+    var p = profile();
+    return (p && p.get()[FIELD]) || {};
   }
   function commit(next) {
-    if (!window.SPSProfile) return false;
-    return window.SPSProfile.save(makePatch(next));
+    var p = profile();
+    if (!p) return false;
+    return p.save(makePatch(next));
   }
   function makePatch(next) { var p = {}; p[FIELD] = next; return p; }
   function clone(o) { return JSON.parse(JSON.stringify(o || {})); }
@@ -50,7 +70,8 @@
 
   var API = {
     available: function () {
-      return !!(window.SPSProfile && window.SPSProfile.available && window.SPSProfile.available());
+      var p = profile();
+      return !!(p && p.available());
     },
     all: function () { return store(); },
 
