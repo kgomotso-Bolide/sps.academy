@@ -257,6 +257,13 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .lesson .lmeta{display:flex;align-items:center;gap:12px}
 .lesson .ltag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);background:var(--bg-soft);padding:3px 8px;border-radius:20px}
 .lesson .ldur{font-size:12.5px;color:var(--ink-soft);font-weight:600;min-width:42px;text-align:right}
+/* A module row that leads to its study guide. It is an <a>, so it needs the
+   hover back that .lesson gives its clickable variant, plus an arrow so it
+   reads as a link next to the rows that are only listings. */
+.lesson-link{cursor:pointer}
+.lesson-link .lname{color:var(--orange-deep)}
+.lesson-link:hover{background:var(--orange-tint)}
+.lesson-link .lname::after{content:" →";font-weight:800;opacity:.65}
 .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .vcard{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff;transition:transform .2s,box-shadow .2s}
 .vcard:hover{transform:translateY(-4px);box-shadow:0 22px 46px -24px rgba(0,0,0,.22)}
@@ -362,6 +369,65 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 /* .ccard-body is a flex column, so the badge stretched the full card width
    until it was told to hug its own content. */
 .ccard-body .acc-badge{margin-bottom:9px;align-self:flex-start;width:-moz-fit-content;width:fit-content}
+
+/* ---- Study plan: stat row + schedule table ----
+   The table has seven columns of real data, so on a phone it scrolls inside its
+   own container rather than squeezing — the page itself must never scroll
+   sideways. */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stats-row .stat{background:#fff;padding:20px 22px}
+.stats-row .stat .n{font-size:clamp(21px,2.6vw,28px);font-weight:800;color:var(--orange-deep);
+  line-height:1.15;letter-spacing:-.02em}
+.stats-row .stat .l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4}
+
+.scrollx{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.ptable{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.ptable thead th{text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);font-weight:700;padding:14px 16px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);white-space:nowrap}
+.ptable td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.ptable tbody tr:last-child td{border-bottom:0}
+.ptable tbody tr:hover{background:var(--orange-tint)}
+.ptable .num{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.ptable thead th.num{text-align:left}
+.ptable a{color:var(--grey)}
+.ptable a strong{color:var(--orange-deep)}
+.ptable a:hover{text-decoration:underline}
+
+/* ---- Knowledge module pages ----
+   The topic weighting is the most useful number on the page — it tells a learner
+   where the marks are — so it gets its own slot at the end of the head row
+   rather than being buried in the meta line. */
+.topic-w{flex:0 0 auto;font-size:15px;font-weight:800;color:var(--orange-deep);
+  background:var(--orange-tint);border-radius:20px;padding:5px 12px;letter-spacing:-.01em}
+.topic-key{padding:16px 22px 18px;border-top:1px solid var(--line);background:var(--bg-soft);
+  font-size:14.5px;line-height:1.7;color:var(--ink-soft)}
+.topic-key .lbl{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;
+  font-weight:700;color:var(--grey);margin-bottom:7px}
+/* the sub-topic rows are reference text, not clickable lessons */
+#m-topics .lesson:hover{background:transparent}
+#m-topics .lesson .lname{line-height:1.55;padding:2px 0}
+
+.vid-soon{border:1px dashed var(--line);border-radius:14px;padding:30px 26px;background:var(--bg-soft);
+  font-size:14.5px;line-height:1.7;color:var(--ink-soft);max-width:760px}
+.vid-soon strong{display:block;color:var(--grey);font-size:16px;margin-bottom:6px}
+
+.modnav{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center}
+.modnav a{display:block;padding:18px 20px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;transition:border-color .18s,transform .18s}
+.modnav a:hover{border-color:var(--orange);transform:translateY(-2px)}
+.modnav span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--orange-deep);margin-bottom:5px}
+.modnav strong{display:block;font-size:14.5px;color:var(--grey);line-height:1.4;font-weight:700}
+.modnav-r{text-align:right}
+.modnav-c{font-size:13px;font-weight:700;color:var(--ink-soft);white-space:nowrap;
+  padding:18px 16px!important;border-style:dashed!important}
+@media (max-width:820px){
+  .modnav{grid-template-columns:1fr;gap:12px}
+  .modnav-r{text-align:left}
+  .modnav-c{text-align:center}
+}
 
 /* ---- Locked courses ----
    Only the Project Management route is open while its material is prepared.
@@ -660,7 +726,9 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   .nav-inner{padding:11px 18px}
   .hero{padding:104px 0 60px}
   .hero h1{font-size:clamp(28px,8vw,40px)}
-  .features,.course-grid,.outcomes,.form .two,.hero-card .meta,.learn,.vgrid,.dgrid{grid-template-columns:1fr}
+  /* .dgrid.two-up is two classes, so it outranks a bare .dgrid here and stayed
+     two-up on phones. Match its specificity or the cards never collapse. */
+  .features,.course-grid,.outcomes,.form .two,.hero-card .meta,.learn,.vgrid,.dgrid,.dgrid.two-up{grid-template-columns:1fr}
   .btn-row{gap:10px}.btn-row .btn{flex:1;text-align:center}
   .hero-card{padding:22px}
   .corp{padding:28px;flex-direction:column;align-items:flex-start;text-align:left}

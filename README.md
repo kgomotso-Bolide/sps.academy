@@ -124,6 +124,13 @@ sps/
 │                           #   portfolio of evidence, the process, and what RPL is not
 ├── locks.js                # WHICH COURSES ARE OPEN — single source of truth. Edit this
 │                           #   file (OPEN_TITLES / OPEN_SLUGS) to reopen a course.
+├── module.html             # ONE data-driven KNOWLEDGE MODULE template — renders any of
+│                           #   the 11 via ?m=KM-02
+├── pm-modules.js           # The 11 knowledge modules: topics, weightings, what each
+│                           #   covers, the defining idea. PUT DRIVE LINKS IN `DOCS` HERE.
+├── pm-schedule.html        # Study planner: pace → module dates → calendar invites
+├── pm-schedule.js          # Pacing maths + RFC 5545 .ics generation. Set OFFICIAL_DATES
+│                           #   here once Centenary confirms a real programme calendar.
 ├── pm-pathway.html         # Google PM Certificate ↔ the NQF 5 Project Manager qualification:
 │                           #   which knowledge modules it covers, which are taught here,
 │                           #   and how the 240 credits are actually earned
@@ -324,8 +331,57 @@ accredited qualification.
   - Note: the lock is JS-driven. With JS disabled the catalogue has no working links at all
     (`cards.js` is what adds them), so nothing can be enrolled in — it fails safe — but the static
     "Available Now" label would still show. Worth fixing in markup if a no-JS audience ever matters.
-- [ ] **Prepare the Project Manager learning material** — the 11 knowledge modules currently render
-  as a title/code/credit list only. Real content is the next piece of work.
+- [x] **Project Manager knowledge modules (12 Aug 2026)** — `module.html` + `pm-modules.js` turn the
+  11 knowledge modules into study guides: 51 topics with their registered weightings, 265 sub-topic
+  areas, and the defining paragraph for each topic. Built by parsing the provider's learner guides
+  (`scratchpad/parse-km.js` → `gen-pm-modules.js`); credits sum to 80 and every module's weightings
+  sum to 100, asserted both at build time and again in the browser so a bad edit fails loudly.
+  Knowledge modules on the course page now link through; the 13 practicals and 4 workplace modules
+  stay as flat rows because they are **mentor-signed logbooks, not material you read**, and need a
+  different treatment.
+  - **Nothing from the QCTO pack is committed to this repo.** The 24 summative assessments, 24
+    marking memos and 24 facilitator guides are excluded outright — publishing marking memos on a
+    public site would invalidate the assessments and put Centenary's accreditation at risk. The 52
+    learner documents are not hosted here either: `DOCS` in `pm-modules.js` holds Drive/SharePoint
+    links, and a `null` renders "Ask HR for a copy" rather than a dead button.
+  - The lesson pages carry the study *structure*, not the full teaching prose — the guides are
+    Centenary's material, and rendering every paragraph publicly would defeat the gated links.
+- [x] **Study plan + calendar invites (12 Aug 2026)** — `pm-schedule.html` / `pm-schedule.js`.
+  Built in answer to SPS: Babalwa asked how a self-paced programme gets tracked, and Mandy asked for
+  "structured learning… sessions scheduled in their diaries". Kgomotso has confirmed to the client
+  that the programme **is self-paced**, so this adds structure *on top of* self-paced material and
+  never presents itself as fixed instructor-led classes. Pick a start date and weekly hours; it
+  computes module-by-module dates from the registered credits (1 credit = 10 notional hours) and
+  emits a `.ics` with a block per module plus recurring study sessions.
+  - `OFFICIAL_DATES` is `null` and the page says so on every render: Centenary sets the real
+    calendar, and the registered documents leave duration blank deliberately. **Do not let these
+    dates reach a WSP or a learner agreement as though they were the provider's.**
+  - The .ics is tested in Node (`scratchpad/test-ics.js`): CRLF, 75-octet folding that does not
+    split multi-byte characters, escaping of `, ; \` and newlines, unique UIDs, exclusive all-day
+    `DTEND`, and `RRULE UNTIL` matching the programme end.
+  - **The arithmetic is sobering and worth knowing:** the knowledge component alone is 800 notional
+    hours — ~1.9 years at 8 h/week, ~1.2 years at 15. That is 80 of 240 credits. If the real
+    programme is meant to be shorter, the notional-hours figure and the provider's actual duration
+    need reconciling before anyone commits to dates.
+- [ ] **Tracking / completion reporting** — still unbuilt, and it is what SPS actually asked for
+  first. There is no backend: no accounts, no progress, no completion records. Note for the client
+  conversation: a website can track *progress*; only Centenary can issue competence records, and
+  only the QCTO awards the qualification after the EISA.
+- [ ] **Reconcile the Google overlap figure with Kgomotso** — `pm-pathway.html` says ~74% of the
+  theory / ~25% of the qualification (our credit-weighted mapping). Kgomotso told SPS in writing
+  that "50% of the course content matches the Google Career Certificates". Those disagree in front
+  of the client, and the provider's number governs because exemption is Centenary's decision. Ask
+  what the 50% is 50% *of*, and which modules she would exempt, then carry her figure.
+- [ ] **PMI claims** — Kgomotso told SPS candidates will be registered with PMI and that the Google
+  certificates are "accredited by" PMI. Nothing about PMI is on the site yet, and that wording needs
+  tightening before it is repeated: PMI does not accredit Google Career Certificates. Confirm
+  whether "register" means PMI membership or a CAPM pathway (CAPM has its own eligibility rules).
+- [ ] **Fill in the `DOCS` links in `pm-modules.js`** — all 33 slots (guide / workbook / video for
+  11 modules) are `null`, so every module currently says "Ask HR for a copy". Set each file's
+  sharing permissions *before* pasting its link: the page is public, so a link is only as private
+  as its own sharing setting.
+- [ ] **Practical and workplace modules** — 13 practicals and 4 workplace modules still need their
+  logbook treatment (mentor sign-off, evidence checklists), which is a different page shape.
 - [ ] **Confirm the QCTO accreditation number** — the site footer carries `07-QCTO/SDP180526182035`
   (valid 15 May 2026 – 14 May 2031); `Centenary_Course_Options_DRAFT.pdf` (29 Jul 2026) carries
   `07-QCTO/SDP120426174903`. Only one can be current, and it is on every page.

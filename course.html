@@ -143,8 +143,10 @@
   </div>
 </div>
 
-<!-- must load before the render below, which asks it whether this course is open -->
+<!-- both must load before the render below: locks.js says whether this course is
+     open, pm-modules.js says which modules have a study guide to link to -->
 <script src="locks.js"></script>
+<script src="pm-modules.js"></script>
 <script>
   // Placeholder intro clip: "A Designer Interacting With a Chatbot" (Coverr).
   // Coverr licence: free for commercial use, no attribution required. Self-hosted
@@ -346,7 +348,7 @@
     "ai-leaders":{title:"AI for Leaders & Managers",cat:"Leadership",mode:"Online · Self-paced",level:"Intermediate",img:"1552664730-d307ca884978",lead:"For SPS managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business."},
     "new-venture":{title:"AI & New Venture Creation",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",avail:"Coming Soon",img:"1559136555-9303baea8ebd",lead:"Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy."},
     "computer-technician":{title:"Occupational Certificate: Computer Technician",cat:"Technical",mode:"Online",level:"NQF 5",acc:"local",qid:"101408",credits:"282",img:"1581092160562-40aa08e78837",lead:"The full technical qualification — computer systems, hardware and support, covered properly. The formal route for our technicians and field teams."},
-    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"It covers about three-quarters of the theory in this qualification — seven of the eleven knowledge modules, worth 52 credits, are candidates for exemption. It carries no NQF credits on its own, so those credits are claimed through RPL.",cta:"How the two fit together"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
+    "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Blended",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"It covers about three-quarters of the theory in this qualification — seven of the eleven knowledge modules, worth 52 credits, are candidates for exemption. It carries no NQF credits on its own, so those credits are claimed through RPL.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "deploying-tinyml":{title:"Deploying TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Advanced",img:"1593376853899-fbb47a057fa0",lead:"Learn to program in TensorFlow Lite for microcontrollers, write the code, and deploy your model to your very own tiny microcontroller — implementing an entire TinyML application."},
     "fundamentals-tinyml":{title:"Fundamentals of TinyML",cat:"Computer Science",mode:"Online · Self-paced",level:"Intermediate",img:"1518770660439-4636190af475",lead:"Focusing on the basics of machine learning and embedded systems, this course introduces you to the “language” of TinyML."},
     "ai-strategy":{title:"AI Strategy for Business Leaders: From Hype to Impact",cat:"Business",mode:"Online Live",level:"Executive",img:"1542744173-8e7e53415bb0",lead:"Leverage new technologies to build real, measurable value for SPS — moving AI from hype to impact."},
@@ -430,7 +432,14 @@
         ' <a href="'+c.pathway.href+'">'+ESC(c.pathway.cta)+'</a></div>'
       : '';
 
-    document.getElementById('c-rpl').innerHTML = rplNote + pathNote;
+    /* A self-paced qualification needs a pacing aid more than a taught one does,
+       so the planner is offered wherever a course record names one. */
+    const planNote = c.plan
+      ? '<div class="c-rplnote"><strong>'+ESC(c.plan.lead)+'</strong> '+ESC(c.plan.body)+
+        ' <a href="'+c.plan.href+'">'+ESC(c.plan.cta)+'</a></div>'
+      : '';
+
+    document.getElementById('c-rpl').innerHTML = rplNote + pathNote + planNote;
 
     /* A locked course still renders — people arrive on bookmarks and on the
        legacy /ai-fundamentals redirect — but it must not offer enrolment. The
@@ -533,18 +542,28 @@
   function nMods(c){ return c.qcto.reduce((t,g)=>t+g.mods.length,0); }
 
   /* Modules carry a code and a credit value, so they are listed rather than
-     played — same accordion, no play buttons and no invented run times. */
+     played — same accordion, no play buttons and no invented run times.
+
+     A knowledge module whose study guide has been built links through to it.
+     Practical and workplace modules are logbooks signed off by a mentor rather
+     than material you read, so they stay as plain rows until they get their own
+     treatment — linking them to a page that doesn't exist would be worse than
+     leaving them flat. */
   function qctoHtml(c){
+    const built = window.PM_MODULE_BY_ID || {};
     return c.qcto.map((g,gi)=>
       '<div class="module'+(gi===0?' open':'')+'">'+
         '<button class="module-head"><span class="module-num">'+(gi+1)+'</span>'+
         '<div class="mt"><h4>'+ESC(g.c)+'</h4><div class="meta">'+g.mods.length+' modules · '+g.cr+' credits · '+ESC(g.note)+'</div></div>'+CHEV+'</button>'+
-        '<div class="module-body">'+ g.mods.map(m=>
-          '<div class="lesson" style="cursor:default">'+
+        '<div class="module-body">'+ g.mods.map(m=>{
+          const inner=
             '<span class="lname">'+ESC(m[1])+'</span>'+
             '<span class="lmeta"><span class="ltag">'+c.code+'-'+m[0]+'</span>'+
-            '<span class="ldur">'+m[2]+' cr</span></span></div>'
-        ).join('') +'</div></div>').join('');
+            '<span class="ldur">'+m[2]+' cr</span></span>';
+          return built[m[0]]
+            ? '<a class="lesson lesson-link" href="module?m='+m[0]+'">'+inner+'</a>'
+            : '<div class="lesson" style="cursor:default">'+inner+'</div>';
+        }).join('') +'</div></div>').join('');
   }
 
   /* interactions */
