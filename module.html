@@ -48,7 +48,7 @@
       <p>The learner guide carries the full notes for this module; the workbook holds the activities and self-assessments you hand to your facilitator for your portfolio of evidence.</p>
     </div>
     <div class="dgrid two-up reveal" id="m-docs"></div>
-    <p class="sg-caveat reveal" style="max-width:820px;margin-top:26px"><strong>These documents aren't hosted on this site.</strong> They're Centenary's material and are shared with enrolled learners directly, so the links above go to the controlled copy rather than a public download. If a link isn't working for you, ask HR — don't pass copies around, because the version you're assessed against has to be the current one.</p>
+    <p class="sg-caveat reveal" style="max-width:820px;margin-top:26px"><strong>These documents aren't hosted on this site.</strong> They're Centenary's material and are shared with enrolled learners directly, so the links above go to the controlled copy rather than a public download. If a link isn't working for you, <a href="mailto:kgomotso@centenarynetworks.com">ask HR</a> — don't pass copies around, because the version you're assessed against has to be the current one.</p>
   </div>
 </section>
 
@@ -168,13 +168,17 @@
 
   /* ---- documents ----
      A null link means the document exists but has no sharing link set yet. That
-     renders as "ask HR" rather than a dead button — a broken download is worse
-     than an honest one. */
+     renders as "ask HR for a copy" rather than a dead button — a broken download
+     is worse than an honest one. It is a mailto rather than plain text, because a
+     learner who wants the guide should not also have to work out who to ask and
+     what to call the module. Kgomotso is acting in the HR role for now, hence the
+     wording stays and only the address changes when that is settled. */
   const DOC_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
   function docCard(title,desc,href){
     const foot = href
       ? '<span class="dl">'+DOC_ICON+' Open the document ↗</span>'
-      : '<span class="dl" style="color:var(--ink-soft)">'+DOC_ICON+' Ask HR for a copy</span>';
+      : '<a class="dl" style="color:var(--ink-soft)" href="mailto:kgomotso@centenarynetworks.com?subject='+encodeURIComponent(m.id+' '+title+' — request a copy')+'">'+
+          DOC_ICON+' Ask HR for a copy</a>';
     const inner='<div class="dmeta"><h4>'+ESC(title)+'</h4><p>'+ESC(desc)+'</p>'+foot+'</div>';
     return href
       ? '<a class="dcard" href="'+ESC(href)+'" target="_blank" rel="noopener noreferrer">'+inner+'</a>'

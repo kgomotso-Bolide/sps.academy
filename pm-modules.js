@@ -63,7 +63,7 @@
           "Project stakeholders and governance",
           "The project process groups and knowledge areas"
         ],
-        key: "A project has a limited life span. It’s more of an event than a perpetual activity, meaning that all things being equal a Project has a starting date as well as a finishing date. A project has also a detailed scope of work to be undertaken as well as the resources needed to successfully undertake that particular scope of work. A project is unique in that it is not a routine operation, but a specific set of operations designed to accomplish a…" },
+        key: "A project has a limited life span. It’s more of an event than a perpetual activity, meaning that all things being equal a Project has a starting date as well as a finishing date. A project has also a detailed scope of work to be undertaken as well as the resources needed to successfully undertake that particular scope of work. A project is unique in that it is not a routine operation, but a specific set of operations designed to accomplish a singular goal." },
       { code: "KM-01-KT03", n: "Project management processes", w: 10,
         covers: [
           "Initiating",
@@ -72,7 +72,7 @@
           "Monitoring and controlling",
           "Closing"
         ],
-        key: "A process can be defined as a set of interrelated actions or activities that are carried out in order to achieve a predetermined outcome. Project Management Process is the practice of initiating, planning, executing, controlling, and closing the work of a team to achieve specific goals and meet specific success criteria at the specified time. The primary challenge of project management process is to achieve all of the project goals within the…" },
+        key: "A process can be defined as a set of interrelated actions or activities that are carried out in order to achieve a predetermined outcome. Project Management Process is the practice of initiating, planning, executing, controlling, and closing the work of a team to achieve specific goals and meet specific success criteria at the specified time. The primary challenge of project management process is to achieve all of the project goals within the given constraints." },
       { code: "KM-01-KT04", n: "Business ethics", w: 40,
         covers: [
           "Codes of conduct",
@@ -82,7 +82,7 @@
           "Supplier relations, tenders and procurement",
           "Stakeholder expectations"
         ],
-        key: "A code of conduct is a way for management to say what that culture should be - how employees should act and how they shouldn't act. Anyone can write a code of conduct by writing down feel-good phrases. An effective code has specific, clear guidelines that you want the company to live by. The Code outlines the minimum ethical standards of behaviour that an organization expects from its employees, including upholding propriety, integrity and…" }
+        key: "A code of conduct is a way for management to say what that culture should be - how employees should act and how they shouldn't act. Anyone can write a code of conduct by writing down feel-good phrases. An effective code has specific, clear guidelines that you want the company to live by. The Code outlines the minimum ethical standards of behaviour that an organization expects from its employees, including upholding propriety, integrity and ethical values in their conduct." }
     ]
   },
   {
@@ -100,7 +100,7 @@
           "Structure and scope of a project charter",
           "Governance of a project charter"
         ],
-        key: "A project charter is a comprehensive document which outlines the duties and work obligations of the team associated with that project, identify the key stakeholders, specifies the authority and power of the project manager. It is a crucial ingredient in planning out the project because it is used throughout the project lifecycle. The terms of reference are usually part of the project charter. A project charter will be created in the initiating…" },
+        key: "A project charter is a comprehensive document which outlines the duties and work obligations of the team associated with that project, identify the key stakeholders, specifies the authority and power of the project manager. It is a crucial ingredient in planning out the project because it is used throughout the project lifecycle. The terms of reference are usually part of the project charter. A project charter will be created in the initiating process group of a phase or a project at the very start." },
       { code: "KM-02-KT02", n: "Project management plan", w: 20,
         covers: [
           "Project management plan concepts and flow of data",
@@ -112,7 +112,7 @@
           "Project life cycle",
           "Elements of a project management plan"
         ],
-        key: "From a business perspective, Planning is a management action which pivots around creating and describing a company goals and objectives as well as detailing how to achieve and accomplish the stated goal and objectives. It stipulates a company vision as well as the direction it intends to embark upon as well as the resources needed to attain these goals. In a nutshell planning is the process of deciding in advance what is to be done, who is to do…" },
+        key: "From a business perspective, Planning is a management action which pivots around creating and describing a company goals and objectives as well as detailing how to achieve and accomplish the stated goal and objectives. It stipulates a company vision as well as the direction it intends to embark upon as well as the resources needed to attain these goals. In a nutshell planning is the process of deciding in advance what is to be done, who is to do it, how it is to be done and when it is to be done." },
       { code: "KM-02-KT03", n: "Direct and manage project work", w: 20,
         covers: [
           "Concepts and flow of data related to directing and managing project work",
@@ -124,7 +124,7 @@
           "Inputs related to directing and managing project work",
           "Tools and techniques for directing and managing project work"
         ],
-        key: "Direct and manage project work means executing the work defined in the plan to achieve the project requirements defined in the project scope management. The key benefit of this process is that it provides overall management of the project work. Direct and manage project work means executing the work defined in the plan to achieve the project requirements defined in the project scope management. The key benefit of this process is that it provides…" },
+        key: "Direct and manage project work means executing the work defined in the plan to achieve the project requirements defined in the project scope management. The key benefit of this process is that it provides overall management of the project work. Direct and manage project work means executing the work defined in the plan to achieve the project requirements defined in the project scope management. The key benefit of this process is that it provides overall management of the project work." },
       { code: "KM-02-KT04", n: "Monitor and control project work", w: 20,
         covers: [
           "Concepts and flow of data related to monitoring and controlling project work",
@@ -132,7 +132,7 @@
           "Inputs related to monitoring and controlling project work",
           "Tools and techniques for monitoring and controlling project work"
         ],
-        key: "Monitoring and Controlling Project Work involves tracking the actual project performance with the planned project management activities. It can mainly be looked as a Control function that takes place at all stages of a project i.e. from Initiation through Closing. For small projects, monitoring and control project work is comparatively an easy task. However, as you are aware, Project Management is more stringently required for large projects…" },
+        key: "Monitoring and Controlling Project Work involves tracking the actual project performance with the planned project management activities. It can mainly be looked as a Control function that takes place at all stages of a project i.e. from Initiation through Closing. For small projects, monitoring and control project work is comparatively an easy task." },
       { code: "KM-02-KT05", n: "Integrated change control", w: 20,
         covers: [
           "Integrated change control concepts and flow of data",
@@ -167,7 +167,7 @@
           "Scope management planning tools and techniques (Expert judgment, Meetings)",
           "Outputs of project scope management planning (The scope management plan, Requirements management plan)"
         ],
-        key: "Scope management plan contains scope planning, execution and control. is created as a part of Define Project Management plan process and is not included as a separate scope management process. Already have a head start on refining the project’s objectives in quantifiable terms, but now you need to plan further and write down all the intermediate and final deliverables that you and your team will produce over the course of the project.…" },
+        key: "Scope management plan contains scope planning, execution and control. is created as a part of Define Project Management plan process and is not included as a separate scope management process. Already have a head start on refining the project’s objectives in quantifiable terms, but now you need to plan further and write down all the intermediate and final deliverables that you and your team will produce over the course of the project." },
       { code: "KM-03-KT02", n: "Scope management requirements and needs", w: 15,
         covers: [
           "Concepts related to the requirements for effective scope management and flow of data",
@@ -177,7 +177,7 @@
           "Documenting the requirements and needs (Business requirements, Stakeholder requirements, Solution requirements, Project requirements, Transition requirements, Requirement assumptions, dependencies and constraints)",
           "Requirements traceability matrix"
         ],
-        key: "Data flow diagrams are also known as bubble charts. DFD is a designing tool used in the top-down approach to Systems Design. This context-level DFD is next \"exploded\", to produce a Level 1 DFD that shows some of the detail of the system being modelled. The Level 1 DFD shows how the system is divided into sub-systems (processes), each of which deals with one or more of the data flows to or from an external agent, and which together provide all of…" },
+        key: "Data flow diagrams are also known as bubble charts. DFD is a designing tool used in the top-down approach to Systems Design. This context-level DFD is next \"exploded\", to produce a Level 1 DFD that shows some of the detail of the system being modelled. The Level 1 DFD shows how the system is divided into sub-systems (processes), each of which deals with one or more of the data flows to or from an external agent, and which together provide all of the functionality of the system as a whole." },
       { code: "KM-03-KT03", n: "Define scope", w: 15,
         covers: [
           "Project scope concepts and flow of data",
@@ -196,7 +196,7 @@
           "Scope baseline",
           "The work breakdown structure report and dictionary"
         ],
-        key: "A work breakdown structure (WBS) is a key project deliverable that organizes the team's work into manageable sections. The Project Management Body of Knowledge (PMBOK) defines the work breakdown structure as a \"deliverable oriented hierarchical decomposition of the work to be executed by the project team.\" The work breakdown structure visually defines the scope into manageable chunks that a project team can understand, as each level of the work…" },
+        key: "A work breakdown structure (WBS) is a key project deliverable that organizes the team's work into manageable sections. The Project Management Body of Knowledge (PMBOK) defines the work breakdown structure as a \"deliverable oriented hierarchical decomposition of the work to be executed by the project team.\" The work breakdown structure visually defines the scope into manageable chunks that a project team can understand, as each level of the work breakdown structure provides further definition and detail." },
       { code: "KM-03-KT05", n: "Validate scope", w: 15,
         covers: [
           "Scope validation concepts and flow of data",
@@ -214,7 +214,7 @@
           "Tools and techniques to control the project scope (Variances analysis)",
           "Scope control reports and outputs (Work Performance Information, Change Requests, Project Management Plan Updates, Project Document Updates, Organisation Process Assets Updates)"
         ],
-        key: "Scope control is one of the keys to effective project management. Good project management requires managing scope in such a way that the goals of a project can be obtained on time without leaving out resolution of items that are critical to the project’s success. Good scope control allows the changing and adding of critical tasks without adding in unnecessary items or items that would be best suited for a later version that if added could cause…" }
+        key: "Scope control is one of the keys to effective project management. Good project management requires managing scope in such a way that the goals of a project can be obtained on time without leaving out resolution of items that are critical to the project’s success. Good scope control allows the changing and adding of critical tasks without adding in unnecessary items or items that would be best suited for a later version that if added could cause a project to miss its critical deadlines." }
     ]
   },
   {
@@ -231,7 +231,7 @@
           "Schedule management planning tools and techniques (Expert judgement, Analytical techniques, Meetings)",
           "The schedule management plan (Project schedule model development, Level of accuracy, Units of measurement, Organisational procedure links, Project schedule model maintenance, Control thresholds, Rules of performance measurement)"
         ],
-        key: "Plan Schedule Management is the process of establishing the policies, procedures, and documentation for planning, developing, managing, executing, and controlling the project schedule. The key benefit of this process is that it provides guidance and direction on how the project schedule will be managed throughout the project. The inputs, tools and techniques, and outputs of this process are depicted in depicts the data flow disgraceful Management Plan" },
+        key: "Plan Schedule Management is the process of establishing the policies, procedures, and documentation for planning, developing, managing, executing, and controlling the project schedule. The key benefit of this process is that it provides guidance and direction on how the project schedule will be managed throughout the project." },
       { code: "KM-04-KT02", n: "Define schedule activities", w: 10,
         covers: [
           "Defining schedule activity concepts and flow of data",
@@ -240,7 +240,7 @@
           "Tools and techniques to collect and refine requirements (Decomposition, Rolling wave planning, Expert judgement)",
           "Activity list (Activity attributes, Milestone list)"
         ],
-        key: "Activity definition refers to the process of parsing a project into a number of individual tasks which must be completed before the deliverables can be considered completed. Activity definitions rely on a number of specific input processes. These include enterprise environmental factors, organizational process assets, the project scope statement, the work breakdown structure, the WBS dictionary, the project management plan (which consists of the…" },
+        key: "Activity definition refers to the process of parsing a project into a number of individual tasks which must be completed before the deliverables can be considered completed. Activity definitions rely on a number of specific input processes. These include enterprise environmental factors, organizational process assets, the project scope statement, the work breakdown structure, the WBS dictionary, the project management plan (which consists of the project scope management plan and the schedule management plan)." },
       { code: "KM-04-KT03", n: "Sequence activities", w: 15,
         covers: [
           "Activity sequencing concepts and flow of data",
@@ -249,16 +249,16 @@
           "Precedence Diagramming tools and techniques to perform activity scheduling (Finish-to start, Finish-to finish, Start-to-start, Start-to-finish)",
           "Dependency determination tools and techniques to perform activity scheduling (Mandatory dependencies, Discretionary dependencies, External dependencies, Internal dependencies)",
           "Leads and lags",
-          "Outputs of sequencing activities (Project Schedule network Diagram, Project Document Updates (activity lists, activity attributes, Milestone lists, Risk register) Sequence activities Sequence Activities is the process of identifying and documenting relationships among the project activities. The key benefit of this process is that it defines the logical sequence of work to obtain the greatest efficiency given all project constraints. The inputs, tools and techniques, and outputs of this process are depicted in Figure 6-7. Figure 6-8 depicts the data flow diagram of the process. INCLUDEPICTURE \"https://www.oreilly.com/library/view/a-guide-to/9781935589679/images/fig6-7.png\" \\* MERGEFORMATINET INCLUDEPICTURE \"https://www.oreilly.com/library/view/a-guide-to/9781935589679/images/fig6-7.png\" \\* MERGEFORMATINET INCLUDEPICTURE \"https://www.oreilly.com/library/view/a-guide-to/9781935589679/images/fig6-7.png\" \\* MERGEFORMATINET INCLUDEPICTURE \"https://www.oreilly.com/library/view/a-guide-to/9781935589679/images/fig6-7.png\" \\* MERGEFORMATINET"
+          "Outputs of sequencing activities (Project Schedule network Diagram, Project Document Updates (activity lists, activity attributes, Milestone lists, Risk register))"
         ],
-        key: "Sequence Activities is the process of identifying and documenting relationships among the project activities. The key benefit of this process is that it defines the logical sequence of work to obtain the greatest efficiency given all project constraints. The inputs, tools and techniques, and outputs of this process are depicted in Figure 6-7. Figure 6-8 depicts the data flow diagram of the process." },
+        key: "Sequence Activities is the process of identifying and documenting relationships among the project activities. The key benefit of this process is that it defines the logical sequence of work to obtain the greatest efficiency given all project constraints." },
       { code: "KM-04-KT04", n: "Estimate activity resources", w: 15,
         covers: [
           "Activity resource estimation concepts and flow of data",
           "The importance and benefits of estimation of activity resources",
           "Input documents to estimate activity resources (Schedule Management Plan, Activity list, Activity Attributes, Resource Calendars, Risk Register, Activity Cost Estimates, Enterprise Environmental Factors, Organisation Process Assets)",
           "Tools and techniques to estimate activity resources (Expert judgement, Alternative analysis, published estimating data, Bottom-up estimating, Project Management Software)",
-          "Activity estimation outputs (Activity Resource Requirement, Resource Breakdown Structure, Update of project documents (Activity List, Activity Attributes, Resources Calendars) Estimate activity resources The definition of resources in project management include people, materials, equipment, money, facilities and any fundamental things that are necessary for executing the project. Resources are needed throughout the entire lifecycle of the project. Determining the resource requirements is very important for successful management. The ability of the project manager to estimate the activity resources is very crucial. Estimate activity resource is the process that estimates the type and amount of resources like equipment, supplies, and human resource to perform individual tasks for a particular project. One of the benefits of this particular process is that it identifies the type, quality and characteristics of the resources that are required to complete a particular activity. Moreover, this will also allow the calculation of costs accurately as well as duration estimates."
+          "Activity estimation outputs (Activity Resource Requirement, Resource Breakdown Structure, Update of project documents (Activity List, Activity Attributes, Resources Calendars))"
         ],
         key: "The definition of resources in project management include people, materials, equipment, money, facilities and any fundamental things that are necessary for executing the project. Resources are needed throughout the entire lifecycle of the project. Determining the resource requirements is very important for successful management." },
       { code: "KM-04-KT05", n: "Estimate activity duration", w: 15,
@@ -278,7 +278,7 @@
           "Tools and techniques to develop project schedule (Schedule Network Analysis, Critical Path Method, Critical Chain Method, Resource Optimisation Techniques [Resources levelling, Resource smoothing], Modelling Techniques [What-if scenario analysis, Simulation], Lead and Lag Techniques, Schedule Compression, Scheduling Tool)",
           "Scheduling reports and outputs (Schedule Base Line, Project Schedule [Bar charts, Milestone charts, Project Schedule network diagrams], Schedule Data, Project Calendars, Project Management Plan Updates, Project Document Updates)"
         ],
-        key: "Project scheduling is a mechanism to communicate what tasks need to get done and which organizational resources will be allocated to complete those tasks in what timeframe. A project schedule is a document collecting all the work needed to deliver the project on time" },
+        key: "Project scheduling is a mechanism to communicate what tasks need to get done and which organizational resources will be allocated to complete those tasks in what timeframe." },
       { code: "KM-04-KT07", n: "Control schedule", w: 15,
         covers: [
           "Schedule control concepts and flow of data",
@@ -311,7 +311,7 @@
           "The importance and benefits of cost estimation",
           "Input documents to estimate the project cost (Cost Management Plan, Human Resource Management Plan, Scope Baseline [Project Scope Statement, Work Breakdown Structure, WBS Dictionary], Project Schedule, Risk Register, Enterprise Environmental Factors, Organisational Process Assets)",
           "Cost estimation tools and techniques (Expert judgement, Parametric estimating, Bottom-up estimating, three-point estimating, Reserve analysis, Cost of quality, Project management software, Vendor bid analysis, Group decision-making)",
-          "Cost estimation reports and outputs (Activity Cost Estimates, Basis of Estimates [Basis of estimates, Assumptions, Know constraints, Range of estimates, Confidence level) Project cost estimation concepts and flow of data Project cost estimating scares a lot of people. They don't know how much something will cost, but they know whatever value they give, they will be held to it by their manager. The challenge with estimating is that it always involves some uncertainty. Some of the factors that contribute to this uncertainty include: Experience with Similar Projects: The less experience you have with similar projects, the greater the uncertainty. If you've managed similar projects, you will be able to better estimate the costs of the project."
+          "Cost estimation reports and outputs (Activity Cost Estimates, Basis of Estimates [Basis of estimates, Assumptions, Know constraints, Range of estimates, Confidence level)]"
         ],
         key: "Experience with Similar Projects: The less experience you have with similar projects, the greater the uncertainty. If you've managed similar projects, you will be able to better estimate the costs of the project." },
       { code: "KM-05-KT03", n: "Project budgeting concepts", w: 30,
@@ -366,7 +366,7 @@
           "Quality control tools and techniques (Quality Management and Control Tools [Affinity diagrams, Process decision program charts, Interrelationship digraphs, Tree diagrams, Prioritisation matrices, Activity network diagrams, Matrix diagrams], Statistical Sampling, Inspection, Approved Change Requests Review)",
           "Quality control reports and outputs (Quality Control Measurements, Validated Changes, Verified Deliverables, Work Performance Information, Change Requests, Project Management Plan Updates, Project Document Updates, Organisations Process Assets Updates)"
         ],
-        key: "According to PMBOK Quality Control is the process for \"monitoring specific project results to determine whether the comply with relevant quality standards and identifying ways to eliminate causes of unsatisfactory performance\"" }
+        key: "According to PMBOK Quality Control is the process for \"monitoring specific project results to determine whether the comply with relevant quality standards and identifying ways to eliminate causes of unsatisfactory performance.\"" }
     ]
   },
   {
@@ -393,7 +393,7 @@
           "Tools and techniques to acquire a project team (Pre-assignments, Negotiations, Acquisition, Virtual Teams, Multi-criteria Decision Analysis)",
           "Outputs of the process (Project Staff Assignments, Resource Calendars, Project Management Plan Updates)"
         ],
-        key: "Acquiring project team is an activity that allows selecting and approving human resource availability according to the list of required skills and criteria for choosing human resource for the purpose of obtaining the team necessary to accomplish project" },
+        key: "Acquiring project team is an activity that allows selecting and approving human resource availability according to the list of required skills and criteria for choosing human resource for the purpose of obtaining the team necessary to accomplish project." },
       { code: "KM-07-KT03", n: "Develop a project team", w: 25,
         covers: [
           "Team development concepts (Team dynamics)",
@@ -437,7 +437,7 @@
           "Communication management tools and techniques (Communication technology, Communication models, Communication methods, Information management systems, Performance reporting)",
           "Communication management outputs (Project communications, Project document updates, Organisation process assets update (Stakeholder notices, Project reports, Project presentation, Project records, Stakeholder feedback, Lessons learned))"
         ],
-        key: "Manage Communications is the process of creating, collecting, distributing, storing, retrieving, and the ultimate disposition of project information in accordance to the communications management plan. The key benefit of this process is that it enables an efficient and effective communications flow between project stakeholders manage communications process requires different inputs such as the communications management plan, work performance…" },
+        key: "Manage Communications is the process of creating, collecting, distributing, storing, retrieving, and the ultimate disposition of project information in accordance to the communications management plan." },
       { code: "KM-08-KT03", n: "Control communications", w: 33,
         covers: [
           "Communication control concepts and flow of data",
@@ -446,7 +446,7 @@
           "Communication control tools and techniques (Information management systems, Expert judgment, Meetings)",
           "Communication control outputs (Work performance information, Change requests, document updates, Organisational process assets updates)"
         ],
-        key: "Control Communications is the process of monitoring and controlling communications throughout the entire project life cycle to ensure the information needs of the project stakeholders are met" }
+        key: "Control Communications is the process of monitoring and controlling communications throughout the entire project life cycle to ensure the information needs of the project stakeholders are met." }
     ]
   },
   {
@@ -481,7 +481,7 @@
           "Qualitative risk analysis and techniques (Probability and impact matrix, Risk data quality assessment, Risk categorization, Risk urgency assessment, Expert judgment)",
           "Qualitative risk analysis outputs (Risk register updates, Assumptions log updates)"
         ],
-        key: "Qualitative Risk Analysis at its simplest involves only a description of the obvious project risks; in some circumstances risk identification may be all the risk analysis that is required, in other cases more in-depth analysis will be warranted. Risk analysis is qualitative and comprises qualifying and prioritizing the risks that have been identified in terms of likelihood and impact on the construction project undertaking. Each risk must be…" },
+        key: "Qualitative Risk Analysis at its simplest involves only a description of the obvious project risks; in some circumstances risk identification may be all the risk analysis that is required, in other cases more in-depth analysis will be warranted. Risk analysis is qualitative and comprises qualifying and prioritizing the risks that have been identified in terms of likelihood and impact on the construction project undertaking." },
       { code: "KM-09-KT04", n: "Quantitative risk analysis", w: 15,
         covers: [
           "Quantitative risk analysis concepts and flow of data",
@@ -499,7 +499,7 @@
           "Risk response planning techniques (Risk response strategies, Contingent response strategies)",
           "Risk response planning outputs (Project planning document updates, Project Management document updates)"
         ],
-        key: "The risk response planning involves determining ways to reduce or eliminate any threats to the project, and also the opportunities to increase their impact. Project managers should work to eliminate the threats before they occur. Similarly, the project managers should work to ensure that opportunities occur. Likewise, the project manager is also responsible to decrease the probability and impact of threats and increase the probability and impact…" },
+        key: "The risk response planning involves determining ways to reduce or eliminate any threats to the project, and also the opportunities to increase their impact. Project managers should work to eliminate the threats before they occur. Similarly, the project managers should work to ensure that opportunities occur. Likewise, the project manager is also responsible to decrease the probability and impact of threats and increase the probability and impact of opportunities." },
       { code: "KM-09-KT06", n: "Control risks", w: 15,
         covers: [
           "Risk control concepts and flow of data",
@@ -534,7 +534,7 @@
           "Procurement tools and techniques (Bidder conference, Proposal/tender evaluation techniques, Independent estimates, Expert judgment, Advertising, Analytical techniques, Procurement negotiations)",
           "Procurement outputs (Selected seller/contractor, Agreements, Resource calendars, change requests, Project management plan updates, project document updates)"
         ],
-        key: "Transparency in public procurement is important. Information on the public procurement process must be made available to all public procurement stakeholders: contractors, suppliers, service providers, and the public at large, unless there are valid and legal reasons for keeping certain information confidential. Examples of confidential information are proprietary information belonging to companies or individuals participating in the solicitation…" },
+        key: "Transparency in public procurement is important. Information on the public procurement process must be made available to all public procurement stakeholders: contractors, suppliers, service providers, and the public at large, unless there are valid and legal reasons for keeping certain information confidential." },
       { code: "KM-10-KT03", n: "Control procurement", w: 25,
         covers: [
           "Procurement control concepts and flow of data",
@@ -543,7 +543,7 @@
           "Procurement control tools and techniques (Contract change control system, Procurement performance reviews, Inspections and audits, Performance reporting, Payment systems, Claims administration, Records management system)",
           "Procurement control outputs (Work performance information, Change requests, Project management plan updates, Project document updates, Organisational process assets updates)"
         ],
-        key: "Control Procurements: Inputs. The procurement management plan (part of the project management plan) provides guidance on who will manage various aspects of the procurement as well as how to go about it. This includes information on how to use the payment systems, contract change control system, and performance" },
+        key: "Control Procurements: Inputs. The procurement management plan (part of the project management plan) provides guidance on who will manage various aspects of the procurement as well as how to go about it." },
       { code: "KM-10-KT04", n: "Close procurement", w: 25,
         covers: [],
         key: "Procurements are closed when a contract is completed OR when a contract is terminated before the work is completed. The Close Procurements is a part of Closing Process Group. All procurements must be closed out, no matter the circumstances under which they stop, are terminated, or are completed." }
@@ -580,7 +580,7 @@
           "Stakeholder engagement management tools and techniques (Communication methods, Interpersonal skills, Management skills, Expert judgement, Meetings)",
           "Stakeholder engagement management outputs (Issues log, Change requests, project management plan updates)"
         ],
-        key: "Stakeholder management is a critical component to the successful delivery of any project, programmer or activity. A stakeholder is any individual, group or organization that can affect, be affected by, or perceive itself to be affected by a programmer. Stakeholder management creates positive relationships with stakeholders through the appropriate management of their expectations and agreed objectives. Stakeholder management is a process and…" },
+        key: "Stakeholder management is a critical component to the successful delivery of any project, programmer or activity. A stakeholder is any individual, group or organization that can affect, be affected by, or perceive itself to be affected by a programmer. Stakeholder management creates positive relationships with stakeholders through the appropriate management of their expectations and agreed objectives. Stakeholder management is a process and control that must be planned and guided by underlying principles." },
       { code: "KM-11-KT04", n: "Control stakeholder engagements", w: 25,
         covers: [
           "Stakeholder engagement control concepts and flow of data",
@@ -589,7 +589,7 @@
           "Stakeholder engagement control tools and techniques (Information management systems, Expert judgement, Meetings)",
           "Stakeholder engagement control outputs (Work performance information, Change requests, Project management plan updates)"
         ],
-        key: "Control Stakeholder Engagement is the process of monitoring overall project stakeholder relationships and adjusting strategies and plans for engaging stakeholders. This process compares the stakeholder management plan with the results from engaging stakeholders. If stakeholder engagement is not occurring as desired a change request is initiated. You will notice that the artifacts used to control stakeholder engagement are similar to those used…" }
+        key: "Control Stakeholder Engagement is the process of monitoring overall project stakeholder relationships and adjusting strategies and plans for engaging stakeholders. This process compares the stakeholder management plan with the results from engaging stakeholders. If stakeholder engagement is not occurring as desired a change request is initiated. You will notice that the artifacts used to control stakeholder engagement are similar to those used to control communications. These two processes are very tightly linked." }
     ]
   }
   ];
