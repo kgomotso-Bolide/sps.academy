@@ -314,7 +314,10 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 /* GM MESSAGE */
 .gm{display:grid;grid-template-columns:300px 1fr;gap:46px;align-items:center;max-width:1020px;margin:0 auto}
 .gm-photo{border-radius:18px;overflow:hidden;background:var(--dark);box-shadow:0 26px 60px -30px rgba(34,32,33,.65)}
-.gm-photo img{width:100%;display:block}
+/* height:auto is load-bearing: the <img> carries its intrinsic width and height
+   so the space is reserved before it loads, and without this the attribute
+   height survives width:100% and stretches the portrait. */
+.gm-photo img{width:100%;height:auto;display:block}
 .gm .eyebrow{display:block;margin-bottom:16px}
 .gm blockquote{margin:0;color:var(--ink-soft);font-size:16.5px;line-height:1.7}
 .gm blockquote p{margin-bottom:16px}
