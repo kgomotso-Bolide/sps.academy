@@ -1,3 +1,7 @@
+/* Motion removed 14 Aug 2026 at Kgomotso's request, along with the drop
+   shadows — the same reasoning as the hero canvas she asked to pause on
+   4 Aug. The typewriter and the counting stats are switched off below; the
+   original typewriter is kept as typeHTML_animated in case it comes back. */
   /* ---- AI in Action: typewriter demo ---- */
   (function(){
     const chat=document.getElementById('aiChat'),tabs=document.getElementById('aiTabs');if(!chat||!tabs)return;
@@ -14,7 +18,11 @@
     let active=-1,timer=null;
     const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
     function clearTimers(){if(timer){clearTimeout(timer);timer=null;}}
-    function typeHTML(el,html,done){
+    /* The typewriter is switched off — see the note at the top of this file.
+       The answer is placed in one go, so the panel is readable the moment it
+       appears rather than assembling itself. */
+    function typeHTML(el,html,done){ el.innerHTML=html; done&&done(); }
+    function typeHTML_animated(el,html,done){
       // tokens are either HTML tags (injected whole) or text runs (typed char-by-char)
       const tokens=html.match(/<[^>]+>|[^<]+/g)||[];
       const caret='<span class="ai-caret"></span>';
@@ -55,8 +63,9 @@
       if(!e.isIntersecting)return;ob.unobserve(e.target);
       const el=e.target,txt=el.dataset.txt;
       if(txt){el.textContent=txt;return;}
-      const to=+el.dataset.to,suf=el.dataset.suf||'';let s=null;
-      (function tick(t){if(!s)s=t;const p=Math.min((t-s)/1100,1);el.textContent=Math.round(p*to)+suf;if(p<1)requestAnimationFrame(tick);})(performance.now());
+      /* Counters no longer tick up from zero — the figure is simply the figure. */
+      const to=+el.dataset.to,suf=el.dataset.suf||'';
+      el.textContent=to+suf;
     }),{threshold:.6});
     nums.forEach(n=>obs.observe(n));
   })();
