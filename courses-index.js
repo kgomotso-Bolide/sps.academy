@@ -45,8 +45,7 @@
   var empty=document.createElement('div');
   empty.className='cx-empty'; empty.hidden=true;
   empty.innerHTML='<strong>Nothing matches that</strong>'+
-    '<p>Only '+cards.length+' of our 800 qualifications and courses are on the site so far. '+
-    'If what you want isn\'t here yet, <a href="contact" style="color:var(--orange-deep);font-weight:700;'+
+    '<p>Try clearing the filters. If what you want isn\'t on the site yet, <a href="contact" style="color:var(--orange-deep);font-weight:700;'+
     'text-decoration:underline">ask HR</a> — if it\'s in the catalogue, you can do it.</p>';
   var last=grids[grids.length-1];
   last.parentNode.insertBefore(empty,last.nextSibling);
@@ -73,7 +72,7 @@
     count.innerHTML='Showing <strong>'+shown+'</strong> of <strong>'+cards.length+
       '</strong> courses on the site'+
       (filtered?' <button class="cx-reset" id="cxReset">Clear filters</button>':'')+
-      '<br><span style="font-size:12.5px">The full catalogue runs to 800 — ask HR for anything not listed.</span>';
+      '<br><span style="font-size:12.5px">Ask HR for anything not listed.</span>';
     var r=document.getElementById('cxReset');
     if(r) r.addEventListener('click',reset);
   }
