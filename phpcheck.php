@@ -47,6 +47,29 @@ printf("    real document root %s\n", $docroot !== '' ? (realpath($docroot) ?: '
 printf("    one level up       %s\n", dirname($appRoot));
 printf("    two levels up      %s\n", dirname($appRoot, 2));
 
+/* Where the account's real home is, which is NOT reachable by walking up from
+   the site when public_html is a symlink. This is the directory an SFTP client
+   shows on login, and therefore the obvious place to put a config file. */
+$home = (string) (getenv('HOME') ?: '');
+if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
+    $pw = @posix_getpwuid(posix_getuid());
+    $home = (string) ($pw['dir'] ?? '');
+}
+printf("    account home       %s\n", $home !== '' ? $home : '(cannot determine)');
+
+$basedir = (string) ini_get('open_basedir');
+printf("    open_basedir       %s\n", $basedir !== '' ? $basedir : '(not set — PHP may read anywhere it has permission)');
+
+/* Can PHP actually reach the home directory, and is the config sitting there?
+   This is the question that decides where the file has to live. */
+if ($home !== '') {
+    printf("    home is readable   %s\n", is_readable($home) ? 'yes' : 'NO');
+    foreach ([$home . '/sps-config.php', $home . '/private/sps-config.php'] as $c) {
+        printf("    %-18s %s\n", basename(dirname($c)) === basename($home) ? 'config here?' : 'config in private?',
+            is_file($c) ? 'FOUND: ' . $c : 'not at ' . $c);
+    }
+}
+
 echo "\n  configuration:\n";
 $found   = null;
 $dir     = $appRoot;
