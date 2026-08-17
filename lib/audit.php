@@ -42,9 +42,3 @@ function audit(
         app_log('AUDIT FAILED (' . $action . '): ' . $e->getMessage());
     }
 }
-
-/** Null until the login work lands; the signature is here so callers do not change. */
-function current_user_id(): ?int
-{
-    return isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
-}

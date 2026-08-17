@@ -175,6 +175,19 @@ function app_session_start(): void
     session_start();
 }
 
+/**
+ * Who is signed in, or null.
+ *
+ * Lives here rather than in lib/auth.php because lib/audit.php needs it, and
+ * audit is loaded on pages that have nothing to do with signing in. It only
+ * reads the session, so it costs nothing where nobody is signed in.
+ */
+function current_user_id(): ?int
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) return null;
+    return isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+}
+
 function is_post(): bool
 {
     return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
