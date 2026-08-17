@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the site
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Refuse to deploy anywhere dangerous
         env:
@@ -151,6 +151,7 @@ jobs:
             -X 'tools/' -X '_drafts/' -X 'private/' \
             -X 'Website-inspiration-latout/' \
             -X 'SPS-AI-Micro-Learning-Onepager.*' \
+            -X 'SPS-AI-Micro-Learning-Onepager.files/' \
             -X '*.md' -X '*.docx' -X '*.zip' \
             -X 'config.local.php' -X 'config.sample.php' \
             ./ "${{ inputs.server_dir }}"
