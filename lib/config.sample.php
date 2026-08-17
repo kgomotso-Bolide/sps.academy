@@ -56,6 +56,16 @@ return [
      exactly did this person agree to, and when" years later. */
   'policy_version' => '2026-08-17',
 
+  /* Switches setup.php on, and is the ONLY thing that does.
+
+     Xneelo gives us SFTP but no shell, so the tables have to be created through
+     a browser. While this is a non-empty string, /setup is reachable by anyone
+     who knows the token; while it is empty, /setup is a plain 404.
+
+     Fill it in, load /setup over https, run it, then COME BACK AND EMPTY IT.
+     Generate with: php -r "echo bin2hex(random_bytes(32));" */
+  'setup_token' => '',
+
   /* Never true on a live site. Turns database and PHP errors into on-screen
      output, which is exactly how connection strings end up in screenshots. */
   'debug' => false,

@@ -959,3 +959,17 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   .adm-head h2{font-size:24px}
   .auth-card{padding:26px}
 }
+
+/* The one-time installer at /setup. Staff-facing and short-lived — it stops
+   existing once the setup token is emptied — so it borrows the sign-in card
+   rather than earning a look of its own. */
+.setup-list{margin:0 0 18px;padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink-soft)}
+.setup-state{font-size:13px;color:var(--ink-soft);background:var(--bg-soft);
+  border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:0 0 20px}
+.setup-secret{background:var(--ink);color:#fff;border-radius:12px;padding:18px;margin:0 0 18px}
+.setup-secret strong{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  opacity:.75;margin-bottom:9px}
+.setup-secret code{display:block;font-size:21px;letter-spacing:.04em;word-break:break-all;
+  margin-bottom:11px}
+.setup-secret span{display:block;font-size:13px;line-height:1.6;opacity:.8}
+.setup-secret a{color:#fff;text-decoration:underline}

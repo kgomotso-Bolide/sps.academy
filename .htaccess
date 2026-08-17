@@ -1,22 +1,41 @@
-# Apache configuration for sps.centenarynetworks.com (Xneelo shared hosting).
+# Apache configuration for SPS Academy.
 #
-# The single most important rule here is the extensionless one. Every link on
-# this site is written without a file extension — href="courses", href="contact"
-# — because GitHub Pages served them that way for free. Apache does not. Without
-# the rewrite below, every internal link on all 15 pages 404s the moment we move.
-# It is one rule, and it means not one line of HTML has to change.
+# WRITTEN TO WORK IN EITHER PLACE, because it has to be both:
+#   public_html/sps/            a folder on centenarynetworks.com  (now)
+#   the document root itself    sps.centenarynetworks.com          (later)
+#
+# That means nothing in here may assume it is at the root of the site. Every
+# rewrite substitution is RELATIVE — no leading slash — so Apache resolves it
+# against whichever directory this file is sitting in. A single "/" in the wrong
+# place here sends /sps/courses to the Centenary homepage.
+#
+# It also means being a guest. centenarynetworks.com is a live site we do not
+# own the whole of, so this file must not set anything host-wide. See the note
+# on HSTS below — that one would have reached across the entire domain.
+#
+# Confirmed on 17 Aug 2026 by probing the live site: the root site rewrites
+# unknown paths to its homepage, but its rule exempts real directories
+# (/assets/ returns 403, not the homepage). So a genuine sps/ directory is
+# served by these rules and the parent's catch-all does not interfere.
+# mod_rewrite rules are not inherited into subdirectories by default, which is
+# what we are relying on.
 
 Options -Indexes
 DirectoryIndex index.html index.php
 
-# Server-side code and data are not documents. Nothing under these paths should
-# ever be fetchable over HTTP, whatever the server is configured to do with .php
-# files. Each directory also carries its own deny file — this is the outer belt.
-RedirectMatch 404 ^/(lib|schema|tools|_drafts)(/|$)
-RedirectMatch 404 ^/.*/(\.git|\.env|config\.local\.php)
-
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Server-side code and data are not documents.
+  #
+  # Expressed as a RewriteRule, not RedirectMatch. RedirectMatch matches the
+  # full URL path from the root, so "^/(lib|schema|tools)" silently stops
+  # matching the moment the site moves into a folder — the pattern would be
+  # tested against /sps/lib/db.php and never fire. A RewriteRule in a
+  # per-directory file matches the path RELATIVE to this directory, so it keeps
+  # working in both layouts. A deny rule that quietly stops denying is the worst
+  # kind of thing to get wrong.
+  RewriteRule ^(lib|schema|tools|_drafts|private)(/|$) - [R=404,L]
 
   # Force HTTPS. Registration posts personal information; it does not travel in
   # the clear. X-Forwarded-Proto is checked too because shared hosting often
@@ -25,20 +44,21 @@ RedirectMatch 404 ^/.*/(\.git|\.env|config\.local\.php)
   RewriteCond %{HTTP:X-Forwarded-Proto} !=https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-  # /courses -> courses.html, but only when that file actually exists, and never
-  # for a real file or directory. This is the GitHub Pages behaviour, restored.
+  # /courses -> courses.html, and /contact -> contact.php. This is what GitHub
+  # Pages did for free and Apache does not; without it every internal link on
+  # all seventeen pages 404s. Real files and directories are left alone.
+  #
+  # No leading slash on the substitution — that is what makes this work in a
+  # subfolder as well as at a document root.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME}.html -f
-  RewriteRule ^(.+?)/?$ /$1.html [L]
+  RewriteRule ^(.+?)/?$ $1.html [L]
 
-  # /contact -> contact.php, same idea. Pages that grow a server side change
-  # extension and keep their URL, so nothing that links to them has to change —
-  # and nothing that is bookmarked or already printed on a slide breaks.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME}.php -f
-  RewriteRule ^(.+?)/?$ /$1.php [L]
+  RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -46,8 +66,15 @@ RedirectMatch 404 ^/.*/(\.git|\.env|config\.local\.php)
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-  # Only meaningful once the domain is live and serving real TLS; harmless until.
-  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+
+  # NO Strict-Transport-Security here, deliberately.
+  #
+  # HSTS is not scoped to a path — it applies to the whole hostname. Setting it
+  # from this folder would force HTTPS on all of centenarynetworks.com,
+  # including the existing site and anything else ever put on it, for a year,
+  # and it cannot be recalled from a browser that has already seen it. That is
+  # not ours to decide from inside /sps/. It goes back when the academy has a
+  # hostname of its own.
 </IfModule>
 
 # PHP should never announce its version, and should never print a stack trace to
@@ -58,4 +85,6 @@ RedirectMatch 404 ^/.*/(\.git|\.env|config\.local\.php)
   php_flag expose_php Off
 </IfModule>
 
-ErrorDocument 404 /404.html
+# No ErrorDocument. It takes a path from the document root, which would have to
+# be hardcoded as /sps/404.html and would then be wrong at the subdomain. The
+# server's default 404 is plain but correct in both places.

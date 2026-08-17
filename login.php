@@ -10,16 +10,23 @@ require __DIR__ . '/lib/auth.php';
 /**
  * Where to go after signing in.
  *
- * Only a path on this site is accepted. A "next" parameter that is allowed to
- * be a full URL turns the sign-in page into an open redirect — somebody sends
- * a staff member a link to our real login page, they sign in successfully, and
- * are handed to a copy of it somewhere else. The leading "//" check matters as
- * much as the "/" one: //evil.example is a protocol-relative URL, not a path.
+ * Only a path inside THIS installation is accepted, for two reasons.
+ *
+ * A "next" that may be a full URL turns the sign-in page into an open redirect:
+ * somebody sends a staff member a link to our real login page, they sign in
+ * successfully, and are handed to a copy of it somewhere else. The "//" test
+ * matters as much as the "/" one — //evil.example is a protocol-relative URL,
+ * not a path.
+ *
+ * And in the folder layout the four academies share a hostname, so "a path on
+ * this site" is no longer specific enough: /fungi/admin is a path on this site.
+ * The target must be under our own base path.
  */
 function safe_next(?string $raw, string $fallback): string
 {
     $raw = (string) $raw;
     if ($raw === '' || $raw[0] !== '/' || str_starts_with($raw, '//')) return $fallback;
+    if (!str_starts_with($raw, app_base_path())) return $fallback;
     return $raw;
 }
 

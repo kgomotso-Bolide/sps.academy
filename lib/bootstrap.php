@@ -19,28 +19,85 @@ define('APP_BOOTED', true);
    Configuration
    --------------------------------------------------------------------------- */
 
+/** Normalise a path for comparison: real path where possible, forward slashes. */
+function path_norm(string $p): string
+{
+    $r = realpath($p);
+    return str_replace('\\', '/', $r === false ? $p : $r);
+}
+
 /**
- * Find and load the config file, searching from most explicit to most local.
+ * Is $path inside $dir? Used to keep the configuration out of the web root.
  *
- * The candidate list is ordered so that a real server never accidentally picks
- * up a development config: ~/private/ is checked before the in-repo fallback,
- * and the in-repo fallback is gitignored so it cannot exist on a fresh deploy.
+ * The trailing slash on $dir matters: without it, "/var/www/public_htmlX"
+ * counts as inside "/var/www/public_html".
+ */
+function path_inside(string $path, string $dir): bool
+{
+    $path = path_norm($path);
+    $dir  = rtrim(path_norm($dir), '/') . '/';
+    return $dir !== '/' && str_starts_with($path, $dir);
+}
+
+/**
+ * Find and load the config file.
+ *
+ * It walks UP from the application directory looking for private/sps-config.php,
+ * and REFUSES any candidate that turns out to be inside the web root. That
+ * refusal is the whole point of the function, and it is why this is not just a
+ * hardcoded path.
+ *
+ * The two layouts this has to serve put the web root in different places:
+ *
+ *   subdomain   ~/sps.centenarynetworks.com/   <- web root IS the app
+ *               ~/private/sps-config.php       <- one level up, outside. Fine.
+ *
+ *   folder      ~/public_html/sps/             <- app
+ *               ~/public_html/private/         <- one level up, INSIDE the web
+ *                                                 root. Anyone could fetch
+ *                                                 /private/sps-config.php.
+ *               ~/private/sps-config.php       <- two levels up, outside. Fine.
+ *
+ * A fixed "one level up" rule is correct for the first and hands out the
+ * database password in the second. So the level is not fixed; the test is
+ * whether the file is reachable over HTTP.
  */
 function app_config(?string $key = null)
 {
     static $cfg = null;
 
     if ($cfg === null) {
-        $candidates = array_filter([
-            getenv('SPS_CONFIG') ?: null,
-            dirname(APP_ROOT) . '/private/sps-config.php',   // ~/private, web root is ~/<site>
-            dirname(APP_ROOT, 2) . '/private/sps-config.php', // web root nested one deeper
-            APP_ROOT . '/lib/config.local.php',              // development only, gitignored
-        ]);
+        $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+
+        $candidates = [];
+        if ($env = getenv('SPS_CONFIG')) $candidates[] = $env;
+
+        // Walk up from the app directory. Four levels is far more than either
+        // layout needs and still cannot escape a hosting account.
+        $dir = APP_ROOT;
+        for ($i = 0; $i < 4; $i++) {
+            $dir = dirname($dir);
+            if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
+            $candidates[] = $dir . '/private/sps-config.php';
+        }
+
+        $candidates[] = APP_ROOT . '/lib/config.local.php';  // development only, gitignored
 
         $found = null;
         foreach ($candidates as $path) {
-            if (is_file($path)) { $found = $path; break; }
+            if (!is_file($path)) continue;
+
+            /* The development fallback lives inside the application on purpose —
+               it is gitignored, denied by .htaccess, and only ever points at a
+               local SQLite file. Everything else must be out of reach. */
+            $isDevFallback = path_norm($path) === path_norm(APP_ROOT . '/lib/config.local.php');
+
+            if (!$isDevFallback && $docroot !== '' && path_inside($path, $docroot)) {
+                app_log('REFUSED config inside the web root: ' . $path);
+                continue;
+            }
+            $found = $path;
+            break;
         }
 
         if ($found === null) {
@@ -107,12 +164,44 @@ function app_config_safe(string $key)
     try { return app_config($key); } catch (Throwable $e) { return null; }
 }
 
+/**
+ * A writable directory that is NOT reachable over HTTP.
+ *
+ * Same reasoning as the config search, for the same reason: a log of what went
+ * wrong on a registration page quotes the request, and the request contains
+ * somebody's name and email address. Serving that at /private/logs/app.log
+ * would be a worse leak than the bug being logged.
+ */
+function app_private_dir(string $sub = ''): ?string
+{
+    static $base = null;
+
+    if ($base === null) {
+        $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+        $base    = false;
+        $dir     = APP_ROOT;
+        for ($i = 0; $i < 4; $i++) {
+            $dir = dirname($dir);
+            if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
+            $candidate = $dir . '/private';
+            if (!is_dir($candidate)) continue;
+            if ($docroot !== '' && path_inside($candidate, $docroot)) continue;
+            $base = $candidate;
+            break;
+        }
+    }
+
+    if ($base === false) return null;
+    if ($sub === '') return $base;
+
+    $path = $base . '/' . $sub;
+    if (!is_dir($path)) @mkdir($path, 0700, true);
+    return is_dir($path) ? $path : null;
+}
+
 function app_log(string $line): void
 {
-    $dir = dirname(APP_ROOT) . '/private/logs';
-    if (!is_dir($dir)) {
-        $dir = sys_get_temp_dir();
-    }
+    $dir = app_private_dir('logs') ?? sys_get_temp_dir();
     @file_put_contents(
         $dir . '/app-' . date('Y-m') . '.log',
         '[' . date('c') . '] ' . $line . "\n",
@@ -152,10 +241,39 @@ function client_ip_hash(): string
 }
 
 /**
+ * The URL path this installation is mounted at: "/" or "/sps/".
+ *
+ * Derived rather than configured, so the folder can be renamed — or the site
+ * moved to a subdomain of its own — without editing anything.
+ */
+function app_base_path(): string
+{
+    static $base = null;
+    if ($base !== null) return $base;
+
+    $dir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));
+    if ($dir === '' || $dir === '.' || $dir === '/') return $base = '/';
+    return $base = rtrim($dir, '/') . '/';
+}
+
+/**
  * Start a session with cookie flags set BEFORE the cookie is issued.
  *
  * Called explicitly rather than on every request: an anonymous visitor reading
  * the course catalogue should not be given a cookie they never needed.
+ *
+ * The path and the name both matter more in the folder layout than they would
+ * on a subdomain. With four academies living at /sps/, /fungi/, /maziv/ and
+ * /equinix/ on ONE hostname, a cookie set at path "/" is sent to all four —
+ * one company's session cookie travelling to another company's site. Scoping
+ * the cookie to this installation's own path, and giving each tenant its own
+ * session name, keeps them apart.
+ *
+ * Worth being honest about the limit: a cookie path is not a security boundary.
+ * Same host means same origin, and the browser will not defend these four from
+ * each other the way it would defend four subdomains. That is the real cost of
+ * the folder layout, and it is why this is a stop on the way to subdomains
+ * rather than the destination.
  */
 function app_session_start(): void
 {
@@ -166,12 +284,14 @@ function app_session_start(): void
 
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/',
+        'path'     => app_base_path(),
         'secure'   => $https,
         'httponly' => true,      // not readable from JavaScript
         'samesite' => 'Lax',     // survives normal navigation, blocks cross-site POST
     ]);
-    session_name('spsacad');
+
+    $slug = (string) (app_config_safe('tenant') ?? 'acad');
+    session_name('acad_' . (preg_replace('/[^a-z0-9]/', '', strtolower($slug)) ?: 'x'));
     session_start();
 }
 

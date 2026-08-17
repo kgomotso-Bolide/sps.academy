@@ -107,49 +107,21 @@ if ($checkOnly) exit(0);
    Apply
    --------------------------------------------------------------------------- */
 
-$driver = db_driver();
-$file   = $root . 'schema.' . ($driver === 'sqlite' ? 'sqlite' : 'mysql') . '.sql';
-echo "driver  $driver\n";
+/* The work itself lives in lib/install.php, shared with setup.php.
+   Xneelo has no shell, so the server is installed through the browser — and the
+   two paths must do exactly the same thing, which they cannot drift out of if
+   there is only one copy of it. */
+require __DIR__ . '/../lib/install.php';
+
+echo "driver  " . db_driver() . "\n";
 echo "config  " . app_config('_path') . "\n";
 
-$sql = preg_replace('/^\s*--.*$/m', '', (string) file_get_contents($file));
+$missing = install_missing_tables();
+echo "applied " . install_apply_schema() . " statements"
+   . ($missing ? " (created: " . implode(', ', $missing) . ")" : " (nothing was missing)") . "\n";
 
-$applied = 0;
-foreach (array_filter(array_map('trim', explode(';', $sql))) as $statement) {
-    db()->exec($statement);
-    $applied++;
-}
-echo "applied $applied statements\n";
-
-/* Seed all four companies, not just this one.
-
-   The tenants table describes the platform, not the installation. Every
-   installation runs the same schema against the same database and picks its own
-   row by slug, so the row for Fungi existing here is what makes standing Fungi
-   up later a configuration change rather than a migration. */
-$seed = [
-    ['sps',     'SPS — Sustainable Power Solutions', 'SPS Academy'],
-    ['fungi',   'Fungi Utilities (Pty) Ltd',         'Fungi Academy'],
-    ['equinix', 'Equinix',                           'Equinix Academy'],
-    ['maziv',   'Maziv',                             'Maziv Academy'],
-];
-
-$contact = (string) (app_config('notify_email') ?? 'kgomotso@centenarynetworks.com');
-$added   = 0;
-
-foreach ($seed as [$slug, $name, $academy]) {
-    $exists = db_value('SELECT id FROM tenants WHERE slug = ?', [$slug]);
-    if ($exists !== null) continue;
-    db_insert('tenants', [
-        'slug'          => $slug,
-        'name'          => $name,
-        'academy_name'  => $academy,
-        'contact_email' => $contact,
-        'created_at'    => now(),
-    ]);
-    $added++;
-}
-echo "tenants $added added, " . db_value('SELECT COUNT(*) FROM tenants') . " total\n";
+echo "tenants " . install_seed_tenants() . " added, "
+   . db_value('SELECT COUNT(*) FROM tenants') . " total\n";
 
 $slug = (string) app_config('tenant');
 echo "this installation serves '$slug' (tenant id " . tenant_id() . ")\n";
