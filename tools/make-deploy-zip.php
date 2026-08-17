@@ -34,10 +34,19 @@ if (!extension_loaded('zip')) { fwrite(STDERR, "PHP's zip extension is not avail
 $root = dirname(__DIR__);
 $out  = dirname($root) . '/sps-deploy-' . date('Y-m-d-Hi') . '.zip';
 
-/* Directories that never ship, matched on the first path segment. */
+/* Directories that never ship, matched on the first path segment.
+ *
+ * tools/ is in this list on purpose. Every script in it is command-line only,
+ * and Xneelo answers port 22 with "SSH-2.0-FTP Service" — SFTP, no shell — so
+ * none of it could be run on the server even if it were there. Uploading code
+ * that cannot run, to a public web server, is all risk and no benefit. It is
+ * also why setup.php exists.
+ *
+ * schema/ DOES ship, and must: setup.php reads schema/schema.mysql.sql to
+ * create the tables. It is denied to the web by its own .htaccess. */
 $skipDirs = [
     '.git', '.github', '.vscode', '.claude', '.idea',
-    '_drafts', 'private', 'node_modules',
+    '_drafts', 'private', 'node_modules', 'tools',
     'Website-inspiration-latout',
     'SPS-AI-Micro-Learning-Onepager.files',
 ];
@@ -47,15 +56,31 @@ $skipDirs = [
    The git housekeeping files are only noise on a web server, but .gitignore in
    particular advertises that lib/config.local.php exists, which is a small hint
    nobody needs to be given. */
-$skipFiles = ['lib/config.local.php', '.gitignore', '.gitattributes'];
+$skipFiles = [
+    'lib/config.local.php',
+    'lib/config.sample.php',   // a template, read here and filled in by hand — the
+                               // server never loads it, so it has no business there
+    '.gitignore',
+    '.gitattributes',
+];
 
 /* Working documents rather than site content. Checked against the whole
    relative path, so resources/*.pdf (which the course pages link to) still
    ships — only the loose one-pagers at the top level are dropped. */
 $skipPattern = '#^(.*\.(md|zip|docx|htm)|SPS-AI-Micro-Learning-Onepager\..*)$#i';
 
-/** Every .htaccess is load-bearing; the archive is not valid without all of them. */
-$required = ['.htaccess', 'lib/.htaccess', 'schema/.htaccess', 'tools/.htaccess'];
+/* Every .htaccess that ships is load-bearing, and the archive is not valid
+   without all of them. tools/.htaccess is not listed because tools/ does not
+   ship at all — there is nothing left in it to deny. */
+$required = ['.htaccess', 'lib/.htaccess', 'schema/.htaccess'];
+
+/* Files the server genuinely cannot work without, checked for the same reason:
+   a silently incomplete archive is worse than an obviously broken one. */
+$requiredAlso = [
+    'index.html', 'styles.css', 'contact.php', 'setup.php',
+    'lib/bootstrap.php', 'lib/db.php', 'lib/install.php',
+    'schema/schema.mysql.sql',
+];
 
 $files = [];
 $it = new RecursiveIteratorIterator(
@@ -83,7 +108,7 @@ sort($files);
 
 $problems = [];
 
-foreach ($required as $r) {
+foreach (array_merge($required, $requiredAlso) as $r) {
     if (!in_array($r, $files, true)) $problems[] = 'missing ' . $r;
 }
 foreach ($files as $f) {
@@ -137,7 +162,11 @@ echo "\n  included, and easy to lose:\n";
 foreach ($required as $r) echo "    $r\n";
 
 echo "\n  deliberately left out:\n";
-echo "    .git/  _drafts/  lib/config.local.php  *.md  the Word one-pagers\n";
+echo "    tools/                 command-line only; Xneelo has no shell\n";
+echo "    lib/config.sample.php  a template, filled in by hand and never loaded\n";
+echo "    _drafts/               client emails\n";
+echo "    .git/                  every version of everything\n";
+echo "    *.md, the Word one-pagers, .gitignore\n";
 
 echo "\n  Extract this INSIDE the spsacademy folder — the files sit at the top\n";
 echo "  level of the archive, so you should end up with spsacademy/index.html\n";
