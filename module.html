@@ -225,24 +225,38 @@
   }).join('');
 
   /* ---- progress ----
-     Self-reported, stored in this browser only, and the page never pretends
-     otherwise. Being found competent is the provider's decision after assessment. */
+     Self-reported, and the page never pretends otherwise: being found competent
+     is the provider's decision after assessment.
+
+     Where it is SAVED is now one of two places — the learner's account if they
+     are signed in, this browser if they are not — and the panel says which,
+     because "your progress is safe" means two different things in those two
+     cases and only one of them survives a new phone.
+
+     Rendered on 'pmprogress:sync' rather than immediately. That event fires once
+     on every page, whether the answer was an account, an empty account or no
+     account at all, so waiting for it costs a frame and avoids showing somebody
+     an empty record that is about to be filled in. */
   (function(){
     const P=window.PM_PROGRESS;
     const box=document.getElementById('m-progress');
     if(!P||!box) return;
 
-    if(!P.available()){
-      box.innerHTML='<div class="vid-soon"><strong>Progress can\'t be saved in this browser.</strong>'+
-        'Private browsing or blocked storage. Everything on this page still works — you just '+
-        'won\'t be able to tick topics off.</div>';
-      document.querySelectorAll('.topic-tick').forEach(function(l){ l.remove(); });
-      return;
-    }
+    function render(){
+      if(!P.available()){
+        box.innerHTML='<div class="vid-soon"><strong>Progress can\'t be saved in this browser.</strong>'+
+          'Private browsing or blocked storage, and you are not signed in. Everything on this '+
+          'page still works — you just won\'t be able to tick topics off. '+
+          '<a href="login" style="color:inherit;text-decoration:underline">Sign in</a> and it '+
+          'saves to your account instead.</div>';
+        document.querySelectorAll('.topic-tick').forEach(function(l){ l.remove(); });
+        return;
+      }
 
-    function paint(){
       const s=P.moduleStats(m);
       const done=P.moduleDone(m.id);
+      const onAccount=P.mode()==='account';
+
       box.innerHTML=
         '<div class="prog"><div class="prog-top">'+
           '<div><span class="prog-lbl">Your progress on this module</span>'+
@@ -253,23 +267,35 @@
         '<div class="prog-act">'+
           '<button class="btn '+(done?'btn-ghost-dark':'btn-primary')+'" id="mDone">'+
             (done?'Marked complete — undo':'Mark module complete')+'</button>'+
-          '<a class="btn btn-ghost-dark" href="pm-progress">My progress report</a>'+
+          '<a class="btn btn-ghost-dark" href="'+(onAccount?'my':'pm-progress')+'">'+
+            (onAccount?'My learning':'My progress report')+'</a>'+
         '</div>'+
         (done?'<p class="prog-note">You marked this complete on '+done.slice(0,10)+
           '. That records your own study, not an assessment result — Centenary decides competence.</p>':'')+
+        '<p class="prog-where">'+(onAccount
+          ? 'Saved to your academy account, so it follows you to any device.'
+          : 'Saved in this browser only. It will not follow you to another device, and it '+
+            'goes if the history is cleared — <a href="login">sign in</a> to keep it properly.')+
+        '</p>'+
         '</div>';
+
       document.getElementById('mDone').addEventListener('click',function(){
-        P.setModuleDone(m.id,!P.moduleDone(m.id)); paint();
+        P.setModuleDone(m.id,!P.moduleDone(m.id)); render();
+      });
+
+      document.querySelectorAll('.topic-tick input').forEach(function(cb){
+        cb.checked=P.topicDone(m.id,cb.dataset.topic);
       });
     }
 
     document.querySelectorAll('.topic-tick input').forEach(function(cb){
-      cb.checked=P.topicDone(m.id,cb.dataset.topic);
       cb.addEventListener('change',function(){
-        P.toggleTopic(m.id,cb.dataset.topic); paint();
+        P.toggleTopic(m.id,cb.dataset.topic); render();
       });
     });
-    paint();
+
+    window.addEventListener('pmprogress:sync',render);
+    render();
   })();
 
   /* ---- video ---- */

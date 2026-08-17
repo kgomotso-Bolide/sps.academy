@@ -103,14 +103,41 @@ function auth_attempt(string $email, string $password): array
     }
 
     /* If PHP's default algorithm has moved on since this hash was made, take the
-       one moment we legitimately have the plain password and bring it forward. */
+       one moment we legitimately have the plain password and bring it forward.
+
+       $user is updated in place as well as in the database, and that is not
+       tidiness. auth_sign_in() below stamps the session with a fingerprint of
+       this hash, and current_user() ends any session whose stamp no longer
+       matches. Leaving the stale hash here would stamp the session with a value
+       that was already wrong, and the visitor would be signed out on their very
+       next click — a rehash, which nobody asked for and nobody can see, would
+       lock people out of a correct password. */
     if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
-        db_run('UPDATE users SET password_hash = ? WHERE id = ?',
-               [auth_hash($password), (int) $user['id']]);
+        $hash = auth_hash($password);
+        db_run('UPDATE users SET password_hash = ? WHERE id = ?', [$hash, (int) $user['id']]);
+        $user['password_hash'] = $hash;
     }
 
     auth_sign_in($user);
     return [true, ''];
+}
+
+/**
+ * A short fingerprint of the stored password hash.
+ *
+ * Kept in the session so that changing a password can end every OTHER session
+ * on every other device, which is what a person means when they change it
+ * because something felt wrong. Comparing the fingerprint is enough: the hash
+ * changes on a reset, on a self-service change, and on an administrator setting
+ * a new one, and those are exactly the three moments other sessions should die.
+ *
+ * A fingerprint rather than the hash itself, so the session store never holds
+ * anything that could be attacked offline. Truncated because the only job is to
+ * differ when the hash differs.
+ */
+function auth_password_stamp(string $hash): string
+{
+    return substr(hash('sha256', $hash), 0, 16);
 }
 
 function auth_sign_in(array $user): void
@@ -121,6 +148,7 @@ function auth_sign_in(array $user): void
 
     $_SESSION['uid']  = (int) $user['id'];
     $_SESSION['role'] = (string) $user['role'];
+    $_SESSION['pwv']  = auth_password_stamp((string) $user['password_hash']);
     current_user(true);   // the cached "nobody" from a moment ago is now wrong
 
     db_run('UPDATE users SET last_login_at = ? WHERE id = ?', [now(), (int) $user['id']]);
@@ -174,13 +202,118 @@ function current_user(bool $forget = false): ?array
         auth_sign_out();
         return $user = null;
     }
+
+    /* And it can outlive the password it was issued against. This is what makes
+       "change your password" mean something on a device you have lost.
+
+       A session with no stamp is ADOPTED rather than rejected: sessions created
+       before this check existed are legitimate, and signing out everybody who
+       was already logged in at the moment of a deploy would be a self-inflicted
+       incident. That leaves those particular sessions surviving a reset, once,
+       which is the honest cost of not doing it. */
+    $stamp = auth_password_stamp((string) $user['password_hash']);
+    if (!isset($_SESSION['pwv'])) {
+        $_SESSION['pwv'] = $stamp;
+    } elseif (!hash_equals((string) $_SESSION['pwv'], $stamp)) {
+        audit('session.ended_by_password_change', 'users', (int) $user['id']);
+        auth_sign_out();
+        return $user = null;
+    }
+
     return $user;
+}
+
+/* The shortest password this site will accept.
+ *
+ * Ten, not sixteen, and not a rule about capitals and punctuation. The
+ * generated passwords are nineteen characters of readable nonsense, so this
+ * floor only ever applies to a password somebody chose for themselves — and the
+ * evidence is consistent that composition rules push people towards
+ * "Password1!" rather than towards anything stronger. Length plus the
+ * fifteen-minute lockout above is what actually holds. */
+const PASSWORD_MIN_LENGTH = 10;
+
+/**
+ * Change your own password.
+ *
+ * The current password is required even though the caller is already signed in.
+ * That is not belt-and-braces about the session — it is what stops a borrowed
+ * unlocked laptop from becoming a permanent takeover of somebody's account.
+ *
+ * @return array{0: bool, 1: string} [ok, message]
+ */
+function auth_change_password(array $user, string $current, string $new, string $confirm): array
+{
+    if (!password_verify($current, (string) $user['password_hash'])) {
+        audit('password.change_failed', 'users', (int) $user['id'], 'current password wrong');
+        return [false, 'Your current password is not right. Nothing has been changed.'];
+    }
+    if (mb_strlen($new) < PASSWORD_MIN_LENGTH) {
+        return [false, 'Your new password needs to be at least ' . PASSWORD_MIN_LENGTH
+                     . ' characters. Longer is what makes it strong — a few ordinary '
+                     . 'words together beats a short one with symbols in it.'];
+    }
+    if ($new !== $confirm) {
+        return [false, 'The two new passwords do not match.'];
+    }
+    if ($new === $current) {
+        return [false, 'That is the password you already have.'];
+    }
+
+    auth_set_password((int) $user['id'], $new);
+
+    audit('password.changed', 'users', (int) $user['id']);
+    return [true, 'Your password has been changed on every device. '
+                . 'Use the new one next time you sign in.'];
+}
+
+/**
+ * Write a new password and keep THIS session alive while ending the others.
+ *
+ * The two halves are inseparable, which is why they are one function rather
+ * than two lines every caller has to remember: the new hash ends every session
+ * carrying the old fingerprint, and the session doing the changing must be
+ * re-stamped or it ends itself. Getting that wrong signs the user out at the
+ * moment they succeed, which reads as failure.
+ *
+ * Callers: the change-password box on /my, the reset link, and an
+ * administrator setting one from /admin-users.
+ */
+function auth_set_password(int $userId, string $plain): void
+{
+    $hash = auth_hash($plain);
+    db_run('UPDATE users SET password_hash = ? WHERE id = ? AND tenant_id = ?',
+           [$hash, $userId, tenant_id()]);
+
+    app_session_start();
+    if (current_user_id() === $userId) {
+        // A new session id as well: a password change is one of the two moments
+        // one should not survive — see the note in auth_sign_in().
+        session_regenerate_id(true);
+        $_SESSION['pwv'] = auth_password_stamp($hash);
+    }
+    current_user(true);   // the cached row still carries the old hash
 }
 
 function is_admin(): bool
 {
     $u = current_user();
     return $u !== null && $u['role'] === 'admin';
+}
+
+/**
+ * Send anyone who is not signed in to the sign-in page.
+ *
+ * Any role: this is the gate on the learner's own pages, where an administrator
+ * is simply a signed-in person who also happens to have the admin pages.
+ */
+function require_user(string $fallback = '/my'): array
+{
+    $u = current_user();
+    if ($u === null) {
+        redirect('login?next=' . rawurlencode($_SERVER['REQUEST_URI'] ?? $fallback));
+    }
+    return $u;
 }
 
 /** Send anyone who is not an administrator to the sign-in page. */

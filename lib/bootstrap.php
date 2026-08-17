@@ -35,7 +35,20 @@ error_reporting(E_ALL);
 function path_norm(string $p): string
 {
     $r = realpath($p);
-    return str_replace('\\', '/', $r === false ? $p : $r);
+    if ($r !== false) return str_replace('\\', '/', $r);
+
+    /* The path does not exist YET — a log file about to be created on first
+       write, for instance. realpath() gives up entirely on a missing leaf and
+       returns false, and the old fallback then compared the raw string with its
+       ".." segments still in it. "…/sps/lib/../../private/mail.log" is outside
+       …/sps, but as a plain string it starts with "…/sps/", so path_inside()
+       answered "inside the web root" and the caller refused a perfectly safe
+       path. Resolve the deepest part that does exist and rebuild from there. */
+    $parent = realpath(dirname($p));
+    if ($parent !== false) {
+        return str_replace('\\', '/', rtrim($parent, '\\/') . '/' . basename($p));
+    }
+    return str_replace('\\', '/', $p);
 }
 
 /**

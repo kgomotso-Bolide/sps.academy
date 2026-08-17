@@ -106,6 +106,31 @@ authorises Google only. Mail sent from Xneelo will fail SPF and land in spam. Th
 block launch — the database is the record, the email is only a notification — but it should
 be fixed before Kgomotso relies on the alerts.
 
+## Updating a site that is already live
+
+Deploying new code does **not** create new database tables. Two releases have needed a
+second pass, and both are the same three moves.
+
+**Learner accounts and password reset, 18 Aug 2026 — three new tables.** `enrolments`,
+`learner_progress` and `password_resets`. Until they exist, `/admin` still lists registrations
+but pressing **Enrol** fails, a learner who signs in sees a dashboard that cannot load their
+progress, and asking for a reset link fails silently.
+
+1. Deploy the code as usual (Actions → *Deploy SPS Academy*, ref `xneelo-backend`).
+   `setup.php` and `phpcheck.php` were deleted off the live server by hand after the first
+   install; the deploy puts them back, and they are both **404 while `setup_token` is empty**,
+   so putting them back changes nothing until you choose to use them.
+2. Set `'setup_token' => '<a fresh random value>'` in `~/private/sps-config.php`, open
+   `/spsacademy/setup`, and run it. It reports **"3 tables created"** and leaves the existing
+   five alone — the installer only ever creates. `/spsacademy/phpcheck.php` will now say
+   `tables  9 of 9 present`, and names any that are missing.
+3. Empty `setup_token` again and confirm `/spsacademy/setup` is a 404.
+
+**Also bump `policy_version`** in `~/private/sps-config.php` to `2026-08-18`. The privacy
+notice gained a section on learner accounts and progress; a consent row records the version
+that was on screen, so leaving it at `2026-08-17` records agreement to wording that no longer
+matches the page. Consents already stored keep their old version, which is the point.
+
 ## Check before telling anyone
 
 - [ ] `https://centenarynetworks.com/` — the **Centenary homepage**, unchanged.
@@ -119,10 +144,46 @@ be fixed before Kgomotso relies on the alerts.
       `/spsacademy/admin-progress`.
 - [ ] Sign out, then load `/spsacademy/admin` — it must send you to the sign-in page.
 
+### Learner accounts
+
+- [ ] `/spsacademy/account.php` signed out — returns `{"in":false,...}`, not a 404 and not a 500.
+- [ ] On `/spsacademy/courses`, signed out, the nav shows **Sign in**.
+- [ ] On `/admin`, press **Enrol this person** on a real registration. The password panel
+      appears **once**. Write the password down before leaving the page — it is not recoverable.
+- [ ] Sign in as that learner: you land on `/spsacademy/my`, greeted by name, with the course
+      listed and a progress bar.
+- [ ] Change the password from the box on `/my`, sign out, and sign in with the new one.
+- [ ] Open `/spsacademy/module?m=KM-01`, tick a topic, reload — the tick is still there. Then
+      open the same page in a **different browser** signed in as the same learner; the tick is
+      there too. That is the whole point of the release, and it is the one check that proves it.
+- [ ] `/spsacademy/my` signed out — redirects to sign-in, does not render.
+
+### Getting back in
+
+- [ ] `/spsacademy/login` shows a **Forgotten your password?** link.
+- [ ] Ask for a reset with an address that has **no** account. The page must say exactly what
+      it says for a real one — *"If that address has an academy account…"*. Anything that
+      distinguishes the two turns the form into a way to find out who works at SPS.
+- [ ] Ask for one with a **real** address and see whether the mail arrives, **including the
+      junk folder**. This is the one thing that cannot be tested from here: if it does not
+      arrive, that is the missing SPF record below, not a bug.
+- [ ] Open the link, set a password, and confirm you land signed in on `/my`. Then open the
+      same link again — it must say the link no longer works.
+- [ ] `/admin-users` — the **Accounts** page. Press **Set a new password** on a test account,
+      confirm the password appears once, and sign in with it.
+- [ ] Switch a test account off, confirm it cannot sign in, and switch it back on.
+- [ ] Confirm the **Switch this account off** link is absent on your own row.
+
+> **Until SPF is fixed, tell Kgomotso to use `/admin-users`.** The self-service reset is built
+> and correct, but it depends on mail that this server cannot yet get delivered. The Accounts
+> page needs no email at all and is the route that always works. This replaced the old promise
+> on the sign-in page, which could not be kept: the only way to set a password used to be
+> `tools/make-user.php`, and Xneelo has no shell to run it from.
+
 Kgomotso needs two bookmarks: **`/spsacademy/admin`** for registrations and
-**`/spsacademy/admin-progress`** for progress reports. There is no sign-in link in the site's
-navigation yet — that arrives with the shared page header, so until then the URL is how she
-gets there.
+**`/spsacademy/admin-progress`** for progress reports. Learners need only the site itself —
+**Sign in** is now in the navigation on every page, added by `profile.js` rather than by
+editing seventeen files, so it appears wherever that script is loaded.
 
 ## If the .php pages return 503 and the .html pages are fine
 

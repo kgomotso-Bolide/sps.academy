@@ -79,6 +79,15 @@ $required = ['.htaccess', 'lib/.htaccess', 'schema/.htaccess'];
 $requiredAlso = [
     'index.html', 'styles.css', 'contact.php', 'setup.php',
     'lib/bootstrap.php', 'lib/db.php', 'lib/install.php',
+    // Learner accounts. account.php is the one that would be missed silently:
+    // without it every page still renders, the nav simply never learns anybody
+    // is signed in and progress quietly falls back to browser storage.
+    'login.php', 'my.php', 'account.php', 'lib/auth.php', 'lib/learner.php',
+    'profile.js', 'pm-progress.js',
+    // Getting back in. forgot/reset are the self-service half and admin-users
+    // is the half that works while the domain's SPF record is still missing;
+    // shipping one without the other leaves somebody locked out.
+    'forgot.php', 'reset.php', 'admin-users.php', 'lib/reset.php',
     'schema/schema.mysql.sql',
 ];
 

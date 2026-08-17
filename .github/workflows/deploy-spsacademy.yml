@@ -182,13 +182,34 @@ jobs:
           base="${base/public_html\//}"
           echo "Checking $base"
           fail=0
-          for p in "/" "/styles.css" "/phpcheck.php" "/contact" "/privacy"; do
+          for p in "/" "/styles.css" "/phpcheck.php" "/contact" "/privacy" \
+                   "/login" "/forgot" "/reset" "/my" "/admin-users"; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
             printf '  %-14s %s\n' "$p" "$code"
             case "$p" in
-              /|/styles.css) [ "$code" = "200" ] || fail=1 ;;
+              # /reset with no token is a real page — it says the link no longer
+              # works — so 200 is correct there too.
+              /|/styles.css|/login|/forgot|/reset) [ "$code" = "200" ] || fail=1 ;;
+              # Signed out, these must send you to sign in and must not render.
+              # A 200 here would mean require_user()/require_admin() is not
+              # running, which is the whole access control on those pages.
+              /my|/admin-users)
+                case "$code" in
+                  302|303) ;;
+                  *) echo "::error::$p returned $code signed out — it must redirect to the sign-in page."; fail=1 ;;
+                esac ;;
             esac
           done
+
+          # The session endpoint every learner page depends on. A 404 means it
+          # did not upload; a 500 means it uploaded and cannot run. Either way
+          # the site looks fine and quietly forgets who everyone is.
+          probe=$(curl -sS --max-time 30 "$base/account.php" || echo '')
+          printf '  %-14s %s\n' "/account.php" "$(printf '%s' "$probe" | head -c 40)"
+          case "$probe" in
+            *'"in":false'*) ;;
+            *) echo "::error::/account.php did not answer with a session probe."; fail=1 ;;
+          esac
           # Server code must never be readable.
           for p in "/lib/db.php" "/schema/schema.mysql.sql" "/lib/bootstrap.php"; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)

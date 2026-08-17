@@ -90,6 +90,50 @@ CREATE INDEX IF NOT EXISTS ix_audit_tenant_created ON audit_log (tenant_id, crea
 CREATE INDEX IF NOT EXISTS ix_audit_entity ON audit_log (entity, entity_id);
 
 
+CREATE TABLE IF NOT EXISTS password_resets (
+  id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  user_id    INTEGER NOT NULL REFERENCES users (id),
+  token_hash TEXT    NOT NULL,
+  expires_at TEXT    NOT NULL,
+  used_at    TEXT        NULL,
+  ip_hash    TEXT        NULL,
+  created_at TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reset_token ON password_resets (token_hash);
+CREATE INDEX IF NOT EXISTS ix_reset_user ON password_resets (tenant_id, user_id);
+CREATE INDEX IF NOT EXISTS ix_reset_expires ON password_resets (expires_at);
+
+
+CREATE TABLE IF NOT EXISTS enrolments (
+  id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id       INTEGER NOT NULL REFERENCES tenants (id),
+  user_id         INTEGER NOT NULL REFERENCES users (id),
+  course_slug     TEXT    NOT NULL,
+  course_title    TEXT        NULL,
+  registration_id INTEGER     NULL REFERENCES registrations (id),
+  status          TEXT    NOT NULL DEFAULT 'active',
+  enrolled_at     TEXT    NOT NULL,
+  enrolled_by     INTEGER     NULL REFERENCES users (id),
+  completed_at    TEXT        NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_enrol_user_course ON enrolments (tenant_id, user_id, course_slug);
+CREATE INDEX IF NOT EXISTS ix_enrol_tenant_status ON enrolments (tenant_id, status);
+
+
+CREATE TABLE IF NOT EXISTS learner_progress (
+  id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants (id),
+  user_id      INTEGER NOT NULL REFERENCES users (id),
+  course_slug  TEXT    NOT NULL,
+  module_code  TEXT    NOT NULL,
+  item_code    TEXT    NOT NULL DEFAULT '',
+  completed_at TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_lprog_item ON learner_progress (tenant_id, user_id, course_slug, module_code, item_code);
+CREATE INDEX IF NOT EXISTS ix_lprog_user ON learner_progress (tenant_id, user_id);
+
+
 CREATE TABLE IF NOT EXISTS progress_reports (
   id            INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   tenant_id     INTEGER NOT NULL REFERENCES tenants (id),

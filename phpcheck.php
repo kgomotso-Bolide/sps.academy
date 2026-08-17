@@ -126,12 +126,18 @@ if (is_array($cfg)) {
         $pdo = new PDO($dsn, $db['user'] ?? null, $db['pass'] ?? null,
                        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]);
         echo "    connection       CONNECTED\n";
+        $expected = ['tenants', 'users', 'registrations', 'consents', 'audit_log',
+                     'password_resets', 'enrolments', 'learner_progress', 'progress_reports'];
         $tables = [];
-        foreach (['tenants', 'users', 'registrations', 'consents', 'audit_log', 'progress_reports'] as $t) {
+        foreach ($expected as $t) {
             try { $pdo->query('SELECT 1 FROM ' . $t . ' LIMIT 1'); $tables[] = $t; } catch (Throwable $e) {}
         }
         printf("    tables           %s\n", $tables
-            ? count($tables) . ' of 6 present' : 'none yet — run /setup');
+            ? count($tables) . ' of ' . count($expected) . ' present'
+              . (count($tables) < count($expected)
+                  ? ' — missing: ' . implode(', ', array_diff($expected, $tables)) . '; run /setup'
+                  : '')
+            : 'none yet — run /setup');
     } catch (Throwable $e) {
         $m = $e->getMessage();
         echo "    connection       FAILED — " . (

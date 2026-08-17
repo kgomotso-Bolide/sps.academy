@@ -11,12 +11,18 @@
  *   - who each company has appointed as its Information Officer;
  *   - whether Centenary's Information Officer is registered with the
  *     Information Regulator;
- *   - the retention period the QCTO requires for learner records, which drives
- *     everything the enrolment tables will keep.
+ *   - the retention period the QCTO requires for learner records, which is now
+ *     load-bearing rather than hypothetical: the enrolments and learner_progress
+ *     tables both hold rows with no expiry date on them, waiting for it.
  *
  * The version string comes from the config so that the notice, and the
  * consents recorded against it, can never disagree about which wording was on
  * screen when somebody ticked the box.
+ *
+ * CHANGING THIS PAGE means bumping 'policy_version' in the configuration file.
+ * A consent row records the version that was on screen, so leaving the version
+ * alone after a substantive edit — such as the learner-account section added in
+ * August 2026 — makes every earlier consent evidence of wording nobody saw.
  */
 declare(strict_types=1);
 
@@ -88,6 +94,13 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <p>We also record the date and time, and a one-way scrambled version of your internet address. We keep the scrambled version rather than the address itself so that we can spot a flood of automated submissions without holding information that identifies your connection.</p>
     <p>We do <strong>not</strong> collect your ID number at this stage. It is needed later to register you with the QCTO for an accredited qualification, and we will ask for it then, separately, and tell you why.</p>
 
+    <h3>If you are given an academy account</h3>
+    <p>When you are enrolled on a course, the academy creates a sign-in for you. It holds your name, work email address, and your employee number and department if you gave them on the registration form — nothing that was not already on that form. Accounts are created by the academy; you cannot make one yourself.</p>
+    <p>Once you are signed in, the topics you tick off as you study are saved <strong>to your account</strong> rather than to the computer you are using, together with the date you ticked each one. That is what lets your progress follow you to another device, and what stops the next person on a shared machine seeing your record. Before you sign in — and if you never do — those ticks stay in your browser and reach us only if you send a progress report.</p>
+    <p>What you tick is <strong>your own account of what you have studied</strong>. It is not a mark, and it is not an assessment result: being found competent is Centenary's decision after assessment, and the qualification is awarded by the QCTO after the external assessment.</p>
+    <p>The academy can see your ticks and their dates, and uses them to know who needs help and to report on how an intake is going. Your line manager sees them only in a progress report that you send.</p>
+    <p>If you ask for a password reset, we email a one-time link to the address on your account and keep a record that a reset was asked for and when. We do not keep the link itself, only a scrambled version of it, so nobody — including us — can read it back out of our records. The link stops working after an hour or after you use it, whichever comes first.</p>
+
     <h3>Why we need it, and on what basis</h3>
     <p>We use it to contact you about the course, to confirm your place on an intake, and — if you go on to enrol in an accredited qualification — to register and assess you for it. We rely on your consent, which you give by ticking the box on the registration form, and on the fact that this processing is necessary to deliver training your employer has arranged.</p>
     <p>We do not use your details for marketing, we do not sell them, and we do not use them for anything other than the training you registered for.</p>
@@ -105,7 +118,8 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 
     <h3>How long we keep it</h3>
     <p>If you register your interest and do not go on to enrol, we delete your registration <strong>twelve months</strong> after you sent it. That is long enough to cover the next intake and the one after it.</p>
-    <p>If you do enrol in an accredited qualification, your learner record has to be kept for as long as the QCTO requires — a qualification that cannot be evidenced is a qualification you cannot prove you hold. That period is longer, and it is not something we can shorten at your request.</p>
+    <p>If you do enrol in an accredited qualification, your learner record — your account, your enrolment, and the progress recorded against it — has to be kept for as long as the QCTO requires. A qualification that cannot be evidenced is a qualification you cannot prove you hold. That period is longer, and it is not something we can shorten at your request.</p>
+    <p>You can clear your own recorded progress at any time from the progress report page. Doing so deletes those ticks and does not keep a copy.</p>
     <p class="legal-tbc"><strong>To confirm:</strong> the exact retention period required by the QCTO for learner and assessment records.</p>
 
     <h3>What you can ask us to do</h3>

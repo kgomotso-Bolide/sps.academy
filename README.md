@@ -128,17 +128,43 @@ sps/
 │                           #   the 11 via ?m=KM-02
 ├── pm-modules.js           # The 11 knowledge modules: topics, weightings, what each
 │                           #   covers, the defining idea. PUT DRIVE LINKS IN `DOCS` HERE.
-├── pm-progress.html        # Learner progress report: submit to HR, print for manager signature
-├── pm-progress.js          # Progress store (lives inside the profile, browser-only)
+├── pm-progress.php         # Learner progress report: submit to HR, print for manager signature
+├── pm-progress.js          # Progress store. TWO stores: the learner's ACCOUNT when signed in,
+│                           #   localStorage when not. Fires 'pmprogress:sync' when it knows which.
 ├── pm-schedule.html        # Study planner: pace → module dates → calendar invites
 ├── pm-schedule.js          # Pacing maths + RFC 5545 .ics generation. Set OFFICIAL_DATES
 │                           #   here once Centenary confirms a real programme calendar.
 ├── pm-pathway.html         # Google PM Certificate ↔ the NQF 5 Project Manager qualification:
 │                           #   which knowledge modules it covers, which are taught here,
 │                           #   and how the 240 credits are actually earned
-├── profile.html            # Optional local profile (no account, localStorage only)
+├── profile.html            # Optional LOCAL profile (localStorage only) — NOT the academy
+│                           #   account; the page says so and links to sign-in
 ├── ai-in-action.html       # Interactive AI demo + impact stats
-├── contact.html            # Contact details + working registration form
+├── contact.php             # Contact details + working registration form (writes to the database)
+│
+│  ── the back end (xneelo-backend branch only; none of it runs on GitHub Pages) ──
+├── login.php               # Sign in. Admins land on /admin, learners on /my
+├── logout.php              # POST + CSRF only
+├── forgot.php              # Ask for a reset link. Says the SAME thing whether or not the
+│                           #   address has an account — read the note in lib/reset.php
+├── reset.php               # Set a new password from the link. Single use, one hour
+├── admin-users.php         # ACCOUNTS: set a password by hand, switch an account off.
+│                           #   The route that works while the domain's SPF record is missing
+├── my.php                  # THE LEARNER DASHBOARD — courses, progress, change password
+├── account.php             # JSON: the session probe every page makes, and progress writes
+├── admin.php               # Registrations list + the Enrol button that creates learner accounts
+├── admin-progress.php      # Submitted progress reports
+├── privacy.php             # Privacy notice — VERSIONED; bump policy_version when you edit it
+├── setup.php               # Browser installer (404 unless setup_token is set in the config)
+├── phpcheck.php            # Dependency-free preflight (same gate as setup.php)
+├── lib/                    # bootstrap · db · auth · learner · registration · progress ·
+│                           #   csrf · audit · mail · install. Denied to the web.
+├── schema/                 # schema.mysql.sql is canonical; schema.sqlite.sql mirrors it so
+│                           #   the whole site runs on a laptop. tools/migrate.php --check
+│                           #   refuses to run if the two have drifted.
+├── tools/                  # Command line only, never uploaded: dev-server, migrate,
+│                           #   make-user, make-deploy-zip
+├── DEPLOY-XNEELO.md        # The deployment procedure, and the 503 post-mortem
 ├── course.html             # ONE data-driven COURSE template — renders any course via ?c=<slug>
 ├── ai-fundamentals.html    # Legacy URL → redirects to course.html?c=ai-fundamentals
 ├── thanks.html             # Form submission confirmation page
@@ -211,18 +237,29 @@ All course content lives in one place: the **`COURSES` catalog** inside `course.
 
 ## 5. Tech Stack & Hosting
 
-- **Static HTML/CSS/JS** — no framework, no backend, no database, no build.
-- **Hosting:** GitHub Pages (free), served from `main` branch root.
-  - Repo: `https://github.com/kgomotso-bolide/sps.academy`
-  - Live: **https://kgomotso-bolide.github.io/sps.academy/**
-- **Deploy = push.** Every push to `main` triggers a Pages rebuild (~1 min).
+Two answers, because there are two branches and they are genuinely different sites.
 
-```bash
-# from the sps/ folder
-git add -A
-git commit -m "…"
-git push          # site updates automatically
-```
+**`main` — the original static site, still live on GitHub Pages.**
+
+- Static HTML/CSS/JS — no framework, no backend, no database, no build.
+- Repo `https://github.com/kgomotso-bolide/sps.academy`, live at
+  **https://kgomotso-bolide.github.io/sps.academy/**. Deploy = push to `main`.
+- **Leave it working.** Kgomotso may have sent these links to managers. It must not be
+  merged over until the professional URLs replace it: `contact.html` became `contact.php`,
+  and PHP does not run on Pages, so merging 404s the registration form.
+
+**`xneelo-backend` — what is actually live for SPS.**
+
+- **PHP 8 + MySQL, no Composer, no build step** — matching Xneelo shared hosting.
+- Live at **https://centenarynetworks.com/spsacademy/**, on Xneelo shared hosting in
+  Johannesburg. The folder layout is interim; subdomains follow once GoDaddy DNS is sorted.
+- **Deploy is manual**: GitHub → Actions → *Deploy SPS Academy*, and **the ref must be set to
+  `xneelo-backend`** — it defaults to `main`, which would overwrite the working site with the
+  old FormSubmit one.
+- The configuration, with the database password and the IP pepper, lives at
+  `~/private/sps-config.php` **outside the web root** and is never in the repo.
+- Full procedure, including what to do when a release adds database tables:
+  **`DEPLOY-XNEELO.md`**.
 
 ---
 
@@ -295,6 +332,52 @@ accredited qualification.
   belongs in `resources/`, which is world-readable on GitHub Pages. The PDFs currently offered on the
   Project Manager page are still the generic AI placeholders; if real material is ever published it
   needs the provider's written go-ahead and a check for what must stay behind a login.
+- [x] **Learner accounts (18 Aug 2026)** — learners sign in, and their progress lives on the
+  account instead of in the browser. Kgomotso asked for this after showing us the GIBS
+  Blackboard site, and it is the change that most of those features reduce to: the site now
+  knows who you are.
+  - **Getting an account**: an administrator presses **Enrol** on a registration in `/admin`.
+    It creates the sign-in, records the enrolment, links the registration to the person, and
+    shows the password **once**. Deliberately **no self-signup** — the site is on a public URL
+    and mail from this server still fails the domain's SPF, so an address cannot be verified.
+    When SPF is fixed the honest upgrade is an invite link and only the delivery step changes.
+  - **Why it matters more than it sounds**: browser storage was tied to one device, was deleted
+    by clearing history, and on a shared site machine showed the previous learner's record to
+    the next one. That last is a disclosure, not an inconvenience.
+  - **Nobody loses anything**: a learner signing in for the first time with ticks already in
+    their browser is offered a one-press import that only ever adds. Original tick dates are
+    preserved — they get printed on the report a manager signs.
+  - **Sign in** is now in the navigation on every page, injected by `profile.js` rather than by
+    editing seventeen navs. That is a stopgap the shared page header will absorb.
+  - New tables `enrolments` and `learner_progress`. **Deploying the code is not enough** —
+    see "Updating a site that is already live" in `DEPLOY-XNEELO.md`.
+- [x] **Password reset, and the Accounts page (18 Aug 2026)** — two halves of one problem.
+  - **Self-service** at `/forgot` → emailed link → `/reset`. The token is stored only as a
+    SHA-256 hash, lasts an hour, works once, and issuing a new one retires the old. Requests
+    are rate limited per address and per source — not because 256 bits is guessable, but
+    because otherwise the endpoint is a way to make our server email anyone, repeatedly.
+    The request form says the **same sentence** whether or not the address has an account;
+    a helpful "no such user" would undo the effort `lib/auth.php` puts into not confirming
+    which addresses exist.
+  - **`/admin-users`** — set a password by hand, and switch an account off. This half exists
+    because the sign-in page used to promise that Kgomotso would reset your password, and
+    that promise could not be kept: `tools/make-user.php` is command line only and **Xneelo
+    has no shell**. Anyone who forgot their password on the live site was locked out for good.
+    It is also the route to use until the SPF record lands, since a reset email from this
+    server may never arrive.
+  - **Changing a password now ends every other session**, on every device. Done with a
+    fingerprint of the password hash held in the session (`auth_password_stamp`) rather than a
+    new column, so it needed no schema change to `users` — and `install_apply_schema()` only
+    ever runs `CREATE TABLE IF NOT EXISTS`, so it could not have added one anyway.
+  - New table `password_resets`. Same two-step deploy as above.
+  - No deleting of accounts, deliberately: progress and enrolments hang off a user, and the
+    real need — somebody has left SPS — is met by switching the account off while keeping the
+    learner record the QCTO obliges us to hold.
+- [ ] **Gate the learner material behind sign-in** — the site can now tell who is enrolled, so
+  the 33 `DOCS` links in `pm-modules.js` can finally be served to enrolled learners only.
+  Blocked on Kgomotso's Drive links, not on code. Assessment memos are never published.
+- [ ] **Portfolio of evidence upload** — the real QCTO requirement, and the thing no
+  international course can do for us. Needs an operator agreement in place first.
 - [ ] **Entry requirements and purpose statement** — still unread. They are in `Qualification
   Document.pdf` in the provider's pack, which would not render for text extraction here. Worth adding
   to the course page once someone reads them off.

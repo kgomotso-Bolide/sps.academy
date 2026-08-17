@@ -103,6 +103,7 @@ function when(string $utc): string
     <div class="nav-links">
       <a href="admin">Registrations</a>
       <a href="admin-progress" class="active">Progress</a>
+      <a href="admin-users">Accounts</a>
       <a href="./">View the site</a>
       <form method="POST" action="logout" style="display:inline">
         <?= csrf_field() ?>

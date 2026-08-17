@@ -110,9 +110,15 @@ function old(array $old, string $field): string
       <h2 class="lede-h">Where you are, and something you can hand to your manager</h2>
       <p>Tick topics off as you work through them and this keeps count. When you have finished a module, print the report for your manager to sign and send the academy a dated record — so your progress is on file without anyone having to chase you for it.</p>
     </div>
-    <div class="sg-assure reveal">
+    <?php /* Two different true answers, and the page must give the right one:
+             a signed-in learner's ticks are on the server, an anonymous one's
+             are in their browser. The wording is swapped by the script at the
+             foot of this page once the session is known, and the markup below
+             is the anonymous case because that is what somebody with JavaScript
+             disabled is guaranteed to be. */ ?>
+    <div class="sg-assure reveal" id="pgWhere">
       <span class="lbl">Where this is stored</span>
-      In this browser, on this device, and nowhere else — the same place your profile lives. Nothing is uploaded until you press send. On a shared machine, clear it from <a href="profile" style="color:var(--accent-green);font-weight:700">your profile</a> when you are done.
+      <span id="pgWhereText">In this browser, on this device, and nowhere else — the same place your profile lives. Nothing is uploaded until you press send. On a shared machine, clear it from <a href="profile" style="color:var(--accent-green);font-weight:700">your profile</a> when you are done.</span>
     </div>
   </div>
 </section>
@@ -283,8 +289,27 @@ function old(array $old, string $field): string
 
   $('pgPrint').addEventListener('click',()=>window.print());
   $('pgReset').addEventListener('click',function(){
-    if(!confirm('Clear your recorded progress on all eleven modules? This cannot be undone.')) return;
+    var onAccount=P.mode()==='account';
+    if(!confirm(onAccount
+      ? 'Clear your recorded progress on all eleven modules? This deletes it from your '+
+        'academy account, on every device, and cannot be undone.'
+      : 'Clear your recorded progress on all eleven modules? This cannot be undone.')) return;
     P.clear(); paint();
+  });
+
+  /* Which of the two true answers to give about where this is kept. Both are
+     honest; giving the wrong one is not, and "in this browser and nowhere else"
+     stops being true the moment somebody signs in. */
+  window.addEventListener('pmprogress:sync',function(){
+    paint();
+    var t=$('pgWhereText'); if(!t) return;
+    if(P.mode()==='account'){
+      t.innerHTML='On your academy account, held by Centenary Networks on a server in '+
+        'Johannesburg — so it follows you to any device and survives this browser being '+
+        'cleared. The academy can see your ticks and their dates. What is held, why, and '+
+        'how to ask for it is in the <a href="privacy" style="color:var(--accent-green);'+
+        'font-weight:700">privacy notice</a>.';
+    }
   });
 
   /* Progress is usually ticked off on the module pages, in another tab. Two

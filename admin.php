@@ -20,6 +20,8 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/install.php';   // install_readable_password()
+require __DIR__ . '/lib/learner.php';
 
 $me = require_admin();
 
@@ -27,29 +29,47 @@ const STATUSES  = ['new', 'contacted', 'enrolled', 'declined'];
 const PER_PAGE  = 25;
 
 /* ---------------------------------------------------------------------------
-   Changing a status
+   Actions
    --------------------------------------------------------------------------- */
 
 $notice = '';
+/* A new account's password, held only for the length of this one response. It
+   is never stored anywhere readable, never written to the audit log, and never
+   shown again — which is why the panel that displays it says so plainly. */
+$fresh  = null;
 
 if (is_post()) {
     if (!csrf_valid()) {
         $notice = 'That form had expired — nothing was changed. Please try again.';
     } else {
         $id     = (int) ($_POST['id'] ?? 0);
-        $status = (string) ($_POST['status'] ?? '');
+        $action = (string) ($_POST['a'] ?? 'status');
 
-        if ($id > 0 && in_array($status, STATUSES, true)) {
-            // Scoped to the tenant in the WHERE clause, not just in the lookup:
-            // an id from another company must not be updatable by guessing it.
-            $n = db_run(
-                'UPDATE registrations SET status = ? WHERE id = ? AND tenant_id = ?',
-                [$status, $id, tenant_id()]
-            )->rowCount();
+        if ($action === 'enrol' && $id > 0) {
+            $result = learner_enrol_registration($id, (string) ($_POST['course'] ?? ''));
+            $notice = $result['message'];
+            if ($result['ok'] && $result['password'] !== null) {
+                $fresh = [
+                    'name'     => trim($result['user']['first_name'] . ' ' . $result['user']['last_name']),
+                    'email'    => (string) $result['user']['email'],
+                    'password' => $result['password'],
+                ];
+            }
+        } else {
+            $status = (string) ($_POST['status'] ?? '');
 
-            if ($n > 0) {
-                audit('registration.status_changed', 'registrations', $id, 'to: ' . $status);
-                $notice = 'Registration #' . $id . ' marked "' . $status . '".';
+            if ($id > 0 && in_array($status, STATUSES, true)) {
+                // Scoped to the tenant in the WHERE clause, not just in the lookup:
+                // an id from another company must not be updatable by guessing it.
+                $n = db_run(
+                    'UPDATE registrations SET status = ? WHERE id = ? AND tenant_id = ?',
+                    [$status, $id, tenant_id()]
+                )->rowCount();
+
+                if ($n > 0) {
+                    audit('registration.status_changed', 'registrations', $id, 'to: ' . $status);
+                    $notice = 'Registration #' . $id . ' marked "' . $status . '".';
+                }
             }
         }
         csrf_rotate();
@@ -142,6 +162,50 @@ foreach (db_all('SELECT status, COUNT(*) AS n FROM registrations WHERE tenant_id
     $counts[$r['status']] = (int) $r['n'];
 }
 
+/* What each already-linked learner is enrolled on.
+ *
+ * One query for the whole page rather than one per row. Twenty-five extra
+ * queries would not be noticed on this table today, and would be noticed on the
+ * day somebody exports a year of registrations. */
+$enrolByUser = [];
+$userIds = array_values(array_unique(array_filter(array_map(
+    fn($r) => (int) ($r['user_id'] ?? 0), $rows
+))));
+if ($userIds) {
+    $in = implode(',', array_fill(0, count($userIds), '?'));
+    foreach (db_all(
+        'SELECT user_id, course_title, status FROM enrolments
+          WHERE tenant_id = ? AND user_id IN (' . $in . ') ORDER BY enrolled_at',
+        array_merge([tenant_id()], $userIds)
+    ) as $en) {
+        $enrolByUser[(int) $en['user_id']][] = $en;
+    }
+}
+
+/**
+ * Which course to preselect in the Enrol box.
+ *
+ * The registration carries free text — whatever was typed into the form, or
+ * whatever the Skills Gap tool put there — so this is a guess, and it is only a
+ * guess: the administrator sees the selection and can change it before pressing
+ * anything. Falls back to the short-course entry, which keeps the learner's own
+ * wording rather than filing them under a qualification nobody chose.
+ */
+function suggest_course(?string $registeredTitle): string
+{
+    $t = mb_strtolower(trim((string) $registeredTitle));
+    if ($t === '') return 'short-course';
+    foreach (learner_catalogue() as $slug => $c) {
+        if ($c['title'] === null) continue;
+        // Compare on the distinctive half — "Occupational Certificate:" is on
+        // both of them and matches everything.
+        $key = mb_strtolower(trim(substr((string) $c['title'], strpos((string) $c['title'], ':') !== false
+            ? (int) strpos((string) $c['title'], ':') + 1 : 0)));
+        if ($key !== '' && str_contains($t, $key)) return $slug;
+    }
+    return 'short-course';
+}
+
 /** Keep the current filter when building a link. */
 function qs(array $over = []): string
 {
@@ -178,6 +242,7 @@ function when(string $utc): string
     <div class="nav-links">
       <a href="admin" class="active">Registrations</a>
       <a href="admin-progress">Progress</a>
+      <a href="admin-users">Accounts</a>
       <a href="./">View the site</a>
       <form method="POST" action="logout" style="display:inline">
         <?= csrf_field() ?>
@@ -200,6 +265,28 @@ function when(string $utc): string
 
     <?php if ($notice !== ''): ?>
       <p class="adm-notice" role="status"><?= e($notice) ?></p>
+    <?php endif; ?>
+
+    <?php if ($fresh !== null): ?>
+      <?php /* Shown once, on this response only. There is no way to get it back
+               — the database holds a hash, not a password — and the panel says
+               so rather than letting somebody discover it tomorrow. */ ?>
+      <div class="adm-creds" role="alert">
+        <h3>New sign-in details for <?= e($fresh['name']) ?></h3>
+        <p>Write these down or give them to <?= e($fresh['name']) ?> now.
+          <strong>This password is not shown again</strong> — if it is lost, the
+          account has to be given a new one.</p>
+        <dl>
+          <dt>Where</dt><dd><?= e('https://' . ($_SERVER['HTTP_HOST'] ?? 'centenarynetworks.com') . app_base_path() . 'login') ?></dd>
+          <dt>Email</dt><dd><?= e($fresh['email']) ?></dd>
+          <dt>Password</dt><dd class="adm-pass"><?= e($fresh['password']) ?></dd>
+        </dl>
+        <p class="adm-creds-note">Give it to them in person or over the phone rather than by
+          email — email is the one channel we cannot vouch for until the domain's SPF record
+          is set. Ask them to change it once they are in: there is a <strong>Change
+          password</strong> box on their dashboard. If it is ever forgotten, they have to
+          come back to you, because there is no self-service reset yet.</p>
+      </div>
     <?php endif; ?>
 
     <div class="adm-tabs">
@@ -229,7 +316,7 @@ function when(string $utc): string
       <table class="adm-table">
         <thead><tr>
           <th>#</th><th>Received</th><th>Name</th><th>Contact</th>
-          <th>Course</th><th>Status</th>
+          <th>Course</th><th>Status</th><th>Academy account</th>
         </tr></thead>
         <tbody>
         <?php foreach ($rows as $r): ?>
@@ -262,6 +349,41 @@ function when(string $utc): string
                 <noscript><button type="submit" class="btn btn-ghost">Save</button></noscript>
               </form>
               <span class="adm-sub">Delete after <?= e((string) $r['purge_after']) ?></span>
+            </td>
+            <td>
+              <?php $mine = $enrolByUser[(int) ($r['user_id'] ?? 0)] ?? []; ?>
+              <?php if ($mine): ?>
+                <?php foreach ($mine as $en): ?>
+                  <span class="adm-enrolled"><?= e((string) $en['course_title']) ?></span>
+                <?php endforeach; ?>
+              <?php endif; ?>
+
+              <?php /* Still offered when they already have an account: the same
+                       person can be enrolled on a second qualification, and the
+                       enrolment function reuses the account rather than making
+                       another one or resetting the password. */ ?>
+              <details class="adm-enrol">
+                <summary><?= $mine ? 'Enrol on another course' : 'Enrol this person' ?></summary>
+                <form method="POST">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="a" value="enrol">
+                  <input type="hidden" name="id" value="<?= (int) $r['id'] ?>">
+                  <label class="adm-enrol-lbl" for="crs-<?= (int) $r['id'] ?>">Course</label>
+                  <select id="crs-<?= (int) $r['id'] ?>" name="course">
+                    <?php $sug = suggest_course($r['course_title'] ?? null); ?>
+                    <?php foreach (learner_catalogue() as $slug => $c): ?>
+                      <option value="<?= e($slug) ?>"<?= $slug === $sug ? ' selected' : '' ?>>
+                        <?= e($c['title'] ?? ('Short course — ' . (($r['course_title'] ?? '') !== ''
+                              ? (string) $r['course_title'] : 'title to be confirmed'))) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                  <button type="submit" class="btn btn-primary">
+                    <?= $mine ? 'Enrol' : 'Create account and enrol' ?></button>
+                  <span class="adm-sub">Creates a sign-in for
+                    <?= e((string) $r['email']) ?> and shows the password once.</span>
+                </form>
+              </details>
             </td>
           </tr>
         <?php endforeach; ?>

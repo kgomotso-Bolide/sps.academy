@@ -30,9 +30,17 @@ function safe_next(?string $raw, string $fallback): string
     return $raw;
 }
 
+/* Where each role lands. An administrator wants the registrations list; a
+   learner wants their own page, which is the only reason they have an account.
+   Neither wants the marketing homepage they just came from. */
+function home_for(array $u): string
+{
+    return $u['role'] === 'admin' ? 'admin' : 'my';
+}
+
 $user = current_user();
 if ($user !== null) {
-    redirect($user['role'] === 'admin' ? 'admin' : './');
+    redirect(home_for($user));
 }
 
 $error = '';
@@ -48,7 +56,7 @@ if (is_post()) {
         if ($ok) {
             csrf_rotate();
             $u = current_user();
-            redirect(safe_next($_GET['next'] ?? null, $u['role'] === 'admin' ? 'admin' : './'));
+            redirect(safe_next($_GET['next'] ?? null, home_for($u)));
         }
         $error = $message;
     }
@@ -99,13 +107,15 @@ if (is_post()) {
           <label for="l-pass">Password</label>
           <input id="l-pass" type="password" name="password"
                  autocomplete="current-password" required>
+          <p class="field-hint"><a href="forgot">Forgotten your password?</a></p>
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%">Sign in</button>
       </form>
 
-      <p class="auth-foot">Forgotten your password? There is no self-service reset yet —
-        email <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>
-        and it will be reset for you.</p>
+      <p class="auth-foot">If the reset email does not arrive, look in your junk mail — the
+        academy's mail is still being set up with the domain. Still nothing? Email
+        <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>
+        and a new password will be set for you by hand.</p>
     </div>
   </div>
 </section>
