@@ -82,25 +82,48 @@ $requiredAlso = [
     'schema/schema.mysql.sql',
 ];
 
-$files = [];
-$it = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
-    RecursiveIteratorIterator::SELF_FIRST
-);
+/* The file list comes from git, not from the filesystem.
+ *
+ * A filesystem walk ships whatever happens to be lying in the directory. That
+ * is not hypothetical: a debugging session left r.html and r2.html here —
+ * saved copies of server responses — and both went into an archive destined
+ * for a public web server before anyone noticed. Version control already knows
+ * the difference between "part of the site" and "something I saved once", so
+ * it is asked.
+ *
+ * Anything untracked is reported rather than silently dropped, because the
+ * other way this goes wrong is a genuinely new page that was never added. */
+exec('git -C ' . escapeshellarg($root) . ' ls-files --cached --exclude-standard 2>&1', $tracked, $gitStatus);
 
-foreach ($it as $path) {
-    $rel = str_replace('\\', '/', substr($path->getPathname(), strlen($root) + 1));
-    if ($rel === '') continue;
+if ($gitStatus !== 0) {
+    fwrite(STDERR, "git is not available here, so the archive cannot be built safely.\n"
+                 . "Without it there is no way to tell site files from stray ones.\n");
+    exit(1);
+}
+
+$files = [];
+foreach ($tracked as $rel) {
+    $rel = trim(str_replace('\\', '/', $rel));
+    if ($rel === '' || !is_file($root . '/' . $rel)) continue;
 
     $first = explode('/', $rel)[0];
     if (in_array($first, $skipDirs, true)) continue;
-    if ($path->isDir()) continue;
     if (in_array($rel, $skipFiles, true)) continue;
     if (preg_match($skipPattern, $rel)) continue;
 
     $files[] = $rel;
 }
 sort($files);
+
+/* Untracked files that look like site content — a page someone wrote and
+   forgot to commit would otherwise be missing from the deploy without a word. */
+exec('git -C ' . escapeshellarg($root) . ' ls-files --others --exclude-standard 2>&1', $untracked);
+$notable = array_values(array_filter($untracked, function ($f) use ($skipDirs) {
+    $f = trim(str_replace('\\', '/', $f));
+    if ($f === '') return false;
+    if (in_array(explode('/', $f)[0], $skipDirs, true)) return false;
+    return (bool) preg_match('#\.(html|php|css|js|svg|png|jpg|pdf)$#i', $f);
+}));
 
 /* ---------------------------------------------------------------------------
    Checks, before anything is written
@@ -155,8 +178,14 @@ $zip->close();
 
 $bytes = filesize($out);
 printf("\n  built    %s\n", str_replace('\\', '/', $out));
-printf("  files    %d\n", count($files));
+printf("  files    %d  (from git, not from the directory)\n", count($files));
 printf("  size     %.1f MB\n", $bytes / 1048576);
+
+if ($notable) {
+    echo "\n  NOT included — these look like site files but are not committed:\n";
+    foreach ($notable as $f) echo "    " . trim($f) . "\n";
+    echo "  Commit them if they belong on the site, or delete them if they do not.\n";
+}
 
 echo "\n  included, and easy to lose:\n";
 foreach ($required as $r) echo "    $r\n";
