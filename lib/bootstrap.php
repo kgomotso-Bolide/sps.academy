@@ -84,13 +84,23 @@ function app_config(?string $key = null)
         $candidates = [];
         if ($env = getenv('SPS_CONFIG')) $candidates[] = $env;
 
-        // Walk up from the app directory. Four levels is far more than either
-        // layout needs and still cannot escape a hosting account.
+        /* Walk up from the app directory. Four levels is far more than either
+           layout needs and still cannot escape a hosting account.
+
+           Both a private/ subdirectory and the directory itself are checked.
+           On Xneelo the SFTP login lands in the home directory, and the obvious
+           place to drop the file is right there — ~/sps-config.php — which is
+           just as safely outside the web root as ~/private/sps-config.php.
+           Insisting on the tidier of the two only produces a site that says it
+           cannot find its configuration while the file sits in plain view one
+           directory up. The test that matters is the DOCUMENT_ROOT one below,
+           not which folder it is in. */
         $dir = APP_ROOT;
         for ($i = 0; $i < 4; $i++) {
             $dir = dirname($dir);
             if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
             $candidates[] = $dir . '/private/sps-config.php';
+            $candidates[] = $dir . '/sps-config.php';
         }
 
         $candidates[] = APP_ROOT . '/lib/config.local.php';  // development only, gitignored

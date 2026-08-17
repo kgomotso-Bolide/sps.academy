@@ -41,15 +41,16 @@ $dir     = $appRoot;
 for ($i = 0; $i < 4; $i++) {
     $dir = dirname($dir);
     if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-    $candidate = $dir . '/private/sps-config.php';
-    $inside = $docroot !== '' && str_starts_with(
-        str_replace('\\', '/', (string) (realpath($candidate) ?: $candidate)),
-        rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
-    );
-    printf("    %-52s %s\n", $candidate,
-        !is_file($candidate) ? 'not there'
-            : ($inside ? 'FOUND but INSIDE the web root — refused' : 'found, and outside the web root'));
-    if (is_file($candidate) && !$inside && $found === null) $found = $candidate;
+    foreach ([$dir . '/private/sps-config.php', $dir . '/sps-config.php'] as $candidate) {
+        $inside = $docroot !== '' && str_starts_with(
+            str_replace('\\', '/', (string) (realpath($candidate) ?: $candidate)),
+            rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
+        );
+        printf("    %-56s %s\n", $candidate,
+            !is_file($candidate) ? 'not there'
+                : ($inside ? 'FOUND but INSIDE the web root — refused' : 'found, and outside the web root'));
+        if (is_file($candidate) && !$inside && $found === null) $found = $candidate;
+    }
 }
 printf("    %s\n", $found ? 'A usable configuration file was found.'
                           : 'No usable configuration file. See DEPLOY-XNEELO.md step 4.');

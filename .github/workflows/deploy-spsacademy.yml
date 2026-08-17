@@ -1,0 +1,207 @@
+# Deploy SPS Academy to centenarynetworks.com/spsacademy/ over SFTP.
+#
+# DELIBERATELY MANUAL: GitHub -> Actions -> "Deploy SPS Academy" -> Run workflow.
+# Pushing does not deploy. This lands inside a LIVE CLIENT SITE, and going live
+# stays a decision rather than a side effect of a commit.
+#
+# THE RISK THIS FILE IS BUILT AROUND
+# centenarynetworks.com is not ours. Its homepage, its .htaccess and its assets
+# sit one directory above where we write. A mirror pointed at the wrong
+# directory, with deletion enabled, would erase a client's website. So:
+#
+#   - server_dir must look like public_html/<something>. Deploying to the web
+#     root itself is refused by the job, not by a convention in a document.
+#   - delete_removed is off by default and cannot be combined with a dry run
+#     being skipped without you choosing it explicitly.
+#   - after uploading, the job fetches the CLIENT's homepage and fails if it
+#     stopped looking like theirs.
+#
+# TRANSPORT: SFTP on port 22. Xneelo answers with "SSH-2.0-FTP Service" and
+# refuses FTPS on 21. The host key is pinned in .github/known_hosts with
+# StrictHostKeyChecking=yes, so a substituted server aborts the deploy instead
+# of being handed the password.
+#
+# CREDENTIALS live in repository secrets and are never in this file, never in
+# the repository, and never pasted into a chat:
+#   SPS_FTP_SERVER    centenarynetworks.com
+#   SPS_FTP_USERNAME  the Xneelo SFTP user
+#   SPS_FTP_PASSWORD  its password
+# Set them with:  printf '%s' 'value' | gh secret set SPS_FTP_USERNAME
+#
+# Ask Xneelo for an FTP user whose home is public_html/spsacademy if the panel
+# allows it. Then the credential in this repository physically cannot reach the
+# client's site, which is worth more than every check written below.
+name: Deploy SPS Academy
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — list what would change, upload nothing"
+        type: boolean
+        default: true
+      server_dir:
+        description: "Target directory, relative to the SFTP login directory"
+        type: string
+        default: "public_html/spsacademy"
+      delete_removed:
+        description: "Delete server files no longer in the repo (destructive — leave off)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-spsacademy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Upload to centenarynetworks.com/spsacademy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Refuse to deploy anywhere dangerous
+        env:
+          DIR: ${{ inputs.server_dir }}
+        run: |
+          # A subdirectory of public_html, and nothing else. This is the check
+          # that stands between a typo and a client's website.
+          if ! printf '%s' "$DIR" | grep -Eq '^public_html/[A-Za-z0-9._-]+$'; then
+            echo "::error::server_dir must be public_html/<folder> — got '$DIR'."
+            echo "Deploying to the web root would overwrite the client's site."
+            exit 1
+          fi
+          echo "Target '$DIR' is a subdirectory of the web root. Good."
+
+      - name: Fail early if the credentials are missing
+        env:
+          FTP_SERVER: ${{ secrets.SPS_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.SPS_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.SPS_FTP_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$FTP_SERVER" ]   || missing="$missing SPS_FTP_SERVER"
+          [ -n "$FTP_USERNAME" ] || missing="$missing SPS_FTP_USERNAME"
+          [ -n "$FTP_PASSWORD" ] || missing="$missing SPS_FTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            exit 1
+          fi
+          test -s .github/known_hosts || {
+            echo "::error::.github/known_hosts is missing — refusing to connect without a pinned host key."
+            exit 1
+          }
+          echo "Secrets present, host key pinned."
+
+      - name: Record what the client's site looks like BEFORE we touch anything
+        run: |
+          curl -sS --max-time 30 https://centenarynetworks.com/ -o /tmp/client-before.html || true
+          if [ -s /tmp/client-before.html ]; then
+            echo "before=$(md5sum /tmp/client-before.html | cut -d' ' -f1)" >> "$GITHUB_ENV"
+            echo "Captured the client homepage ($(wc -c < /tmp/client-before.html) bytes)."
+          else
+            echo "::warning::Could not fetch the client homepage beforehand; the after-check will be skipped."
+          fi
+
+      - name: Install lftp and sshpass
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp sshpass
+
+      - name: Deploy
+        env:
+          SSHPASS: ${{ secrets.SPS_FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.SPS_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.SPS_FTP_USERNAME }}
+        run: |
+          set -euo pipefail
+          FLAGS="--reverse --verbose --no-perms"
+          [ "${{ inputs.dry_run }}" = "true" ]        && FLAGS="$FLAGS --dry-run"
+          [ "${{ inputs.delete_removed }}" = "true" ] && FLAGS="$FLAGS --delete"
+
+          # The same exclusions as tools/make-deploy-zip.php, for the same
+          # reasons: _drafts/ holds client emails, tools/ is command-line only
+          # and cannot run on a host with no shell, and lib/config.local.php
+          # holds the development IP pepper. The real config lives outside the
+          # web root and is uploaded once, by hand — never from here.
+          cat > "$RUNNER_TEMP/deploy.lftp" <<EOF
+          set sftp:connect-program "sshpass -e ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$GITHUB_WORKSPACE/.github/known_hosts"
+          set net:max-retries 5
+          set net:timeout 60
+          set net:reconnect-interval-base 5
+          set net:reconnect-interval-multiplier 1.5
+          # Shared hosting throttles concurrent SFTP channels; one at a time is
+          # slower but survives a few dozen files.
+          set mirror:parallel-transfer-count 1
+          open -u "$FTP_USERNAME","" sftp://$FTP_SERVER
+          mirror $FLAGS \
+            -X '.git*' -X '.git*/' \
+            -X '.github/' -X '.vscode/' -X '.claude/' \
+            -X 'tools/' -X '_drafts/' -X 'private/' \
+            -X 'Website-inspiration-latout/' \
+            -X 'SPS-AI-Micro-Learning-Onepager.*' \
+            -X '*.md' -X '*.docx' -X '*.zip' \
+            -X 'config.local.php' -X 'config.sample.php' \
+            ./ "${{ inputs.server_dir }}"
+          bye
+          EOF
+          lftp -f "$RUNNER_TEMP/deploy.lftp"
+
+      - name: Check we did not disturb the client's site
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          sleep 5
+          curl -sS --max-time 30 https://centenarynetworks.com/ -o /tmp/client-after.html || true
+          if [ -n "${before:-}" ] && [ -s /tmp/client-after.html ]; then
+            after=$(md5sum /tmp/client-after.html | cut -d' ' -f1)
+            if [ "$after" != "$before" ]; then
+              echo "::error::The client's homepage CHANGED during this deploy. Check the target directory immediately."
+              exit 1
+            fi
+            echo "Client homepage unchanged."
+          fi
+          curl -sS --max-time 30 -o /dev/null -w 'client assets: %{http_code}\n' \
+            https://centenarynetworks.com/assets/cn-logo.png || true
+
+      - name: Check our own pages
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          base="https://centenarynetworks.com/${{ inputs.server_dir }}"
+          base="${base/public_html\//}"
+          echo "Checking $base"
+          fail=0
+          for p in "/" "/styles.css" "/phpcheck.php" "/contact" "/privacy"; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
+            printf '  %-14s %s\n' "$p" "$code"
+            case "$p" in
+              /|/styles.css) [ "$code" = "200" ] || fail=1 ;;
+            esac
+          done
+          # Server code must never be readable.
+          for p in "/lib/db.php" "/schema/schema.mysql.sql" "/lib/bootstrap.php"; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
+            printf '  %-24s %s\n' "$p" "$code"
+            [ "$code" = "404" ] || { echo "::error::$p is readable over HTTP — the .htaccess deny rule is not working."; fail=1; }
+          done
+          exit $fail
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deploy SPS Academy"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Ref | \`${{ github.ref_name }}\` |"
+            echo "| Target | \`${{ inputs.server_dir }}\` |"
+            echo "| Dry run | ${{ inputs.dry_run }} |"
+            echo "| Delete removed | ${{ inputs.delete_removed }} |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              echo "Dry run — nothing was uploaded. Read the file list above, then run again with dry_run off."
+            else
+              echo "Live at <https://centenarynetworks.com/spsacademy/>"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
