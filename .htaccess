@@ -1,0 +1,61 @@
+# Apache configuration for sps.centenarynetworks.com (Xneelo shared hosting).
+#
+# The single most important rule here is the extensionless one. Every link on
+# this site is written without a file extension — href="courses", href="contact"
+# — because GitHub Pages served them that way for free. Apache does not. Without
+# the rewrite below, every internal link on all 15 pages 404s the moment we move.
+# It is one rule, and it means not one line of HTML has to change.
+
+Options -Indexes
+DirectoryIndex index.html index.php
+
+# Server-side code and data are not documents. Nothing under these paths should
+# ever be fetchable over HTTP, whatever the server is configured to do with .php
+# files. Each directory also carries its own deny file — this is the outer belt.
+RedirectMatch 404 ^/(lib|schema|tools|_drafts)(/|$)
+RedirectMatch 404 ^/.*/(\.git|\.env|config\.local\.php)
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS. Registration posts personal information; it does not travel in
+  # the clear. X-Forwarded-Proto is checked too because shared hosting often
+  # terminates TLS at a proxy, where %{HTTPS} reads "off" on an https request.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # /courses -> courses.html, but only when that file actually exists, and never
+  # for a real file or directory. This is the GitHub Pages behaviour, restored.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+
+  # /contact -> contact.php, same idea. Pages that grow a server side change
+  # extension and keep their URL, so nothing that links to them has to change —
+  # and nothing that is bookmarked or already printed on a slide breaks.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^(.+?)/?$ /$1.php [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # Only meaningful once the domain is live and serving real TLS; harmless until.
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+</IfModule>
+
+# PHP should never announce its version, and should never print a stack trace to
+# a visitor — a fatal error inside a database call would otherwise put the
+# connection string on screen. Errors go to the log; the visitor gets a message.
+<IfModule mod_php.c>
+  php_flag display_errors Off
+  php_flag expose_php Off
+</IfModule>
+
+ErrorDocument 404 /404.html

@@ -1,2 +1,17 @@
 .vscode/
 copy-dont-touch.html
+
+# Client emails and working notes. Kept inside the workspace so they can be
+# opened from the editor, and ignored so they can never reach the public site.
+_drafts/
+
+# The live configuration holds the database password and the IP hashing key. It
+# lives outside the web root on the server and is never in the repository — this
+# entry exists so that a local development copy cannot be committed by accident.
+lib/config.local.php
+
+# Local development database. Real learner information never goes in it, but it
+# is still personal-information-shaped, and it has no business in git.
+*.sqlite
+*.sqlite-journal
+private/
