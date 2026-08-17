@@ -1,17 +1,78 @@
 <?php
-/* A deliberately tiny preflight check. DELETE IT once the site is working.
+/* A deliberately tiny preflight check.
  *
  * Its whole job is to answer one question before anything else is investigated:
- * does PHP run on this server at all? It depends on nothing — not lib/, not the
- * configuration file, not the database — so if this page works and the rest of
- * the site does not, the fault is ours; and if this page does not work either,
- * the fault is the hosting and no amount of editing our code will help.
+ * does PHP run on this server, and can it reach its configuration and database?
+ * It depends on nothing — not lib/, not the configuration file, not the
+ * database — so if this page works and the rest of the site does not, the fault
+ * is ours; and if this page does not work either, the fault is the hosting and
+ * no amount of editing our code will help.
+ *
+ * WHEN IT IS VISIBLE, and why it is not simply deleted after an install:
+ *
+ *   - No configuration found anywhere -> it runs. The site cannot work in that
+ *     state, so there is nothing to protect and everything to diagnose.
+ *   - Configuration found, setup_token set -> it runs. You are installing.
+ *   - Configuration found, setup_token empty -> 404, exactly like setup.php.
+ *
+ * The alternative was "remember to delete it", which works until the fourth
+ * academy is deployed by somebody in a hurry. What it prints — server paths,
+ * open_basedir, PHP version, which credentials are filled in — is ordinary
+ * reconnaissance material, so on a working site it is not available at all.
  *
  * Deliberately NOT phpinfo(). That publishes paths, module lists and
- * environment variables to anyone who finds the URL. This prints the few facts
- * that matter and nothing else.
+ * environment variables wholesale.
  */
 declare(strict_types=1);
+
+$appRoot = __DIR__;
+$docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+
+/* The account's home directory. On this hosting public_html is a SYMLINK, so
+   the directory an SFTP client shows on login and the directory PHP resolves
+   are not the same place — which is how a configuration file ends up sitting in
+   plain view somewhere the application will never look. */
+$home = (string) (getenv('HOME') ?: '');
+if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
+    $pw = @posix_getpwuid(posix_getuid());
+    $home = (string) ($pw['dir'] ?? '');
+}
+
+/* The same candidate list as lib/bootstrap.php, in the same order, and it must
+   stay that way — a preflight check that disagrees with the thing it is
+   checking is worse than no check. */
+$candidates = [];
+if ($home !== '') {
+    $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
+    $candidates[] = rtrim($home, '/') . '/sps-config.php';
+}
+$dir = $appRoot;
+for ($i = 0; $i < 4; $i++) {
+    $dir = dirname($dir);
+    if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
+    $candidates[] = $dir . '/private/sps-config.php';
+    $candidates[] = $dir . '/sps-config.php';
+}
+
+$inWebRoot = static function (string $path) use ($docroot): bool {
+    if ($docroot === '') return false;
+    return str_starts_with(
+        str_replace('\\', '/', (string) (realpath($path) ?: $path)),
+        rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
+    );
+};
+
+$found = null;
+foreach ($candidates as $c) {
+    if (is_file($c) && !$inWebRoot($c)) { $found = $c; break; }
+}
+
+/* The gate. Worked out before a single byte is printed. */
+$cfg = $found !== null ? @include $found : null;
+if (is_array($cfg) && (string) ($cfg['setup_token'] ?? '') === '') {
+    http_response_code(404);
+    exit('Not found.');
+}
 
 header('Content-Type: text/plain; charset=utf-8');
 
@@ -30,100 +91,34 @@ foreach ($need as $e) {
     printf("    %-12s %s\n", $e, $ok ? 'yes' : 'MISSING');
 }
 
-/* Where the application would look for its configuration, and whether it found
-   one. The path is shown because getting it wrong is the most common mistake
-   here; the contents are never touched. */
-$appRoot = __DIR__;
-$docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
-
-/* The paths as PHP actually sees them. On this host public_html is a SYMLINK,
-   so the directory the SFTP client shows and the directory PHP resolves are not
-   the same place — which is exactly how a configuration file ends up sitting in
-   plain view somewhere the application will never look. */
 echo "\n  paths as PHP resolves them:\n";
-printf("    this file          %s\n", __DIR__);
+printf("    this file          %s\n", $appRoot);
 printf("    document root      %s\n", $docroot !== '' ? $docroot : '(not set)');
-printf("    real document root %s\n", $docroot !== '' ? (realpath($docroot) ?: '(cannot resolve)') : '-');
-printf("    one level up       %s\n", dirname($appRoot));
-printf("    two levels up      %s\n", dirname($appRoot, 2));
-
-/* Where the account's real home is, which is NOT reachable by walking up from
-   the site when public_html is a symlink. This is the directory an SFTP client
-   shows on login, and therefore the obvious place to put a config file. */
-$home = (string) (getenv('HOME') ?: '');
-if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
-    $pw = @posix_getpwuid(posix_getuid());
-    $home = (string) ($pw['dir'] ?? '');
-}
 printf("    account home       %s\n", $home !== '' ? $home : '(cannot determine)');
-
-$basedir = (string) ini_get('open_basedir');
-printf("    open_basedir       %s\n", $basedir !== '' ? $basedir : '(not set — PHP may read anywhere it has permission)');
-
-/* Can PHP actually reach the home directory, and is the config sitting there?
-   This is the question that decides where the file has to live. */
-if ($home !== '') {
-    printf("    home is readable   %s\n", is_readable($home) ? 'yes' : 'NO');
-    foreach ([$home . '/sps-config.php', $home . '/private/sps-config.php'] as $c) {
-        printf("    %-18s %s\n", basename(dirname($c)) === basename($home) ? 'config here?' : 'config in private?',
-            is_file($c) ? 'FOUND: ' . $c : 'not at ' . $c);
-    }
-}
+printf("    open_basedir       %s\n", ini_get('open_basedir') ?: '(not set)');
 
 echo "\n  configuration:\n";
-$found = null;
-
-/* The same candidate list as lib/bootstrap.php, in the same order, and it must
-   stay that way — a preflight check that disagrees with the thing it is
-   checking is worse than no check. The home directory comes first because
-   public_html is a symlink here and walking up never reaches it. */
-$candidates = [];
-if ($home !== '') {
-    $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
-    $candidates[] = rtrim($home, '/') . '/sps-config.php';
-}
-$dir = $appRoot;
-for ($i = 0; $i < 4; $i++) {
-    $dir = dirname($dir);
-    if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-    $candidates[] = $dir . '/private/sps-config.php';
-    $candidates[] = $dir . '/sps-config.php';
-}
-
-foreach ($candidates as $candidate) {
-    $inside = $docroot !== '' && str_starts_with(
-        str_replace('\\', '/', (string) (realpath($candidate) ?: $candidate)),
-        rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
-    );
-    printf("    %-56s %s\n", $candidate,
-        !is_file($candidate) ? 'not there'
-            : ($inside ? 'FOUND but INSIDE the web root — refused' : 'found, and outside the web root'));
-    if (is_file($candidate) && !$inside && $found === null) $found = $candidate;
+foreach ($candidates as $c) {
+    printf("    %-56s %s\n", $c,
+        !is_file($c) ? 'not there'
+            : ($inWebRoot($c) ? 'FOUND but INSIDE the web root — refused'
+                              : 'found, and outside the web root'));
 }
 printf("    %s\n", $found ? 'A usable configuration file was found.'
                           : 'No usable configuration file. See DEPLOY-XNEELO.md step 4.');
 
-/* Can we actually reach the database?
- *
- * Worth testing here rather than discovering it through setup.php, because with
- * debug off a failed connection shows the visitor "something went wrong" and
- * nothing else — correct for a learner, useless for whoever is installing.
- *
- * The exception message is NOT printed. It contains the DSN, which carries the
- * host and database name; the failure is classified instead. */
-if ($found !== null) {
+if (is_array($cfg)) {
+    $db = $cfg['db'] ?? [];
     echo "\n  database:\n";
-    $cfg = @include $found;
-    $db  = is_array($cfg) ? ($cfg['db'] ?? []) : [];
     printf("    driver           %s\n", $db['driver'] ?? '(not set)');
     printf("    database name    %s\n", ($db['name'] ?? '') !== '' ? 'set' : 'NOT SET');
     printf("    user             %s\n", ($db['user'] ?? '') !== '' ? 'set' : 'NOT SET');
     printf("    password         %s\n", ($db['pass'] ?? '') !== '' ? 'set' : 'NOT SET');
-    printf("    setup_token      %s\n", ($cfg['setup_token'] ?? '') !== ''
-        ? 'set — /setup is reachable' : 'empty — /setup is a 404 (set it to install)');
     printf("    ip_pepper        %s\n", strlen((string) ($cfg['ip_pepper'] ?? '')) >= 32
         ? 'set' : 'NOT SET or too short — the site will refuse to store anything');
 
+    /* The exception message is never printed: it carries the DSN, and therefore
+       the host and database name. The failure is classified instead. */
     try {
         $dsn = ($db['driver'] ?? 'mysql') === 'sqlite'
             ? 'sqlite:' . ($db['path'] ?? '')
@@ -136,15 +131,15 @@ if ($found !== null) {
             try { $pdo->query('SELECT 1 FROM ' . $t . ' LIMIT 1'); $tables[] = $t; } catch (Throwable $e) {}
         }
         printf("    tables           %s\n", $tables
-            ? count($tables) . ' of 6 present (' . implode(', ', $tables) . ')'
-            : 'none yet — run /setup');
+            ? count($tables) . ' of 6 present' : 'none yet — run /setup');
     } catch (Throwable $e) {
         $m = $e->getMessage();
-        $why = str_contains($m, 'Access denied') ? 'the username or password is wrong'
-             : (str_contains($m, 'Unknown database') ? 'that database does not exist'
-             : (str_contains($m, 'No such file') || str_contains($m, 'refused') ? 'no database server answered at that host'
-             : 'see the site log for the full message'));
-        echo "    connection       FAILED — " . $why . "\n";
+        echo "    connection       FAILED — " . (
+              str_contains($m, 'Access denied')    ? 'the username or password is wrong'
+            : (str_contains($m, 'Unknown database') ? 'that database does not exist'
+            : (str_contains($m, 'No such file') || str_contains($m, 'refused')
+                                                    ? 'no database server answered at that host'
+                                                    : 'see the site log for the full message'))) . "\n";
     }
 }
 
@@ -156,4 +151,4 @@ foreach (['.htaccess', 'lib/bootstrap.php', 'schema/schema.mysql.sql', 'setup.ph
 echo "\n";
 echo $missing
     ? "Missing extensions must be enabled before the site will work.\n"
-    : "Nothing is missing. Delete this file once the site is up.\n";
+    : "Nothing is missing. Empty setup_token and this page becomes a 404.\n";
