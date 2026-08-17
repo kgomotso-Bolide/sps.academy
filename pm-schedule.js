@@ -1,6 +1,6 @@
 /* ---- Project Manager NQF 5: turning a self-paced programme into a diary ----
 
-   The provider has confirmed to SPS that this qualification is delivered
+   The provider has confirmed that this qualification is delivered
    SELF-PACED. Nothing here changes that. What this file does is work out what a
    chosen weekly commitment implies — when each module would start and finish,
    and when it would all be over — and emit calendar events so the time is

@@ -1,3 +1,81 @@
+<?php
+/* The Project Manager progress report — and, since 17 Aug 2026, the thing that
+ * receives it.
+ *
+ * This page used to POST to formsubmit.co. What a learner sends here is more
+ * revealing than a registration: it is a dated, module-by-module account of how
+ * far behind they are, attached to their name and employee number. That was
+ * leaving South Africa to a third party on no written basis.
+ *
+ * It keeps its URL — the rewrite in .htaccess serves this file at /pm-progress
+ * — so nothing that links to it has to change. Everything below the handler is
+ * the original page: the inline script that paints the progress table is
+ * untouched, and still sets #pgPayload and #pgSummaryField by ID.
+ */
+declare(strict_types=1);
+
+require __DIR__ . '/lib/bootstrap.php';
+require __DIR__ . '/lib/db.php';
+require __DIR__ . '/lib/audit.php';
+require __DIR__ . '/lib/mail.php';
+require __DIR__ . '/lib/csrf.php';
+require __DIR__ . '/lib/progress.php';
+
+$errors = [];
+$old    = [];
+
+if (is_post()) {
+    if (post_str('_honey') !== '') {
+        audit('progress.honeypot', 'progress_reports', null, 'silently discarded');
+        redirect('thanks');
+    }
+
+    [$clean, $errors] = progress_validate($_POST);
+
+    if (!csrf_valid()) {
+        $errors['_form'] = 'This page had been open a while and the form expired. '
+                         . 'Nothing was lost — please send it again.';
+    }
+
+    if (!$errors) {
+        if (progress_rate_limited()) {
+            $errors['_form'] = 'That is a lot of reports from one connection in a short time. '
+                             . 'Please wait a few minutes, or email us directly.';
+            audit('progress.rate_limited');
+        } else {
+            $existing = progress_duplicate_id($clean);
+            if ($existing !== null) {
+                audit('progress.duplicate_ignored', 'progress_reports', $existing);
+                csrf_rotate();
+                redirect('thanks');
+            }
+            $id = progress_store($clean);
+            progress_notify($clean, $id);
+            csrf_rotate();
+            redirect('thanks');
+        }
+    }
+
+    $old = $clean;
+}
+
+/* Same three helpers as contact.php. Duplicated rather than shared because the
+   next structural job is extracting the page chrome into partials, and these
+   move into it then — putting them somewhere shared now would mean moving them
+   twice. */
+function err(array $errors, string $field): string
+{
+    return isset($errors[$field]) ? '<p class="field-err">' . e($errors[$field]) . '</p>' : '';
+}
+function bad(array $errors, string $field): string
+{
+    return isset($errors[$field]) ? ' has-err' : '';
+}
+function old(array $old, string $field): string
+{
+    return e((string) ($old[$field] ?? ''));
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,24 +135,45 @@
         <h3>Put your progress on file</h3>
         <p class="sg-intro">This sends the academy a dated summary of where you are. It goes to Centenary Networks, the accredited provider. It is the record that means nobody has to chase you for an update, and the one your progress is reported from. Send it whenever you finish a module — or sooner if you are stuck.</p>
 
-        <form class="form" id="pgForm" action="https://formsubmit.co/kgomotso@centenarynetworks.com" method="POST">
-          <input type="hidden" name="_subject" value="SPS Academy — Project Manager NQF 5 progress update">
-          <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_next" value="https://kgomotso-bolide.github.io/sps.academy/thanks">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="text" name="_honey" style="display:none">
-          <input type="hidden" name="Qualification" value="Occupational Certificate: Project Manager — SAQA 101869, NQF 5">
-          <input type="hidden" name="Progress" id="pgPayload">
-          <input type="hidden" name="Summary" id="pgSummaryField">
+        <form class="form" id="pgForm" action="pm-progress" method="POST" novalidate>
+          <?= csrf_field() ?>
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+          <input type="hidden" name="qualification" value="Occupational Certificate: Project Manager — SAQA 101869, NQF 5">
+          <input type="hidden" name="detail" id="pgPayload">
+          <input type="hidden" name="summary" id="pgSummaryField">
+
+          <?php if (isset($errors['_form'])): ?>
+            <p class="form-err" role="alert"><?= e($errors['_form']) ?></p>
+          <?php elseif ($errors): ?>
+            <p class="form-err" role="alert">There is something to fix below before this can be sent.</p>
+          <?php endif; ?>
           <div class="two">
-            <div class="field"><label>Full name</label><input type="text" name="Name" placeholder="Your name" required></div>
-            <div class="field"><label>Employee number</label><input type="text" name="Employee number" placeholder="e.g. SP1234"></div>
+            <div class="field<?= bad($errors,'full_name') ?>"><label for="p-name">Full name</label>
+              <input id="p-name" type="text" name="full_name" value="<?= old($old,'full_name') ?>" placeholder="Your name" required>
+              <?= err($errors,'full_name') ?></div>
+            <div class="field"><label for="p-emp">Employee number</label>
+              <input id="p-emp" type="text" name="employee_no" value="<?= old($old,'employee_no') ?>" placeholder="e.g. SP1234"></div>
           </div>
           <div class="two">
-            <div class="field"><label>Work email</label><input type="email" name="Email" placeholder="you@company.co.za" required></div>
-            <div class="field"><label>Line manager</label><input type="text" name="Line manager" placeholder="Manager's name"></div>
+            <div class="field<?= bad($errors,'email') ?>"><label for="p-email">Work email</label>
+              <input id="p-email" type="email" name="email" value="<?= old($old,'email') ?>" placeholder="you@company.co.za" required>
+              <?= err($errors,'email') ?></div>
+            <div class="field"><label for="p-mgr">Line manager</label>
+              <input id="p-mgr" type="text" name="line_manager" value="<?= old($old,'line_manager') ?>" placeholder="Manager's name"></div>
           </div>
-          <div class="field"><label>Anything we should know?</label><textarea name="Message" rows="3" placeholder="Falling behind, shift changes, something blocking you — say so here rather than going quiet"></textarea></div>
+          <div class="field"><label for="p-msg">Anything we should know?</label>
+            <textarea id="p-msg" name="message" rows="3" placeholder="Falling behind, shift changes, something blocking you — say so here rather than going quiet"><?= old($old,'message') ?></textarea></div>
+
+          <div class="field field-consent<?= bad($errors,'consent') ?>">
+            <label class="check">
+              <input type="checkbox" name="consent" value="1"<?= !empty($old['consent']) ? ' checked' : '' ?> required>
+              <span>I agree that SPS and Centenary Networks may keep this progress report as
+                part of my learner record for this qualification. I have read the
+                <a href="privacy" target="_blank" rel="noopener">privacy notice</a>.</span>
+            </label>
+            <?= err($errors,'consent') ?>
+          </div>
+
           <button type="submit" class="btn btn-primary" style="width:100%">Send my progress</button>
         </form>
       </div>
@@ -118,6 +217,7 @@
         <a href="rpl">RPL</a>
         <a href="profile">Profile</a>
         <a href="contact">Contact</a>
+        <a href="privacy">Privacy</a>
       </div>
     </div>
     <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">

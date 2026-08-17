@@ -136,3 +136,39 @@ CREATE TABLE IF NOT EXISTS audit_log (
   KEY ix_audit_tenant_created (tenant_id, created_at),
   KEY ix_audit_entity (entity, entity_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Learner progress reports — what pm-progress.html used to email to FormSubmit.
+--
+-- Same third-party problem as registrations, and arguably worse: a progress
+-- report says how far behind somebody is, which is exactly the sort of thing an
+-- employee would not expect to be sitting on a service outside the country.
+--
+-- No purge_after value is set on these rows, deliberately and not by oversight.
+-- A progress report against an accredited qualification is part of the learner
+-- record the QCTO obliges us to retain, so it does not expire on the twelve-month
+-- rule that registrations use. The exact period the QCTO requires is still
+-- outstanding — it is one of the three items marked "to confirm" on the privacy
+-- notice, and this column is where the answer gets applied once we have it.
+CREATE TABLE IF NOT EXISTS progress_reports (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id     INT UNSIGNED NOT NULL,
+  user_id       INT UNSIGNED     NULL,
+  full_name     VARCHAR(160) NOT NULL,
+  email         VARCHAR(190) NOT NULL,
+  employee_no   VARCHAR(40)      NULL,
+  line_manager  VARCHAR(160)     NULL,
+  qualification VARCHAR(190)     NULL,
+  summary       VARCHAR(500)     NULL,
+  detail        TEXT             NULL,
+  message       TEXT             NULL,
+  status        VARCHAR(20)  NOT NULL DEFAULT 'new',
+  ip_hash       CHAR(64)         NULL,
+  user_agent    VARCHAR(255)     NULL,
+  created_at    DATETIME     NOT NULL,
+  purge_after   DATE             NULL,
+  PRIMARY KEY (id),
+  KEY ix_prog_tenant_created (tenant_id, created_at),
+  CONSTRAINT fk_prog_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_prog_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

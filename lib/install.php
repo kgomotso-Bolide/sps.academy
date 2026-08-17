@@ -26,7 +26,7 @@ function install_table_exists(string $table): bool
 
 function install_tables(): array
 {
-    return ['tenants', 'users', 'registrations', 'consents', 'audit_log'];
+    return ['tenants', 'users', 'registrations', 'consents', 'audit_log', 'progress_reports'];
 }
 
 /** Which of the expected tables are not there yet. */

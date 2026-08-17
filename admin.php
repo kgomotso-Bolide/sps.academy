@@ -177,6 +177,7 @@ function when(string $utc): string
     <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
     <div class="nav-links">
       <a href="admin" class="active">Registrations</a>
+      <a href="admin-progress">Progress</a>
       <a href="./">View the site</a>
       <form method="POST" action="logout" style="display:inline">
         <?= csrf_field() ?>

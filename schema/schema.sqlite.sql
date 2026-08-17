@@ -88,3 +88,24 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS ix_audit_tenant_created ON audit_log (tenant_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_audit_entity ON audit_log (entity, entity_id);
+
+
+CREATE TABLE IF NOT EXISTS progress_reports (
+  id            INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants (id),
+  user_id       INTEGER     NULL REFERENCES users (id),
+  full_name     TEXT    NOT NULL,
+  email         TEXT    NOT NULL,
+  employee_no   TEXT        NULL,
+  line_manager  TEXT        NULL,
+  qualification TEXT        NULL,
+  summary       TEXT        NULL,
+  detail        TEXT        NULL,
+  message       TEXT        NULL,
+  status        TEXT    NOT NULL DEFAULT 'new',
+  ip_hash       TEXT        NULL,
+  user_agent    TEXT        NULL,
+  created_at    TEXT    NOT NULL,
+  purge_after   TEXT        NULL
+);
+CREATE INDEX IF NOT EXISTS ix_prog_tenant_created ON progress_reports (tenant_id, created_at);
