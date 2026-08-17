@@ -90,6 +90,51 @@ for ($i = 0; $i < 4; $i++) {
 printf("    %s\n", $found ? 'A usable configuration file was found.'
                           : 'No usable configuration file. See DEPLOY-XNEELO.md step 4.');
 
+/* Can we actually reach the database?
+ *
+ * Worth testing here rather than discovering it through setup.php, because with
+ * debug off a failed connection shows the visitor "something went wrong" and
+ * nothing else — correct for a learner, useless for whoever is installing.
+ *
+ * The exception message is NOT printed. It contains the DSN, which carries the
+ * host and database name; the failure is classified instead. */
+if ($found !== null) {
+    echo "\n  database:\n";
+    $cfg = @include $found;
+    $db  = is_array($cfg) ? ($cfg['db'] ?? []) : [];
+    printf("    driver           %s\n", $db['driver'] ?? '(not set)');
+    printf("    database name    %s\n", ($db['name'] ?? '') !== '' ? 'set' : 'NOT SET');
+    printf("    user             %s\n", ($db['user'] ?? '') !== '' ? 'set' : 'NOT SET');
+    printf("    password         %s\n", ($db['pass'] ?? '') !== '' ? 'set' : 'NOT SET');
+    printf("    setup_token      %s\n", ($cfg['setup_token'] ?? '') !== ''
+        ? 'set — /setup is reachable' : 'empty — /setup is a 404 (set it to install)');
+    printf("    ip_pepper        %s\n", strlen((string) ($cfg['ip_pepper'] ?? '')) >= 32
+        ? 'set' : 'NOT SET or too short — the site will refuse to store anything');
+
+    try {
+        $dsn = ($db['driver'] ?? 'mysql') === 'sqlite'
+            ? 'sqlite:' . ($db['path'] ?? '')
+            : sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $db['host'] ?? 'localhost', $db['name'] ?? '');
+        $pdo = new PDO($dsn, $db['user'] ?? null, $db['pass'] ?? null,
+                       [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]);
+        echo "    connection       CONNECTED\n";
+        $tables = [];
+        foreach (['tenants', 'users', 'registrations', 'consents', 'audit_log', 'progress_reports'] as $t) {
+            try { $pdo->query('SELECT 1 FROM ' . $t . ' LIMIT 1'); $tables[] = $t; } catch (Throwable $e) {}
+        }
+        printf("    tables           %s\n", $tables
+            ? count($tables) . ' of 6 present (' . implode(', ', $tables) . ')'
+            : 'none yet — run /setup');
+    } catch (Throwable $e) {
+        $m = $e->getMessage();
+        $why = str_contains($m, 'Access denied') ? 'the username or password is wrong'
+             : (str_contains($m, 'Unknown database') ? 'that database does not exist'
+             : (str_contains($m, 'No such file') || str_contains($m, 'refused') ? 'no database server answered at that host'
+             : 'see the site log for the full message'));
+        echo "    connection       FAILED — " . $why . "\n";
+    }
+}
+
 echo "\n  files:\n";
 foreach (['.htaccess', 'lib/bootstrap.php', 'schema/schema.mysql.sql', 'setup.php'] as $f) {
     printf("    %-26s %s\n", $f, is_file($appRoot . '/' . $f) ? 'present' : 'MISSING');
