@@ -15,6 +15,18 @@ if (PHP_VERSION_ID < 80000) {
 define('APP_ROOT', dirname(__DIR__));
 define('APP_BOOTED', true);
 
+/* Errors are never shown to a visitor unless the config says debug, and the
+ * config has not been read yet — so the safe setting goes on first and is
+ * relaxed later, rather than the other way round. A fatal inside a database
+ * call would otherwise print the connection string to the page.
+ *
+ * Set here rather than in .htaccess. php_flag only exists when PHP runs as an
+ * Apache module; under FastCGI or FPM those directives are unknown and can make
+ * the server refuse every .php request while static files serve perfectly. */
+@ini_set('display_errors', '0');
+@ini_set('log_errors', '1');
+error_reporting(E_ALL);
+
 /* ---------------------------------------------------------------------------
    Configuration
    --------------------------------------------------------------------------- */
@@ -110,6 +122,10 @@ function app_config(?string $key = null)
             app_fail('The configuration file did not return an array.');
         }
         $cfg['_path'] = $found;
+
+        // Now — and only now — the safe default set at the top of this file can
+        // be relaxed, because we finally know whether this is a development box.
+        if (!empty($cfg['debug'])) @ini_set('display_errors', '1');
     }
 
     if ($key === null) return $cfg;

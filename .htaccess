@@ -77,13 +77,19 @@ DirectoryIndex index.html index.php
   # hostname of its own.
 </IfModule>
 
-# PHP should never announce its version, and should never print a stack trace to
-# a visitor — a fatal error inside a database call would otherwise put the
-# connection string on screen. Errors go to the log; the visitor gets a message.
-<IfModule mod_php.c>
-  php_flag display_errors Off
-  php_flag expose_php Off
-</IfModule>
+# NO php_flag / php_value DIRECTIVES HERE, deliberately.
+#
+# There used to be a php_flag block guarded by <IfModule mod_php.c>. Those
+# directives only exist when PHP runs as an Apache module; where PHP runs as
+# FastCGI or FPM — which is the normal modern arrangement, and Xneelo's — they
+# are unknown, and depending on the configuration Apache either errors or the
+# handler refuses the request. The symptom is every .php file returning 500 or
+# 503 while .html and .css serve perfectly, which reads like "PHP is broken"
+# rather than "one line of configuration is unwelcome".
+#
+# display_errors is set from PHP instead, in lib/bootstrap.php, where no server
+# configuration can disagree with it. expose_php cannot be set at run time and
+# is not worth a directive — it only hides a version header.
 
 # No ErrorDocument. It takes a path from the document root, which would have to
 # be hardcoded as /sps/404.html and would then be wrong at the subdomain. The

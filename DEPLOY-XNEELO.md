@@ -124,6 +124,40 @@ Kgomotso needs two bookmarks: **`/spsacademy/admin`** for registrations and
 navigation yet — that arrives with the shared page header, so until then the URL is how she
 gets there.
 
+## If the .php pages return 503 and the .html pages are fine
+
+Seen on 17 Aug 2026. It means the upload worked and Apache is happy — `.html`,
+`.css` and images all served 200 — and **PHP is not executing**. Work through it in
+this order, stopping as soon as one of them answers:
+
+**1. Load `/spsacademy/phpcheck.php`.** It depends on nothing — not `lib/`, not the
+configuration, not the database.
+
+- **It prints a report** → PHP works, and the fault is in our code or the config. Read
+  what it says about the configuration file and the extensions.
+- **It also returns 503** → PHP is not running for this folder. Continue.
+
+**2. Rename `.htaccess` to `_htaccess` and reload `/spsacademy/phpcheck.php`.**
+
+- **Now it works** → the fault was a directive in our `.htaccess`. Tell me which
+  server this is and I will fix it; put the file back either way, because without it
+  `/spsacademy/lib/` becomes browsable.
+- **Still 503** → nothing of ours is involved. Continue.
+
+**3. Check the Xneelo control panel for the domain's PHP setting.** A package with no
+PHP version selected, or one pointing at a version that is no longer running, gives
+exactly this: static files fine, every `.php` a 503. Set it to **PHP 8.0 or newer**.
+
+**4. Check file permissions.** Extracting a zip can leave files group-writable, and
+shared hosting refuses to execute those. Files should be **644**, directories **755**.
+
+If steps 3 and 4 are both right and it still 503s, it is Xneelo's side — the PHP pool
+for the account is not answering, and their support can see that from the server logs
+in a way we cannot from outside.
+
+**Delete `phpcheck.php` once the site is working.** It is harmless but it is a
+diagnostic, not part of the site.
+
 ## If something goes wrong
 
 Delete `public_html/spsacademy/`. Nothing else on the domain was touched, so the client's site is
