@@ -84,6 +84,29 @@ function app_config(?string $key = null)
         $candidates = [];
         if ($env = getenv('SPS_CONFIG')) $candidates[] = $env;
 
+        /* The account's home directory, checked BEFORE walking up from the site.
+         *
+         * On this hosting public_html is a symlink: the site resolves to
+         * /usr/www/users/<account>/spsacademy while the directory an SFTP client
+         * shows on login — and therefore the obvious place to put a config file
+         * — is /usr/home/<account>. Walking up from the site never passes
+         * through it, so a file sitting in plain view was invisible to the
+         * application, and the directory immediately above the site turned out
+         * to be the document root itself.
+         *
+         * The home directory is inside open_basedir and outside the document
+         * root, which makes it the correct place on this host rather than
+         * merely a convenient one. */
+        $home = (string) (getenv('HOME') ?: '');
+        if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
+            $pw = @posix_getpwuid(posix_getuid());
+            $home = (string) ($pw['dir'] ?? '');
+        }
+        if ($home !== '') {
+            $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
+            $candidates[] = rtrim($home, '/') . '/sps-config.php';
+        }
+
         /* Walk up from the app directory. Four levels is far more than either
            layout needs and still cannot escape a hosting account.
 
