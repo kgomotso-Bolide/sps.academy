@@ -69,9 +69,12 @@ if (is_post()) {
                session stamped against the old one. That is the correct
                behaviour for "I think somebody else has my password", which is
                half the reason this button gets pressed. */
-            db_run('UPDATE password_resets SET used_at = ?
+            /* Any reset link they had outstanding dies with the old password.
+               db_optional because this table arrives with a release and the
+               migration may not have been run yet — see lib/db.php. */
+            db_optional(fn() => db_run('UPDATE password_resets SET used_at = ?
                      WHERE tenant_id = ? AND user_id = ? AND used_at IS NULL',
-                   [now(), tenant_id(), (int) $target['id']]);
+                   [now(), tenant_id(), (int) $target['id']]));
 
             audit('password.set_by_admin', 'users', (int) $target['id']);
             $notice = 'A new password has been set for '
@@ -133,11 +136,11 @@ $enrolByUser = [];
 if ($rows) {
     $ids = array_map(fn($r) => (int) $r['id'], $rows);
     $in  = implode(',', array_fill(0, count($ids), '?'));
-    foreach (db_all(
+    foreach (db_optional(fn() => db_all(
         'SELECT user_id, course_title, status FROM enrolments
           WHERE tenant_id = ? AND user_id IN (' . $in . ') ORDER BY enrolled_at',
         array_merge([tenant_id()], $ids)
-    ) as $en) {
+    ), []) as $en) {
         $enrolByUser[(int) $en['user_id']][] = $en;
     }
 }
@@ -186,6 +189,9 @@ function when_u(?string $utc): string
       </div>
     </div>
 
+    <?php if (db_schema_incomplete()): ?>
+      <p class="form-err" role="alert"><?= e(db_schema_notice()) ?></p>
+    <?php endif; ?>
     <?php if ($notice !== ''): ?><p class="adm-notice" role="status"><?= e($notice) ?></p><?php endif; ?>
     <?php if ($error  !== ''): ?><p class="form-err"   role="alert" ><?= e($error)  ?></p><?php endif; ?>
 

@@ -112,9 +112,10 @@ Deploying new code does **not** create new database tables. Two releases have ne
 second pass, and both are the same three moves.
 
 **Learner accounts and password reset, 18 Aug 2026 — three new tables.** `enrolments`,
-`learner_progress` and `password_resets`. Until they exist, `/admin` still lists registrations
-but pressing **Enrol** fails, a learner who signs in sees a dashboard that cannot load their
-progress, and asking for a reset link fails silently.
+`learner_progress` and `password_resets`. Until they exist, everything to do with learner
+accounts is unavailable and the admin pages say so — see "If you deploy before you migrate"
+at the end of this file. Nothing returns a 500, and registrations and progress reports carry
+on working untouched.
 
 1. Deploy the code as usual (Actions → *Deploy SPS Academy*, ref `xneelo-backend`).
    `setup.php` and `phpcheck.php` were deleted off the live server by hand after the first
@@ -231,3 +232,13 @@ config file.
 - Course materials are not yet gated behind sign-in; the `DOCS` links in `pm-modules.js` are
   still empty and every module reads "Ask HR for a copy".
 - The privacy notice at `/spsacademy/privacy` is a **draft** with three items marked *to confirm*.
+
+### If you deploy before you migrate
+
+Nothing breaks. The code guards every query against a table that does not exist yet — see
+`db_optional()` in `lib/db.php` — so `/admin` still lists registrations, `/admin-progress`
+still works, and a learner can still sign in. What you get instead is a red notice on the
+admin pages saying the database has not been updated, and the **Enrol** control reads
+*"unavailable until /setup is run"*. Run the installer and both go away.
+
+This was checked by dropping the three tables and running the whole site against them.

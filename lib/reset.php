@@ -112,20 +112,34 @@ function reset_request(string $email): void
     $token = bin2hex(random_bytes(32));
 
     /* Any link already outstanding is retired as this one is issued. Asking
-       again should replace the previous answer, not add to it. */
-    db_run('UPDATE password_resets SET used_at = ?
-             WHERE tenant_id = ? AND user_id = ? AND used_at IS NULL',
-           [now(), tenant_id(), (int) $user['id']]);
+       again should replace the previous answer, not add to it.
 
-    db_insert('password_resets', [
-        'tenant_id'  => tenant_id(),
-        'user_id'    => (int) $user['id'],
-        'token_hash' => hash('sha256', $token),
-        'expires_at' => gmdate('Y-m-d H:i:s', time() + RESET_TTL_SECONDS),
-        'used_at'    => null,
-        'ip_hash'    => $ip,
-        'created_at' => now(),
-    ]);
+       Both statements go through db_optional: password_resets arrives with a
+       release, and on Xneelo the migration is a separate manual step afterwards
+       — see the note in lib/db.php. If the table is not there yet, no link is
+       issued and the page still shows the same sentence it shows everyone,
+       which already points at the academy as the fallback. */
+    $issued = db_optional(function () use ($user, $token, $ip) {
+        db_run('UPDATE password_resets SET used_at = ?
+                 WHERE tenant_id = ? AND user_id = ? AND used_at IS NULL',
+               [now(), tenant_id(), (int) $user['id']]);
+
+        db_insert('password_resets', [
+            'tenant_id'  => tenant_id(),
+            'user_id'    => (int) $user['id'],
+            'token_hash' => hash('sha256', $token),
+            'expires_at' => gmdate('Y-m-d H:i:s', time() + RESET_TTL_SECONDS),
+            'used_at'    => null,
+            'ip_hash'    => $ip,
+            'created_at' => now(),
+        ]);
+        return true;
+    }, false);
+
+    if (!$issued) {
+        audit('password.reset_unavailable', 'users', (int) $user['id']);
+        return;
+    }
 
     $sent = reset_send_link($user, $token);
     audit($sent ? 'password.reset_sent' : 'password.reset_send_failed',
@@ -173,12 +187,12 @@ function reset_lookup(string $token): ?array
 {
     if (!preg_match('/^[a-f0-9]{64}$/', $token)) return null;
 
-    $row = db_one(
+    $row = db_optional(fn() => db_one(
         'SELECT r.id, r.user_id, r.expires_at, r.used_at
            FROM password_resets r
           WHERE r.tenant_id = ? AND r.token_hash = ?',
         [tenant_id(), hash('sha256', $token)]
-    );
+    ));
     if ($row === null || $row['used_at'] !== null) return null;
     if (strtotime((string) $row['expires_at']) < time()) return null;
 

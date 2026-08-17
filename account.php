@@ -73,7 +73,12 @@ if (!is_post()) {
 
     $courses  = [];
     $progress = [];
-    foreach (learner_enrolments((int) $me['id']) as $en) {
+
+    /* db_optional throughout: this endpoint is called by every page on the site,
+       and between a deploy and its migration the enrolment tables do not exist
+       yet. A 500 here would break the nav on the marketing pages, which have
+       nothing to do with accounts. See the note in lib/db.php. */
+    foreach (db_optional(fn() => learner_enrolments((int) $me['id']), []) as $en) {
         $slug      = (string) $en['course_slug'];
         $tracked   = learner_course_tracked($slug);
         $courses[] = [
@@ -84,7 +89,9 @@ if (!is_post()) {
         ];
         if ($tracked) {
             // (object) so an untouched course encodes as {} and not as [].
-            $progress[$slug] = (object) learner_progress_tree((int) $me['id'], $slug);
+            $progress[$slug] = (object) db_optional(
+                fn() => learner_progress_tree((int) $me['id'], $slug), []
+            );
         }
     }
 
@@ -131,7 +138,7 @@ $course = (string) ($_POST['course'] ?? '');
 if (!learner_valid_course_slug($course) || !learner_course_valid($course)) {
     out(['ok' => false, 'error' => 'course', 'message' => 'Unknown course.'], 400);
 }
-if (!learner_is_enrolled($uid, $course)) {
+if (!db_optional(fn() => learner_is_enrolled($uid, $course), false)) {
     /* Worth auditing rather than merely refusing. A signed-in learner posting
        against a course they are not on is either a stale tab from a withdrawn
        enrolment or somebody having a go, and the two look identical from here. */

@@ -60,7 +60,10 @@ if (is_post()) {
     }
 }
 
-$enrolments = learner_enrolments((int) $me['id']);
+/* Survives the gap between a deploy and its migration — see lib/db.php.
+   The dashboard then renders as "you are not on a course yet" with the notice
+   above it, rather than as a 500. */
+$enrolments = db_optional(fn() => learner_enrolments((int) $me['id']), []);
 
 audit('learner.dashboard_viewed', 'users', (int) $me['id'],
       count($enrolments) . ' enrolment' . (count($enrolments) === 1 ? '' : 's'));
@@ -124,6 +127,9 @@ function when_local(?string $utc): string
 <section class="section">
   <div class="wrap">
 
+    <?php if (db_schema_incomplete()): ?>
+      <p class="form-err" role="alert"><?= e(db_schema_notice()) ?></p>
+    <?php endif; ?>
     <?php if ($notice !== ''): ?><p class="adm-notice" role="status"><?= e($notice) ?></p><?php endif; ?>
     <?php if ($error  !== ''): ?><p class="form-err"   role="alert" ><?= e($error)  ?></p><?php endif; ?>
 

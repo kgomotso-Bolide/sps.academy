@@ -173,11 +173,14 @@ $userIds = array_values(array_unique(array_filter(array_map(
 ))));
 if ($userIds) {
     $in = implode(',', array_fill(0, count($userIds), '?'));
-    foreach (db_all(
+    /* db_optional: this table arrives with a release, and the release lands
+       before the migration is run. A missing table must not take down the page
+       Kgomotso reads every day — see the note in lib/db.php. */
+    foreach (db_optional(fn() => db_all(
         'SELECT user_id, course_title, status FROM enrolments
           WHERE tenant_id = ? AND user_id IN (' . $in . ') ORDER BY enrolled_at',
         array_merge([tenant_id()], $userIds)
-    ) as $en) {
+    ), []) as $en) {
         $enrolByUser[(int) $en['user_id']][] = $en;
     }
 }
@@ -262,6 +265,10 @@ function when(string $utc): string
       </div>
       <a class="btn btn-ghost" href="<?= e(qs(['export' => 'csv'])) ?>">Download as CSV</a>
     </div>
+
+    <?php if (db_schema_incomplete()): ?>
+      <p class="form-err" role="alert"><?= e(db_schema_notice()) ?></p>
+    <?php endif; ?>
 
     <?php if ($notice !== ''): ?>
       <p class="adm-notice" role="status"><?= e($notice) ?></p>
@@ -358,6 +365,9 @@ function when(string $utc): string
                 <?php endforeach; ?>
               <?php endif; ?>
 
+              <?php if (db_schema_incomplete()): ?>
+                <span class="adm-none">unavailable until /setup is run</span>
+              <?php else: ?>
               <?php /* Still offered when they already have an account: the same
                        person can be enrolled on a second qualification, and the
                        enrolment function reuses the account rather than making
@@ -384,6 +394,7 @@ function when(string $utc): string
                     <?= e((string) $r['email']) ?> and shows the password once.</span>
                 </form>
               </details>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>
