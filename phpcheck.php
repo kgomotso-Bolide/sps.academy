@@ -71,21 +71,34 @@ if ($home !== '') {
 }
 
 echo "\n  configuration:\n";
-$found   = null;
-$dir     = $appRoot;
+$found = null;
+
+/* The same candidate list as lib/bootstrap.php, in the same order, and it must
+   stay that way — a preflight check that disagrees with the thing it is
+   checking is worse than no check. The home directory comes first because
+   public_html is a symlink here and walking up never reaches it. */
+$candidates = [];
+if ($home !== '') {
+    $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
+    $candidates[] = rtrim($home, '/') . '/sps-config.php';
+}
+$dir = $appRoot;
 for ($i = 0; $i < 4; $i++) {
     $dir = dirname($dir);
     if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-    foreach ([$dir . '/private/sps-config.php', $dir . '/sps-config.php'] as $candidate) {
-        $inside = $docroot !== '' && str_starts_with(
-            str_replace('\\', '/', (string) (realpath($candidate) ?: $candidate)),
-            rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
-        );
-        printf("    %-56s %s\n", $candidate,
-            !is_file($candidate) ? 'not there'
-                : ($inside ? 'FOUND but INSIDE the web root — refused' : 'found, and outside the web root'));
-        if (is_file($candidate) && !$inside && $found === null) $found = $candidate;
-    }
+    $candidates[] = $dir . '/private/sps-config.php';
+    $candidates[] = $dir . '/sps-config.php';
+}
+
+foreach ($candidates as $candidate) {
+    $inside = $docroot !== '' && str_starts_with(
+        str_replace('\\', '/', (string) (realpath($candidate) ?: $candidate)),
+        rtrim(str_replace('\\', '/', (string) (realpath($docroot) ?: $docroot)), '/') . '/'
+    );
+    printf("    %-56s %s\n", $candidate,
+        !is_file($candidate) ? 'not there'
+            : ($inside ? 'FOUND but INSIDE the web root — refused' : 'found, and outside the web root'));
+    if (is_file($candidate) && !$inside && $found === null) $found = $candidate;
 }
 printf("    %s\n", $found ? 'A usable configuration file was found.'
                           : 'No usable configuration file. See DEPLOY-XNEELO.md step 4.');
