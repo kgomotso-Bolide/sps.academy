@@ -193,7 +193,15 @@ jobs:
           for p in "/lib/db.php" "/schema/schema.mysql.sql" "/lib/bootstrap.php"; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
             printf '  %-24s %s\n' "$p" "$code"
-            [ "$code" = "404" ] || { echo "::error::$p is readable over HTTP — the .htaccess deny rule is not working."; fail=1; }
+            # 403 and 404 are both correct here. The parent .htaccess answers 404
+            # and the per-directory deny files answer 403 — whichever fires first,
+            # the file is not readable, which is the whole requirement. Only a 200
+            # is a failure. Demanding exactly 404 failed a deploy that had in fact
+            # worked, and that is a check crying wolf.
+            case "$code" in
+              403|404) ;;
+              *) echo "::error::$p returned $code — it must not be readable over HTTP."; fail=1 ;;
+            esac
           done
           exit $fail
 

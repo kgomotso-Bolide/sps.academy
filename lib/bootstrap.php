@@ -162,6 +162,24 @@ function app_config(?string $key = null)
  */
 function app_fail(string $detail, int $status = 500): void
 {
+    /* Re-entry guard, and it is not theoretical.
+     *
+     * When no configuration file was found, app_config() called app_fail(), and
+     * app_fail() asked app_config_safe('debug') whether to show details — which
+     * called app_config(), which found no file, which called app_fail(). The
+     * try/catch in app_config_safe caught nothing, because app_fail throws
+     * nothing. The result was infinite recursion: the page never responded, and
+     * curl reported no HTTP status at all rather than an error anyone could
+     * read. The most likely reason to reach this function is a missing config,
+     * so the one path that must never loop was the one that did. */
+    static $failing = false;
+    if ($failing) {
+        http_response_code(500);
+        if (PHP_SAPI === 'cli') { fwrite(STDERR, $detail . "\n"); exit(1); }
+        exit('The site is not configured correctly and cannot start.');
+    }
+    $failing = true;
+
     app_log('ERROR ' . $detail);
 
     if (PHP_SAPI === 'cli') {

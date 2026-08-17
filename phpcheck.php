@@ -33,9 +33,21 @@ foreach ($need as $e) {
 /* Where the application would look for its configuration, and whether it found
    one. The path is shown because getting it wrong is the most common mistake
    here; the contents are never touched. */
-echo "\n  configuration:\n";
 $appRoot = __DIR__;
 $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+
+/* The paths as PHP actually sees them. On this host public_html is a SYMLINK,
+   so the directory the SFTP client shows and the directory PHP resolves are not
+   the same place — which is exactly how a configuration file ends up sitting in
+   plain view somewhere the application will never look. */
+echo "\n  paths as PHP resolves them:\n";
+printf("    this file          %s\n", __DIR__);
+printf("    document root      %s\n", $docroot !== '' ? $docroot : '(not set)');
+printf("    real document root %s\n", $docroot !== '' ? (realpath($docroot) ?: '(cannot resolve)') : '-');
+printf("    one level up       %s\n", dirname($appRoot));
+printf("    two levels up      %s\n", dirname($appRoot, 2));
+
+echo "\n  configuration:\n";
 $found   = null;
 $dir     = $appRoot;
 for ($i = 0; $i < 4; $i++) {
