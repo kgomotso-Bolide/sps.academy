@@ -66,13 +66,25 @@ jobs:
           DIR: ${{ inputs.server_dir }}
         run: |
           # A subdirectory of public_html, and nothing else. This is the check
-          # that stands between a typo and a client's website.
-          if ! printf '%s' "$DIR" | grep -Eq '^public_html/[A-Za-z0-9._-]+$'; then
-            echo "::error::server_dir must be public_html/<folder> — got '$DIR'."
+          # that stands between a typo and a client's website, so it is written
+          # to have no way round it.
+          #
+          # The first character must be alphanumeric. An earlier version allowed
+          # [A-Za-z0-9._-]+ for the whole segment, which let "public_html/."
+          # through — and that resolves to public_html itself, the client's web
+          # root. "public_html/.." resolved to their home directory. A guard with
+          # a bypass is worse than no guard, because it is trusted.
+          if ! printf '%s' "$DIR" | grep -Eq '^public_html/[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+            echo "::error::server_dir must be public_html/<folder>, starting with a letter or digit — got '$DIR'."
             echo "Deploying to the web root would overwrite the client's site."
             exit 1
           fi
-          echo "Target '$DIR' is a subdirectory of the web root. Good."
+          # Belt and braces: no path traversal anywhere in the string, whatever
+          # the pattern above may come to allow after a future edit.
+          case "$DIR" in
+            *..*) echo "::error::server_dir must not contain '..' — got '$DIR'."; exit 1 ;;
+          esac
+          echo "Target '$DIR' is a real subdirectory of the web root. Good."
 
       - name: Fail early if the credentials are missing
         env:
