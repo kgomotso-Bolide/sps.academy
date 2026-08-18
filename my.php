@@ -89,7 +89,7 @@ function when_local(?string $utc): string
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My learning — SPS Academy</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -259,9 +259,9 @@ function when_local(?string $utc): string
   </div>
 </footer>
 
-<script src="pm-modules.js"></script>
-<script src="profile.js"></script>
-<script src="pm-progress.js"></script>
+<script src="pm-modules.js?v=20260818"></script>
+<script src="profile.js?v=20260818"></script>
+<script src="pm-progress.js?v=20260818"></script>
 <script>
 /* Paint the progress panel for every tracked course on the page.
    Waits for the account's progress to arrive before drawing anything — see the
@@ -317,6 +317,6 @@ function when_local(?string $utc): string
      the event — so this runs either way rather than leaving "Fetching…" up. */
 })();
 </script>
-<script src="site.js"></script>
+<script src="site.js?v=20260818"></script>
 </body>
 </html>

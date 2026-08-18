@@ -115,7 +115,7 @@ $ready = install_missing_tables() === [];
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Set up the academy database</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <section class="section-soft page-top">

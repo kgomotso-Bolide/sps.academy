@@ -236,7 +236,7 @@ function when(string $utc): string
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registrations — SPS Academy</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -418,5 +418,5 @@ function when(string $utc): string
 
   </div>
 </section>
-<script src="site.js"></script>
+<script src="site.js?v=20260818"></script>
 </body></html>

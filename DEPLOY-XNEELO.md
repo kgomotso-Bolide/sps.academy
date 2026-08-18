@@ -242,3 +242,39 @@ admin pages saying the database has not been updated, and the **Enrol** control 
 *"unavailable until /setup is run"*. Run the installer and both go away.
 
 This was checked by dropping the three tables and running the whole site against them.
+
+## Browser caching — read this before wondering why a deploy "did nothing"
+
+The parent site sets `Cache-Control: max-age=2592000` on CSS and JavaScript, and those
+directives **are** inherited into our folder (mod_rewrite rules are not; mod_expires ones
+are). That is thirty days. On 18 Aug 2026 the learner-accounts deploy uploaded a new
+`styles.css`, `profile.js` and `pm-progress.js`, the server served them correctly to anyone
+who asked, and every browser that had visited the site before did not ask. The dashboard
+rendered as unstyled text, the **Sign in** link never appeared, and progress carried on
+going to `localStorage`. The deploy log was clean and the server was right — the release was
+simply invisible.
+
+Two things fix it, and both are in place:
+
+- **`.htaccess` now sets five minutes with revalidation** on `.css` and `.js`, scoped to our
+  folder only. Images and PDFs keep the parent's long cache.
+- **Every asset reference carries `?v=20260818`.** The `.htaccess` change only helps a
+  browser that makes a request, and a browser holding a thirty-day copy makes none — so the
+  URL had to change once to break everyone out of it.
+
+**You should not need to bump that version again.** With five-minute revalidation in place a
+new deploy is picked up on the next page load. Bumping it is harmless if you ever want to be
+certain — change every `?v=` in the `.html` and `.php` files to the same new date:
+
+```
+grep -rlE '\?v=[0-9]{8}' *.html *.php | xargs perl -pi -e 's/\?v=[0-9]{8}/?v=YYYYMMDD/g'
+```
+
+**To check a deploy actually reached people**, not just the server:
+
+```
+curl -sI https://centenarynetworks.com/spsacademy/styles.css | grep -i cache-control
+```
+
+It should say `max-age=300, must-revalidate`. If it says `max-age=2592000`, our `.htaccess`
+did not take effect and the release will be invisible to returning visitors.

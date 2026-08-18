@@ -39,7 +39,7 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 <title>Privacy Notice — SPS Academy</title>
 <meta name="description" content="How SPS Academy and Centenary Networks handle your personal information, and what you can ask us to do with it.">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -160,5 +160,5 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
-<script src="site.js"></script>
+<script src="site.js?v=20260818"></script>
 </body></html>

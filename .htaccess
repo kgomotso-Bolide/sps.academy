@@ -77,6 +77,44 @@ DirectoryIndex index.html index.php
   # hostname of its own.
 </IfModule>
 
+# HOW LONG BROWSERS MAY HOLD ON TO OUR CSS AND JAVASCRIPT.
+#
+# This is here because of a real incident, on the day learner accounts shipped.
+#
+# The parent site sets, through mod_expires, "Cache-Control: max-age=2592000"
+# on css and js. Those directives ARE inherited into a subdirectory — unlike
+# mod_rewrite rules, which are not — so they applied to us. That is thirty days.
+# The deploy uploaded a new styles.css, profile.js and pm-progress.js, the
+# server served them correctly to anyone who asked, and every browser that had
+# visited before simply did not ask. The dashboard rendered unstyled, the "Sign
+# in" link never appeared, and progress kept going to localStorage. Nothing was
+# broken on the server and nothing looked wrong in the deploy log.
+#
+# Five minutes, with revalidation, is the right trade for a site with no build
+# step and therefore no content-hashed filenames. There is nothing to version,
+# so the only thing between a deploy and the people it is for is this number. A
+# conditional request that comes back 304 costs a few hundred bytes; a release
+# nobody can see costs a day of confusion.
+#
+# Both modules are set to the same value on purpose. mod_expires and mod_headers
+# both write Cache-Control, and which one wins depends on module order, so they
+# are made to agree rather than raced.
+#
+# Scoped to css and js. Images and PDFs keep the parent's long cache, which is
+# right for files that are replaced rather than edited.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                  "access plus 5 minutes"
+  ExpiresByType application/javascript    "access plus 5 minutes"
+  ExpiresByType text/javascript           "access plus 5 minutes"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "max-age=300, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
 # NO php_flag / php_value DIRECTIVES HERE, deliberately.
 #
 # There used to be a php_flag block guarded by <IfModule mod_php.c>. Those

@@ -83,7 +83,7 @@ function old(array $old, string $field): string
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My progress — Project Manager NQF 5 — SPS Academy</title>
 <meta name="description" content="Track your way through the eleven knowledge modules of the Occupational Certificate: Project Manager, print a report for your manager to sign, and send a dated record to the academy.">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -234,9 +234,9 @@ function old(array $old, string $field): string
   </div>
 </footer>
 
-<script src="pm-modules.js"></script>
-<script src="profile.js"></script>
-<script src="pm-progress.js"></script>
+<script src="pm-modules.js?v=20260818"></script>
+<script src="profile.js?v=20260818"></script>
+<script src="pm-progress.js?v=20260818"></script>
 <script>
 (function(){
   const P=window.PM_PROGRESS, MODS=window.PM_MODULES;
@@ -331,7 +331,7 @@ function old(array $old, string $field): string
   paint();
 })();
 </script>
-<script src="site.js"></script>
-<script src="assistant.js"></script>
+<script src="site.js?v=20260818"></script>
+<script src="assistant.js?v=20260818"></script>
 </body>
 </html>

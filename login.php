@@ -69,7 +69,7 @@ if (is_post()) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign In — SPS Academy</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -125,5 +125,5 @@ if (is_post()) {
     <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
-<script src="site.js"></script>
+<script src="site.js?v=20260818"></script>
 </body></html>

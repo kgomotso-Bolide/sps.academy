@@ -92,7 +92,7 @@ function old(array $old, string $field): string
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register Your Interest — SPS Academy</title>
 <meta name="description" content="Register your interest with HR for a SPS Academy course, or ask a question about the next intake.">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260818">
 </head>
 <body>
 <nav id="nav">
@@ -204,7 +204,7 @@ function old(array $old, string $field): string
     <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification, and not everything in it is listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
-<script src="site.js"></script>
-<script src="profile.js"></script>
-<script src="assistant.js"></script>
+<script src="site.js?v=20260818"></script>
+<script src="profile.js?v=20260818"></script>
+<script src="assistant.js?v=20260818"></script>
 </body></html>
