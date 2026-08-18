@@ -298,7 +298,29 @@ the code was concerned. A missing config has to be a loud failure, never a quiet
 `sps-config.php` is still accepted, but only for a folder called `sps` or `spsacademy`, because
 that installation already exists with a file of that name.
 
-To stand up a new academy:
+### Where the code comes from
+
+The other academies do **not** get a hand-written copy of the back end. Every `.php` file
+except `lib/brand.php` is identical across all four sites, and it is pushed from here:
+
+```
+php tools/sync-backend.php --check           # what has drifted, changes nothing
+php tools/sync-backend.php --apply ../fungi  # write it
+```
+
+SPS is the source of truth. The tool copies `lib/`, `schema/`, the pages, `profile.js`,
+`pm-progress.js`, `.htaccess` and `tools/`, plus the block of `styles.css` between the
+`SHARED ACADEMY STYLES` markers — so each site keeps its own palette and gets the same
+components. It refuses to copy `lib/brand.php`, and it refuses to run at all if any file it
+would copy is uncommitted here, so what lands in another repository can always be traced back
+to a commit in this one.
+
+It does **not** commit, push, or deploy. Read the diff in the target repository first.
+
+Run `--check` before any release that touches `lib/`. A security fix that reaches one academy
+and not the other three is the failure this whole arrangement exists to prevent.
+
+### The steps
 
 1. Create `public_html/<name>academy/` and deploy the code there.
 2. Copy `lib/config.sample.php` to `~/private/<name>academy-config.php`.
@@ -309,7 +331,12 @@ To stand up a new academy:
 5. Give it its **own** `ip_pepper`. Sharing one would let the same hashed address be
    correlated across two companies' records, which is precisely what the hash is for.
 6. Set `setup_token`, open `/<name>academy/setup`, run it, then empty the token.
+7. Write that site's `lib/brand.php` — the company name, logo, contact details and form
+   placeholders. It is the only per-site PHP file, and the site will not render without it;
+   a missing key is a fatal error naming the key, never a blank on the page.
 
 Check it worked by signing in and looking at the registrations list. If you see SPS's
 registrations under Fungi's logo, stop and check step 2 — that is the failure this is built
-to prevent, and it should be impossible.
+to prevent, and it should be impossible. The Fungi deploy workflow also checks it
+automatically: after uploading it fetches `/fungiacademy/contact` and fails the build if the
+page comes back carrying SPS's branding.
