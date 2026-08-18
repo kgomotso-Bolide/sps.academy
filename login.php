@@ -5,7 +5,14 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/chrome.php';
+/* Before a single byte is printed. The session cookie is a header, so a page
+   that prints first and starts its session later gets no session at all — and
+   the CSRF token in the form below it is then unbacked, so the form can never
+   be submitted. See the note in app_session_start(). */
+app_session_start();
+
 
 /**
  * Where to go after signing in.
@@ -67,26 +74,17 @@ if (is_post()) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — SPS Academy</title>
+<title>Sign In — <?= e(brand('academy')) ?></title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links" id="navLinks">
-      <a href="./" data-nav="home">Home</a>
-      <a href="courses" data-nav="courses">Courses</a>
-      <a href="contact" data-nav="contact">Contact</a>
-    </div>
-  </div>
-</nav>
+<?php chrome_nav('auth', ['tail' => 'contact']); ?>
 
 <section class="section-soft page-top">
   <div class="wrap">
     <div class="auth-card">
-      <span class="eyebrow">SPS Academy</span>
+      <span class="eyebrow"><?= e(brand('academy')) ?></span>
       <h2>Sign in</h2>
       <p class="auth-lede">For academy staff and enrolled learners. If you are registering
         for a course for the first time, you do not need an account —
@@ -120,10 +118,6 @@ if (is_post()) {
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
-  </div>
-</footer>
-<script src="site.js?v=20260818"></script>
+<?php chrome_footer('slim'); ?>
+<script src="<?= e(asset('site.js')) ?>"></script>
 </body></html>

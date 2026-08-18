@@ -399,6 +399,29 @@ function app_session_start(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) return;
 
+    /* A session cannot be started once anything has been printed, because the
+       cookie is a header. PHP says so in a warning, and on a live site warnings
+       are switched off — so the failure is silent, and what it breaks is not
+       obvious: csrf_token() mints a token, cannot store it, and the next POST
+       is rejected as expired. A form that never submits, with nothing in the
+       log to say why.
+
+       It bit pm-progress.php exactly this way. Worse, it did so only because
+       that page is long enough to overflow PHP's output buffer — contact.php
+       has the identical shape and got away with it because it is shorter. That
+       makes it a bug that appears when someone adds a paragraph, and appears on
+       the server rather than on the laptop, since the buffer size is a server
+       setting. So it is recorded here, loudly, where the failure happens. */
+    if (headers_sent($file, $line)) {
+        app_log(sprintf(
+            'SESSION TOO LATE — output began at %s:%d, so no session cookie can be set. '
+            . 'Any CSRF token on this page is worthless and its form cannot be submitted. '
+            . 'Call app_session_start() before the page prints anything.',
+            $file, $line
+        ));
+        return;
+    }
+
     $https = (($_SERVER['HTTPS'] ?? '') === 'on')
           || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 

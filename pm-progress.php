@@ -19,7 +19,14 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/progress.php';
+require __DIR__ . '/lib/progress.php';
+require __DIR__ . '/lib/chrome.php';
+/* Before a single byte is printed. The session cookie is a header, so a page
+   that prints first and starts its session later gets no session at all — and
+   the CSRF token in the form below it is then unbacked, so the form can never
+   be submitted. See the note in app_session_start(). */
+app_session_start();
+
 
 $errors = [];
 $old    = [];
@@ -81,27 +88,12 @@ function old(array $old, string $field): string
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My progress — Project Manager NQF 5 — SPS Academy</title>
+<title>My progress — Project Manager NQF 5 — <?= e(brand('academy')) ?></title>
 <meta name="description" content="Track your way through the eleven knowledge modules of the Occupational Certificate: Project Manager, print a report for your manager to sign, and send a dated record to the academy.">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links" id="navLinks">
-      <a href="./" data-nav="home">Home</a>
-      <a href="ai-in-action" data-nav="ai">AI in Action</a>
-      <a href="about" data-nav="about">About</a>
-      <a href="courses" data-nav="courses">Courses</a>
-      <a href="skills-gap" data-nav="skills">Skills Gap</a>
-      <a href="contact" data-nav="contact">Contact</a>
-      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
-      <a href="contact" class="nav-cta">Upskill Yourself</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  </div>
-</nav>
+<?php chrome_nav('site'); ?>
 
 <section class="section-dark page-top">
   <div class="wrap">
@@ -158,7 +150,7 @@ function old(array $old, string $field): string
               <input id="p-name" type="text" name="full_name" value="<?= old($old,'full_name') ?>" placeholder="Your name" required>
               <?= err($errors,'full_name') ?></div>
             <div class="field"><label for="p-emp">Employee number</label>
-              <input id="p-emp" type="text" name="employee_no" value="<?= old($old,'employee_no') ?>" placeholder="e.g. SP1234"></div>
+              <input id="p-emp" type="text" name="employee_no" value="<?= old($old,'employee_no') ?>" placeholder="<?= e(brand('empno_example')) ?>"></div>
           </div>
           <div class="two">
             <div class="field<?= bad($errors,'email') ?>"><label for="p-email">Work email</label>
@@ -173,7 +165,7 @@ function old(array $old, string $field): string
           <div class="field field-consent<?= bad($errors,'consent') ?>">
             <label class="check">
               <input type="checkbox" name="consent" value="1"<?= !empty($old['consent']) ? ' checked' : '' ?> required>
-              <span>I agree that SPS and Centenary Networks may keep this progress report as
+              <span>I agree that <?= e(brand('company_short')) ?> and Centenary Networks may keep this progress report as
                 part of my learner record for this qualification. I have read the
                 <a href="privacy" target="_blank" rel="noopener">privacy notice</a>.</span>
             </label>
@@ -210,33 +202,11 @@ function old(array $old, string $field): string
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-top">
-      <div class="foot-brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></div>
-      <div class="foot-nav">
-        <a href="./">Home</a>
-        <a href="ai-in-action">AI in Action</a>
-        <a href="about">About</a>
-        <a href="courses">Courses</a>
-        <a href="skills-gap">Skills Gap</a>
-        <a href="rpl">RPL</a>
-        <a href="profile">Profile</a>
-        <a href="contact">Contact</a>
-        <a href="privacy">Privacy</a>
-      </div>
-    </div>
-    <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">
-      <strong>Accreditation</strong>
-      <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
-    </div>
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Progress recorded on this page is self-reported by the learner and stored in their own browser; it is not an assessment result and confers no credits. Module competence is determined by Centenary Networks through assessment, and the qualification is awarded by the QCTO following the external integrated summative assessment. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
-  </div>
-</footer>
+<?php chrome_footer('site', ['employees' => true, 'extra' => 'Progress recorded on this page is self-reported by the learner: it is saved to their academy account once they are signed in, and in their own browser until then. It is not an assessment result and confers no credits. Module competence is determined by Centenary Networks through assessment, and the qualification is awarded by the QCTO following the external integrated summative assessment.']); ?>
 
-<script src="pm-modules.js?v=20260818"></script>
-<script src="profile.js?v=20260818"></script>
-<script src="pm-progress.js?v=20260818"></script>
+<script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('profile.js')) ?>"></script>
+<script src="<?= e(asset('pm-progress.js')) ?>"></script>
 <script>
 (function(){
   const P=window.PM_PROGRESS, MODS=window.PM_MODULES;
@@ -331,7 +301,7 @@ function old(array $old, string $field): string
   paint();
 })();
 </script>
-<script src="site.js?v=20260818"></script>
-<script src="assistant.js?v=20260818"></script>
+<script src="<?= e(asset('site.js')) ?>"></script>
+<script src="<?= e(asset('assistant.js')) ?>"></script>
 </body>
 </html>

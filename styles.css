@@ -838,6 +838,20 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 @media(max-width:400px){.ai-stats{grid-template-columns:1fr;gap:24px}.brand img{height:36px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
 
+/* >>> SHARED ACADEMY STYLES — BEGIN ------------------------------------------
+   Everything below this line is the same on all four academy sites and is
+   written here by tools/sync-backend.php. SPS is the source; edits made in
+   any other repository are overwritten by the next sync without warning.
+
+   It stays inside styles.css rather than becoming academy.css because two
+   STATIC pages — module.html and pm-schedule.html — load pm-progress.js and
+   therefore need .pm-bar, and those pages are not part of this application.
+   A second stylesheet would have to be added to them by hand in four repos,
+   which is the maintenance problem this whole exercise exists to remove.
+
+   It uses only the palette VARIABLES, never literal colours, which is what
+   lets one block of CSS look right in SPS orange and Fungi teal.
+   --------------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------------
    Server-rendered form state, and the privacy notice.
    Added 17 Aug 2026 with the move to Xneelo, when the registration form stopped
@@ -1138,3 +1152,5 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .adm-prog{display:block;font-size:12px;line-height:1.5;color:var(--ink-soft);
   margin:-2px 0 8px;padding-left:8px;border-left:2px solid var(--green)}
 .adm-prog.none{color:var(--ink-soft);border-left-color:var(--line);font-style:italic}
+
+/* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */

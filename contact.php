@@ -17,7 +17,14 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/registration.php';
+require __DIR__ . '/lib/registration.php';
+require __DIR__ . '/lib/chrome.php';
+/* Before a single byte is printed. The session cookie is a header, so a page
+   that prints first and starts its session later gets no session at all — and
+   the CSRF token in the form below it is then unbacked, so the form can never
+   be submitted. See the note in app_session_start(). */
+app_session_start();
+
 
 $errors = [];
 $old    = [];
@@ -90,27 +97,12 @@ function old(array $old, string $field): string
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register Your Interest — SPS Academy</title>
-<meta name="description" content="Register your interest with HR for a SPS Academy course, or ask a question about the next intake.">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<title>Register Your Interest — <?= e(brand('academy')) ?></title>
+<meta name="description" content="Register your interest with HR for a <?= e(brand('academy')) ?> course, or ask a question about the next intake.">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links" id="navLinks">
-      <a href="./" data-nav="home">Home</a>
-      <a href="ai-in-action" data-nav="ai">AI in Action</a>
-      <a href="about" data-nav="about">About</a>
-      <a href="courses" data-nav="courses">Courses</a>
-      <a href="skills-gap" data-nav="skills">Skills Gap</a>
-      <a href="contact" data-nav="contact" class="active">Contact</a>
-      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
-      <a href="contact" class="nav-cta">Upskill Yourself</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  </div>
-</nav>
+<?php chrome_nav('site', ['active' => 'contact']); ?>
 <section class="section-soft page-top" id="contact">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -120,11 +112,11 @@ function old(array $old, string $field): string
     </div>
     <div class="contact-grid">
       <div class="contact-info reveal">
-        <p><span class="lbl">Academy &amp; registrations</span><a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a></p>
-        <p><span class="lbl">Phone</span><a href="tel:0123456789">012 345 6789</a></p>
-        <p><span class="lbl">Office hours</span>Monday–Friday, 08:00–17:00 SAST</p>
-        <p><span class="lbl">Course cost</span>Fully funded by SPS</p>
-        <p><span class="lbl">Delivery</span>Online · from any SPS site or from home</p>
+        <p><span class="lbl">Academy &amp; registrations</span><a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a></p>
+        <p><span class="lbl">Phone</span><a href="tel:<?= e(brand('phone_href')) ?>"><?= e(brand('phone')) ?></a></p>
+        <p><span class="lbl">Office hours</span><?= e(brand('office_hours')) ?></p>
+        <p><span class="lbl">Course cost</span>Fully funded by <?= e(brand('company_short')) ?></p>
+        <p><span class="lbl">Delivery</span>Online · from any <?= e(brand('company_short')) ?> site or from home</p>
       </div>
       <form class="form reveal" action="contact" method="POST" novalidate>
         <?= csrf_field() ?>
@@ -141,11 +133,11 @@ function old(array $old, string $field): string
             <input id="f-name" type="text" name="full_name" value="<?= old($old,'full_name') ?>" placeholder="Your name" required>
             <?= err($errors,'full_name') ?></div>
           <div class="field"><label for="f-emp">Employee number</label>
-            <input id="f-emp" type="text" name="employee_no" value="<?= old($old,'employee_no') ?>" placeholder="e.g. SP1234"></div>
+            <input id="f-emp" type="text" name="employee_no" value="<?= old($old,'employee_no') ?>" placeholder="<?= e(brand('empno_example')) ?>"></div>
         </div>
         <div class="two">
           <div class="field"><label for="f-dept">Department / team</label>
-            <input id="f-dept" type="text" name="department" value="<?= old($old,'department') ?>" placeholder="e.g. Installations, Sales, Field Ops"></div>
+            <input id="f-dept" type="text" name="department" value="<?= old($old,'department') ?>" placeholder="<?= e(brand('dept_example')) ?>"></div>
           <div class="field"><label for="f-mgr">Line manager</label>
             <input id="f-mgr" type="text" name="line_manager" value="<?= old($old,'line_manager') ?>" placeholder="Manager's name"></div>
         </div>
@@ -168,7 +160,7 @@ function old(array $old, string $field): string
         <div class="field field-consent<?= bad($errors,'consent') ?>">
           <label class="check">
             <input type="checkbox" name="consent" value="1"<?= !empty($old['consent']) ? ' checked' : '' ?> required>
-            <span>I agree that SPS and Centenary Networks may use the details above to
+            <span>I agree that <?= e(brand('company_short')) ?> and Centenary Networks may use the details above to
               contact me about this course and to register me for it. I have read the
               <a href="privacy" target="_blank" rel="noopener">privacy notice</a>.</span>
           </label>
@@ -181,30 +173,8 @@ function old(array $old, string $field): string
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-top">
-      <div class="foot-brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></div>
-      <div class="foot-nav">
-        <a href="./">Home</a>
-        <a href="ai-in-action">AI in Action</a>
-        <a href="about">About</a>
-        <a href="courses">Courses</a>
-        <a href="skills-gap">Skills Gap</a>
-        <a href="rpl">RPL</a>
-        <a href="profile">Profile</a>
-        <a href="contact">Contact</a>
-        <a href="privacy">Privacy</a>
-      </div>
-    </div>
-    <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">
-      <strong>Accreditation</strong>
-      <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
-    </div>
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification, and not everything in it is listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
-  </div>
-</footer>
-<script src="site.js?v=20260818"></script>
-<script src="profile.js?v=20260818"></script>
-<script src="assistant.js?v=20260818"></script>
+<?php chrome_footer('site', ['employees' => true, 'extra' => 'Our catalogue is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification, and not everything in it is listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration.']); ?>
+<script src="<?= e(asset('site.js')) ?>"></script>
+<script src="<?= e(asset('profile.js')) ?>"></script>
+<script src="<?= e(asset('assistant.js')) ?>"></script>
 </body></html>

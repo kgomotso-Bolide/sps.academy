@@ -27,7 +27,8 @@
 declare(strict_types=1);
 
 require __DIR__ . '/lib/bootstrap.php';
-require __DIR__ . '/lib/db.php';
+require __DIR__ . '/lib/db.php';
+require __DIR__ . '/lib/chrome.php';
 
 $version = (string) (app_config('policy_version') ?? 'unversioned');
 ?>
@@ -36,35 +37,20 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Notice — SPS Academy</title>
-<meta name="description" content="How SPS Academy and Centenary Networks handle your personal information, and what you can ask us to do with it.">
+<title>Privacy Notice — <?= e(brand('academy')) ?></title>
+<meta name="description" content="How <?= e(brand('academy')) ?> and Centenary Networks handle your personal information, and what you can ask us to do with it.">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links" id="navLinks">
-      <a href="./" data-nav="home">Home</a>
-      <a href="ai-in-action" data-nav="ai">AI in Action</a>
-      <a href="about" data-nav="about">About</a>
-      <a href="courses" data-nav="courses">Courses</a>
-      <a href="skills-gap" data-nav="skills">Skills Gap</a>
-      <a href="contact" data-nav="contact">Contact</a>
-      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
-      <a href="contact" class="nav-cta">Upskill Yourself</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  </div>
-</nav>
+<?php chrome_nav('site'); ?>
 
 <section class="section-dark page-top">
   <div class="wrap">
     <div class="sec-head sec-head-wide">
       <span class="eyebrow">Privacy</span>
       <h2>How we handle your information</h2>
-      <p class="lede-h">This notice explains what SPS Academy collects when you register for a course, why we need it, who else sees it, and what you can tell us to do with it. It is written to be read, not to be scrolled past.</p>
+      <p class="lede-h">This notice explains what <?= e(brand('academy')) ?> collects when you register for a course, why we need it, who else sees it, and what you can tell us to do with it. It is written to be read, not to be scrolled past.</p>
     </div>
   </div>
 </section>
@@ -72,11 +58,11 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 <section class="section">
   <div class="wrap legal">
 
-    <p class="legal-meta">Version <?= e($version) ?> · This notice applies to the SPS Academy website and the course registrations made through it.</p>
+    <p class="legal-meta">Version <?= e($version) ?> · This notice applies to the <?= e(brand('academy')) ?> website and the course registrations made through it.</p>
 
     <div class="legal-draft">
       <strong>Draft for approval.</strong> This notice is accurate about how the system works,
-      but it has not yet been approved by SPS or by Centenary Networks, and the three items
+      but it has not yet been approved by <?= e(brand('company_short')) ?> or by Centenary Networks, and the three items
       marked <em>to confirm</em> below are outstanding. It should not be treated as final until
       that is done.
     </div>
@@ -84,10 +70,10 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <h3>Who is responsible for your information</h3>
     <p>Two organisations are involved, and under the Protection of Personal Information Act 4 of 2013 (POPIA) they have different roles.</p>
     <ul>
-      <li><strong>SPS — Sustainable Power Solutions</strong> is your employer and the <em>responsible party</em>. It decides that this training happens and why.</li>
-      <li><strong>Centenary Networks (Pty) Ltd</strong> runs the academy and this website on SPS's behalf, which makes it an <em>operator</em>. Centenary is also an accredited Skills Development Provider, and in that role it keeps the learner records the Quality Council for Trades and Occupations (QCTO) requires it to keep.</li>
+      <li><strong><?= e(brand('company')) ?></strong> is your employer and the <em>responsible party</em>. It decides that this training happens and why.</li>
+      <li><strong>Centenary Networks (Pty) Ltd</strong> runs the academy and this website on <?= e(brand('company_short')) ?>'s behalf, which makes it an <em>operator</em>. Centenary is also an accredited Skills Development Provider, and in that role it keeps the learner records the Quality Council for Trades and Occupations (QCTO) requires it to keep.</li>
     </ul>
-    <p class="legal-tbc"><strong>To confirm:</strong> the name and contact details of the Information Officer appointed by SPS, and confirmation that Centenary Networks' Information Officer is registered with the Information Regulator.</p>
+    <p class="legal-tbc"><strong>To confirm:</strong> the name and contact details of the Information Officer appointed by <?= e(brand('company_short')) ?>, and confirmation that Centenary Networks' Information Officer is registered with the Information Regulator.</p>
 
     <h3>What we collect</h3>
     <p>When you register your interest in a course, we collect only what is on the form: your name, work email address, and — if you choose to give them — your contact number, employee number, department, line manager's name, the course you are interested in, and anything you write in the message box.</p>
@@ -107,7 +93,7 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 
     <h3>Who else sees it</h3>
     <ul>
-      <li><strong>SPS HR</strong>, who confirm your place and arrange cover with your manager.</li>
+      <li><strong><?= e(brand('company_short')) ?> HR</strong>, who confirm your place and arrange cover with your manager.</li>
       <li><strong>Centenary Networks</strong>, as the training provider.</li>
       <li>For accredited qualifications only: the <strong>QCTO</strong> and the relevant SETA, because a qualification cannot be registered against your name without them being told your name. This is a legal requirement, not a choice either of us makes.</li>
     </ul>
@@ -130,7 +116,7 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
       <li>delete it, where we are not obliged to keep it;</li>
       <li>stop using it, where we are relying on your consent — you can withdraw that consent at any time, though we may then be unable to place you on a course.</li>
     </ul>
-    <p>Ask by emailing <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>. We will respond within a reasonable time, and we will not charge you for a first request.</p>
+    <p>Ask by emailing <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a>. We will respond within a reasonable time, and we will not charge you for a first request.</p>
 
     <h3>If you are not satisfied</h3>
     <p>Tell us first — most things are a misunderstanding and are quicker to fix directly. If that does not resolve it, you have the right to complain to the Information Regulator of South Africa, at <a href="https://inforegulator.org.za" target="_blank" rel="noopener">inforegulator.org.za</a>.</p>
@@ -141,24 +127,6 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-top">
-      <div class="foot-brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></div>
-      <div class="foot-nav">
-        <a href="./">Home</a>
-        <a href="ai-in-action">AI in Action</a>
-        <a href="about">About</a>
-        <a href="courses">Courses</a>
-        <a href="skills-gap">Skills Gap</a>
-        <a href="rpl">RPL</a>
-        <a href="profile">Profile</a>
-        <a href="contact">Contact</a>
-        <a href="privacy">Privacy</a>
-      </div>
-    </div>
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
-  </div>
-</footer>
-<script src="site.js?v=20260818"></script>
+<?php chrome_footer('site', ['accred' => false, 'employees' => true]); ?>
+<script src="<?= e(asset('site.js')) ?>"></script>
 </body></html>

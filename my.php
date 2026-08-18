@@ -31,6 +31,7 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password(), via learner.php
 require __DIR__ . '/lib/learner.php';
+require __DIR__ . '/lib/chrome.php';
 
 $me = require_user();
 
@@ -87,35 +88,17 @@ function when_local(?string $utc): string
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My learning — SPS Academy</title>
+<title>My learning — <?= e(brand('academy')) ?></title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links" id="navLinks">
-      <a href="./" data-nav="home">Home</a>
-      <a href="courses" data-nav="courses">Courses</a>
-      <a href="my" class="active">My learning</a>
-      <?php if ($me['role'] === 'admin'): ?>
-        <a href="admin">Administration</a>
-      <?php endif; ?>
-      <a href="contact" data-nav="contact">Contact</a>
-      <form method="POST" action="logout" style="display:inline">
-        <?= csrf_field() ?>
-        <button type="submit" class="linkish">Sign out</button>
-      </form>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  </div>
-</nav>
+<?php chrome_nav('learner', ['admin' => $me['role'] === 'admin']); ?>
 
 <section class="section-dark page-top">
   <div class="wrap">
     <div class="sec-head sec-head-wide">
-      <span class="eyebrow">SPS Academy</span>
+      <span class="eyebrow"><?= e(brand('academy')) ?></span>
       <h2 class="lede-h">Hello, <?= e($me['first_name']) ?></h2>
       <p>Everything you have ticked off is saved to your account now, not to this browser —
         so it follows you to your phone, and it is still here after somebody clears the
@@ -140,7 +123,7 @@ function when_local(?string $utc): string
         <strong>You are not on a course yet.</strong>
         <p>Your account exists, but nobody has enrolled you on anything. If you were
           expecting to be on a course, email
-          <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a> —
+          <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a> —
           or have a look at <a href="courses">what the academy runs</a> and register your
           interest.</p>
       </div>
@@ -179,7 +162,7 @@ function when_local(?string $utc): string
             <p class="my-untracked">This course does not have its modules on the site yet, so
               there is nothing here to tick off. Your materials come to you from the academy
               directly — email
-              <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>
+              <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a>
               if you have not had them.</p>
           <?php endif; ?>
         </article>
@@ -203,7 +186,7 @@ function when_local(?string $utc): string
         </dl>
         <p class="my-note">Something wrong here? It came from your registration form, and
           only the academy can change it — email
-          <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>.</p>
+          <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a>.</p>
       </section>
 
       <section class="my-card">
@@ -253,15 +236,11 @@ function when_local(?string $utc): string
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
-  </div>
-</footer>
+<?php chrome_footer('slim'); ?>
 
-<script src="pm-modules.js?v=20260818"></script>
-<script src="profile.js?v=20260818"></script>
-<script src="pm-progress.js?v=20260818"></script>
+<script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('profile.js')) ?>"></script>
+<script src="<?= e(asset('pm-progress.js')) ?>"></script>
 <script>
 /* Paint the progress panel for every tracked course on the page.
    Waits for the account's progress to arrive before drawing anything — see the
@@ -299,7 +278,7 @@ function when_local(?string $utc): string
         '<p class="prog-note">' + o.modulesComplete + ' of ' + o.modulesTotal +
           ' modules marked complete · ' + o.creditsClaimed + ' of ' + o.creditsTotal +
           ' knowledge credits covered by your own record. The practical and workplace ' +
-          'credits are assessed separately, against your work at SPS.</p></div>' +
+          'credits are assessed separately, against your work at ' + <?= json_encode(brand("company_short")) ?> + '.</p></div>' +
         (next
           ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + '">' +
               '<span class="my-next-lbl">Carry on with</span>' +
@@ -317,6 +296,6 @@ function when_local(?string $utc): string
      the event — so this runs either way rather than leaving "Fetching…" up. */
 })();
 </script>
-<script src="site.js?v=20260818"></script>
+<script src="<?= e(asset('site.js')) ?>"></script>
 </body>
 </html>

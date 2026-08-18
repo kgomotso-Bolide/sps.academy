@@ -16,7 +16,8 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
 
@@ -92,26 +93,12 @@ function when(string $utc): string
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Progress reports — SPS Academy</title>
+<title>Progress reports — <?= e(brand('academy')) ?></title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
-    <div class="nav-links">
-      <a href="admin">Registrations</a>
-      <a href="admin-progress" class="active">Progress</a>
-      <a href="admin-users">Accounts</a>
-      <a href="./">View the site</a>
-      <form method="POST" action="logout" style="display:inline">
-        <?= csrf_field() ?>
-        <button type="submit" class="linkish">Sign out (<?= e($me['first_name']) ?>)</button>
-      </form>
-    </div>
-  </div>
-</nav>
+<?php chrome_nav('admin', ['active' => 'admin-progress', 'name' => $me['first_name']]); ?>
 
 <section class="section page-top">
   <div class="wrap">
@@ -186,5 +173,5 @@ function when(string $utc): string
 
   </div>
 </section>
-<script src="site.js?v=20260818"></script>
+<script src="<?= e(asset('site.js')) ?>"></script>
 </body></html>
