@@ -58,8 +58,101 @@ if (is_post()) {
             ? db_one('SELECT * FROM users WHERE id = ? AND tenant_id = ?', [$id, tenant_id()])
             : null;
 
-        if ($target === null) {
+        /* -------------------------------------------------------------------
+           Creating an account.
+​
+           Until now the only accounts that could exist were learners created by
+           pressing Enrol on a registration, plus the one administrator that
+           setup.php made. There was no way to add a second administrator at
+           all: tools/make-user.php is command-line only and this hosting has no
+           shell, so "add Muzi so he can help" had no answer.
+
+           It handles both roles because the same gap applies to a learner who
+           never came through the registration form — someone transferring in
+           mid-intake, or the person whose registration went to the old
+           FormSubmit inbox and was never in the database.
+           ------------------------------------------------------------------- */
+        if ($action === 'create') {
+            $first = post_str('first_name', 80);
+            $last  = post_str('last_name', 80);
+            $email = strtolower(post_str('email', 190));
+            $role  = post_str('role', 10) === 'admin' ? 'admin' : 'learner';
+            $empno = post_str('employee_no', 40);
+            $dept  = post_str('department', 120);
+
+            if ($first === '' || $email === '') {
+                $error = 'A first name and an email address are the two things needed.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = 'That email address does not look right.';
+            } elseif (db_one('SELECT id FROM users WHERE tenant_id = ? AND email = ?',
+                             [tenant_id(), $email]) !== null) {
+                /* Deliberately not "update the existing one". Reusing an email
+                   silently resets a real person's password, which is a fine way
+                   to lock out a learner mid-course by typing an address twice. */
+                $error = 'There is already an account with that email address. '
+                       . 'Search for it below — you can set a new password on it from there.';
+            } else {
+                $password = install_readable_password();
+                $newId = db_insert('users', [
+                    'tenant_id'     => tenant_id(),
+                    'email'         => $email,
+                    'password_hash' => auth_hash($password),
+                    'first_name'    => $first,
+                    'last_name'     => $last,
+                    'employee_no'   => $empno !== '' ? $empno : null,
+                    'department'    => $dept  !== '' ? $dept  : null,
+                    'role'          => $role,
+                    'status'        => 'active',
+                    'created_at'    => now(),
+                ]);
+                audit('user.created', 'users', $newId, 'role: ' . $role);
+                $notice = trim($first . ' ' . $last) . ' can now sign in'
+                        . ($role === 'admin' ? ' and administer the academy.' : '.');
+                $fresh = [
+                    'name'     => trim($first . ' ' . $last),
+                    'email'    => $email,
+                    'password' => $password,
+                ];
+            }
+
+        } elseif ($target === null) {
             $error = 'That account no longer exists.';
+
+        /* -------------------------------------------------------------------
+           Changing a role.
+
+           The guard that matters: you cannot change your own. Demoting yourself
+           when you are the only administrator leaves nobody who can reach these
+           pages, and with no shell on this hosting there is no way back in
+           short of editing the database by hand through the host's panel.
+           ------------------------------------------------------------------- */
+        } elseif ($action === 'role') {
+            $to = post_str('role', 10) === 'admin' ? 'admin' : 'learner';
+
+            if ((int) $target['id'] === (int) $me['id']) {
+                $error = 'You cannot change your own role. Ask another administrator to do it.';
+            } elseif ($to === 'learner' && $target['role'] === 'admin'
+                      && (int) db_one('SELECT COUNT(*) c FROM users
+                                       WHERE tenant_id = ? AND role = ? AND status = ?',
+                                      [tenant_id(), 'admin', 'active'])['c'] <= 1) {
+                /* Cannot be reached while the self-check above holds — you are
+                   an administrator, so there is always at least one besides the
+                   one being demoted. Kept because that reasoning is subtle, and
+                   a future change to who may reach this page would break it
+                   silently. */
+                $error = 'That is the last administrator. Make somebody else an '
+                       . 'administrator first, or there will be nobody who can.';
+            } else {
+                db_run('UPDATE users SET role = ? WHERE id = ? AND tenant_id = ?',
+                       [$to, (int) $target['id'], tenant_id()]);
+                audit('user.role_changed', 'users', (int) $target['id'], 'to: ' . $to);
+                $notice = trim($target['first_name'] . ' ' . $target['last_name'])
+                        . ($to === 'admin'
+                            ? ' can now administer the academy. They will see the '
+                              . 'administration pages next time they sign in.'
+                            : ' is now an ordinary learner and can no longer reach '
+                              . 'the administration pages.');
+            }
 
         } elseif ($action === 'password') {
             $password = install_readable_password();
@@ -203,6 +296,47 @@ function when_u(?string $utc): string
       </div>
     <?php endif; ?>
 
+    <?php /* Closed by default. This page is read many times a day to look
+             somebody up and used to add an account rarely, so the form that is
+             wanted once a month should not be the first thing above the list
+             that is wanted every morning. */ ?>
+    <details class="adm-add">
+      <summary>Add someone</summary>
+      <p class="adm-add-lede">For a colleague who needs to help run the academy, or a learner who
+        never came through the registration form. Everyone else arrives by pressing
+        <strong>Enrol</strong> on the registrations list, which is the usual way and keeps their
+        registration and their account joined up.</p>
+      <form method="POST" class="form adm-add-form">
+        <?= csrf_field() ?>
+        <input type="hidden" name="a" value="create">
+        <div class="two">
+          <div class="field"><label for="n-first">First name</label>
+            <input id="n-first" type="text" name="first_name" required></div>
+          <div class="field"><label for="n-last">Surname</label>
+            <input id="n-last" type="text" name="last_name"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="n-email">Work email</label>
+            <input id="n-email" type="email" name="email" required
+                   placeholder="they sign in with this"></div>
+          <div class="field"><label for="n-role">They are</label>
+            <select id="n-role" name="role">
+              <option value="learner">A learner — studies, and sees only their own progress</option>
+              <option value="admin">Staff — can see every learner, enrol people and add accounts</option>
+            </select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="n-emp">Employee number</label>
+            <input id="n-emp" type="text" name="employee_no" placeholder="<?= e(brand('empno_example')) ?>"></div>
+          <div class="field"><label for="n-dept">Department / team</label>
+            <input id="n-dept" type="text" name="department" placeholder="<?= e(brand('dept_example')) ?>"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create the account</button>
+        <p class="field-hint">A password is generated and shown to you once, on this page. Nothing
+          is emailed — give it to them in person or over the phone.</p>
+      </form>
+    </details>
+
     <form class="adm-search" method="GET">
       <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search name, email or employee number">
       <button type="submit" class="btn btn-primary">Search</button>
@@ -283,6 +417,29 @@ function when_u(?string $utc): string
                     <?= $u['status'] === 'active' ? 'Switch this account off' : 'Switch it back on' ?>
                   </button>
                 </form>
+                <?php /* Not offered on your own row. Demoting yourself as the only
+                         administrator locks everyone out of these pages, and there is
+                         no shell on this hosting to undo it. The POST handler refuses
+                         it as well — a control you cannot see is not a check. */ ?>
+                <?php if (!$isMe): ?>
+                  <form method="POST" class="adm-act"
+                        onsubmit="return confirm(<?= e(json_encode(
+                          $u['role'] === 'admin'
+                            ? 'Take administrator rights away from ' . trim($u['first_name'] . ' ' . $u['last_name'])
+                              . '? They keep their account and their progress, and will only see their own.'
+                            : 'Make ' . trim($u['first_name'] . ' ' . $u['last_name'])
+                              . ' an administrator? They will be able to see every learner on this site, '
+                              . 'enrol people, set passwords and add accounts.'
+                        )) ?>)">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="a" value="role">
+                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                    <input type="hidden" name="role" value="<?= $u['role'] === 'admin' ? 'learner' : 'admin' ?>">
+                    <button type="submit" class="linkish adm-toggle">
+                      <?= $u['role'] === 'admin' ? 'Remove administrator rights' : 'Make an administrator' ?>
+                    </button>
+                  </form>
+                <?php endif; ?>
               <?php endif; ?>
             </td>
           </tr>

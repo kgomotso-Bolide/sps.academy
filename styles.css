@@ -1167,4 +1167,25 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   .nav-links form .linkish:hover{color:var(--orange)}
 }
 
+
+/* ---- "Add someone" on the Accounts page ----
+   A <details> rather than a permanent form: this page is read many times a
+   day to look somebody up and used to add an account rarely, so the rare
+   thing stays folded away above the common one. */
+.adm-add{border:1px solid var(--line);border-radius:12px;background:#fff;
+  padding:0 18px;margin:0 0 18px}
+.adm-add[open]{padding-bottom:18px}
+.adm-add summary{cursor:pointer;padding:14px 0;font-weight:700;font-size:14px;
+  color:var(--grey);list-style:none}
+.adm-add summary::-webkit-details-marker{display:none}
+.adm-add summary::before{content:"+ ";color:var(--orange);font-weight:800}
+.adm-add[open] summary::before{content:"– "}
+.adm-add summary:hover{color:var(--orange)}
+.adm-add-lede{font-size:13.5px;line-height:1.7;color:var(--ink-soft);margin:0 0 16px;max-width:70ch}
+/* The page-wide .form card would put a second box inside this one. */
+.adm-add-form{background:transparent;border:0;border-radius:0;padding:0}
+.adm-add-form select{width:100%;padding:12px 14px;border:1px solid var(--line);
+  border-radius:9px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+.adm-add-form select:focus{outline:0;border-color:var(--orange)}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
