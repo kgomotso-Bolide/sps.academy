@@ -89,7 +89,20 @@ function chrome_logo(string $class = 'brand'): string
          . '" alt="' . e(brand('logo_alt')) . '"></a>';
 }
 
-/** The hamburger. Only the navs wide enough to need one get one. */
+/**
+ * The hamburger. EVERY nav needs one — this is not a decoration.
+ *
+ * Below 900px `.nav-links` is `display:none` and only `.nav-links.open` shows,
+ * and site.js adds that class only when it finds BOTH `#navToggle` and
+ * `#navLinks`. So a nav rendered without this button is not a nav that looks a
+ * bit plain on a phone: it is a nav with no links at all, permanently.
+ *
+ * That is what happened to the admin pages. They had four links and a sign-out,
+ * none of which existed on a phone, and it went unnoticed because it is
+ * invisible on a laptop — which is where a page like that gets built and
+ * checked. The auth pages had it too. If you add a fifth nav variant, give it
+ * a toggle and an id="navLinks", and open it at 390px before you believe it.
+ */
 function chrome_nav_toggle(): string
 {
     return '<button class="nav-toggle" id="navToggle" aria-label="Menu">'
@@ -159,6 +172,7 @@ function chrome_nav(string $variant, array $o = []): void
             ? '      <a href="login">Sign in</a>' . "\n"
             : '      <a href="contact" data-nav="contact">Contact</a>' . "\n";
         echo '    </div>' . "\n";
+        echo '    ' . chrome_nav_toggle() . "\n";
 
     } elseif ($variant === 'learner') {
         echo '    <div class="nav-links" id="navLinks">' . "\n";
@@ -174,13 +188,14 @@ function chrome_nav(string $variant, array $o = []): void
         echo '    ' . chrome_nav_toggle() . "\n";
 
     } elseif ($variant === 'admin') {
-        echo '    <div class="nav-links">' . "\n";
+        echo '    <div class="nav-links" id="navLinks">' . "\n";
         echo '      <a href="admin"' . $on('admin') . '>Registrations</a>' . "\n";
         echo '      <a href="admin-progress"' . $on('admin-progress') . '>Progress</a>' . "\n";
         echo '      <a href="admin-users"' . $on('admin-users') . '>Accounts</a>' . "\n";
         echo '      <a href="./">View the site</a>' . "\n";
         echo '      ' . chrome_signout('Sign out (' . (string) ($o['name'] ?? '') . ')') . "\n";
         echo '    </div>' . "\n";
+        echo '    ' . chrome_nav_toggle() . "\n";
 
     } else {
         app_fail('Unknown nav variant "' . $variant . '".');
