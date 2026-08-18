@@ -110,14 +110,47 @@ function app_config(?string $key = null)
          * The home directory is inside open_basedir and outside the document
          * root, which makes it the correct place on this host rather than
          * merely a convenient one. */
+        /* WHICH FILENAME, and why this is not cosmetic.
+         *
+         * Four academies share one Xneelo account and one home directory. The
+         * configuration file is what tells an installation which tenant it is,
+         * so if two installations can find the same file, the second one
+         * silently becomes the first. Fungi at public_html/fungiacademy/ would
+         * have walked up, found ~/sps-config.php, and served SPS's
+         * registrations, learners and progress under Fungi's branding — with no
+         * error, because from the code's point of view nothing went wrong.
+         *
+         * So the name is derived from the directory the application is
+         * installed in: public_html/fungiacademy/ looks for
+         * fungiacademy-config.php and will not accept anything else.
+         *
+         * The one exception is the SPS installation that already exists, whose
+         * file was placed by hand and is called sps-config.php. That fallback
+         * is allowed ONLY when the directory is recognisably the SPS one — not
+         * as a general last resort, because a general last resort is exactly
+         * the cross-tenant bug this is here to prevent. A missing Fungi config
+         * has to fail loudly rather than quietly load somebody else's.
+         */
+        $appDir = basename(APP_ROOT);
+        $names  = [];
+        if ((bool) preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$/', $appDir)) {
+            $names[] = $appDir . '-config.php';
+        }
+        if ($appDir === 'sps' || $appDir === 'spsacademy') {
+            $names[] = 'sps-config.php';
+        }
+        if (!$names) $names[] = 'academy-config.php';   // unnameable directory
+
         $home = (string) (getenv('HOME') ?: '');
         if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
             $pw = @posix_getpwuid(posix_getuid());
             $home = (string) ($pw['dir'] ?? '');
         }
         if ($home !== '') {
-            $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
-            $candidates[] = rtrim($home, '/') . '/sps-config.php';
+            foreach ($names as $n) {
+                $candidates[] = rtrim($home, '/') . '/private/' . $n;
+                $candidates[] = rtrim($home, '/') . '/' . $n;
+            }
         }
 
         /* Walk up from the app directory. Four levels is far more than either
@@ -135,8 +168,10 @@ function app_config(?string $key = null)
         for ($i = 0; $i < 4; $i++) {
             $dir = dirname($dir);
             if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-            $candidates[] = $dir . '/private/sps-config.php';
-            $candidates[] = $dir . '/sps-config.php';
+            foreach ($names as $n) {
+                $candidates[] = $dir . '/private/' . $n;
+                $candidates[] = $dir . '/' . $n;
+            }
         }
 
         $candidates[] = APP_ROOT . '/lib/config.local.php';  // development only, gitignored
@@ -159,8 +194,13 @@ function app_config(?string $key = null)
         }
 
         if ($found === null) {
+            /* Name the file THIS installation is looking for. The generic
+               message sent somebody to create sps-config.php for the Fungi
+               site, which is the one file Fungi must never load. */
             app_fail('No configuration file found. Copy lib/config.sample.php to '
-                   . '~/private/sps-config.php and fill it in.');
+                   . '~/private/' . $names[0] . ' and fill it in. This installation '
+                   . 'is in a directory called "' . $appDir . '", and that is where '
+                   . 'the filename comes from.');
         }
 
         $cfg = require $found;

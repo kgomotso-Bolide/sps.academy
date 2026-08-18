@@ -278,3 +278,38 @@ curl -sI https://centenarynetworks.com/spsacademy/styles.css | grep -i cache-con
 
 It should say `max-age=300, must-revalidate`. If it says `max-age=2592000`, our `.htaccess`
 did not take effect and the release will be invisible to returning visitors.
+
+## Adding a second academy (Fungi, Equinix, Maziv)
+
+Each academy is its own installation in its own folder — `public_html/fungiacademy/`,
+`public_html/equinixacademy/` — sharing one MySQL database, one Xneelo account, and one home
+directory. They are kept apart by the `tenant` line in their configuration file, and by
+nothing else. So the configuration file is the thing that must not be shared.
+
+**The filename is derived from the folder the site is installed in.** `public_html/fungiacademy/`
+looks for `~/private/fungiacademy-config.php` (or `~/fungiacademy-config.php`) and will accept
+nothing else. If it is missing, the site refuses to start and says which file it wanted.
+
+That is deliberate. Before this, the name was hardcoded as `sps-config.php`, and a second
+academy would have walked up, found SPS's file, and served **SPS's registrations, learners and
+progress under Fungi's branding** — with no error, because nothing had gone wrong as far as
+the code was concerned. A missing config has to be a loud failure, never a quiet substitution.
+
+`sps-config.php` is still accepted, but only for a folder called `sps` or `spsacademy`, because
+that installation already exists with a file of that name.
+
+To stand up a new academy:
+
+1. Create `public_html/<name>academy/` and deploy the code there.
+2. Copy `lib/config.sample.php` to `~/private/<name>academy-config.php`.
+3. Set `'tenant' => 'fungi'` (or `equinix`, `maziv`) — the slug must already be in the
+   `tenants` table; the installer seeds all four on any installation.
+4. Use the **same** database name, user and password as SPS. One database, one row per
+   company, a `tenant_id` on everything.
+5. Give it its **own** `ip_pepper`. Sharing one would let the same hashed address be
+   correlated across two companies' records, which is precisely what the hash is for.
+6. Set `setup_token`, open `/<name>academy/setup`, run it, then empty the token.
+
+Check it worked by signing in and looking at the registrations list. If you see SPS's
+registrations under Fungi's logo, stop and check step 2 — that is the failure this is built
+to prevent, and it should be impossible.

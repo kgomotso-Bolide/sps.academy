@@ -41,17 +41,36 @@ if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_
 /* The same candidate list as lib/bootstrap.php, in the same order, and it must
    stay that way — a preflight check that disagrees with the thing it is
    checking is worse than no check. */
+/* The filename is derived from the directory this installation sits in, so
+   that four academies sharing one hosting account cannot load each other's
+   configuration — see the long note in lib/bootstrap.php. sps-config.php is
+   accepted only for the SPS directory, because that installation already
+   exists with a file of that name. */
+$appDir = basename($appRoot);
+$names  = [];
+if ((bool) preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$/', $appDir)) {
+    $names[] = $appDir . '-config.php';
+}
+if ($appDir === 'sps' || $appDir === 'spsacademy') {
+    $names[] = 'sps-config.php';
+}
+if (!$names) $names[] = 'academy-config.php';
+
 $candidates = [];
 if ($home !== '') {
-    $candidates[] = rtrim($home, '/') . '/private/sps-config.php';
-    $candidates[] = rtrim($home, '/') . '/sps-config.php';
+    foreach ($names as $n) {
+        $candidates[] = rtrim($home, '/') . '/private/' . $n;
+        $candidates[] = rtrim($home, '/') . '/' . $n;
+    }
 }
 $dir = $appRoot;
 for ($i = 0; $i < 4; $i++) {
     $dir = dirname($dir);
     if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-    $candidates[] = $dir . '/private/sps-config.php';
-    $candidates[] = $dir . '/sps-config.php';
+    foreach ($names as $n) {
+        $candidates[] = $dir . '/private/' . $n;
+        $candidates[] = $dir . '/' . $n;
+    }
 }
 
 $inWebRoot = static function (string $path) use ($docroot): bool {
