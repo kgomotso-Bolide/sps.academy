@@ -110,12 +110,29 @@ $targets = $only ?: $defaultTargets;
    --------------------------------------------------------------------------- */
 
 if ($mode === 'apply' && !$force) {
-    $status = shell_exec('cd ' . escapeshellarg($root) . ' && git status --porcelain 2>&1');
-    if (is_string($status) && trim($status) !== '') {
+    $status = (string) shell_exec('cd ' . escapeshellarg($root) . ' && git status --porcelain 2>&1');
+
+    /* Only the files this run would actually copy. An earlier version refused on
+       any dirty file at all, which sounds safer and is not: it fires on a
+       scratch directory somebody left lying around, so the habit it teaches is
+       --force, and --force is the one thing that must stay rare. Narrow the
+       question to "is what I am about to copy committed?" and the answer is
+       almost always yes, so a refusal means something. */
+    $dirty = [];
+    foreach (explode("\n", $status) as $line) {
+        $path = trim(substr($line, 2));
+        if ($path === '') continue;
+        if (str_contains($path, ' -> ')) $path = substr($path, strpos($path, ' -> ') + 4);
+        $path = trim($path, '"');
+        if (in_array($path, $shared, true) || $path === CSS_FILE) $dirty[] = trim($line);
+    }
+
+    if ($dirty) {
         fwrite(STDERR,
-            "SPS has uncommitted changes, so a sync now would copy something that\n"
-          . "exists in no commit and cannot be traced back here. Commit first, or\n"
-          . "pass --force if you know why you want this.\n\n" . $status . "\n");
+            "These are on the shared manifest and are not committed, so a sync now\n"
+          . "would copy something that exists in no commit here and cannot be traced\n"
+          . "back to one. Commit first, or pass --force if you know why you want this.\n\n"
+          . '  ' . implode("\n  ", $dirty) . "\n\n");
         exit(1);
     }
 }
