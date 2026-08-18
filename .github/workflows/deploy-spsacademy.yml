@@ -104,7 +104,23 @@ jobs:
             echo "::error::.github/known_hosts is missing — refusing to connect without a pinned host key."
             exit 1
           }
-          echo "Secrets present, host key pinned."
+          # The host key is pinned against an exact hostname, so the secret has
+          # to BE that hostname. Anything else — https:// in front, sftp:// in
+          # front, a www. or ftp. prefix, an IP address, a trailing space from
+          # pasting — connects to a name the pin does not cover, and ssh reports
+          # it as "Host key verification failed" a good half-minute later. That
+          # message reads like the server changed or is being impersonated,
+          # which sends you off checking the wrong thing entirely.
+          #
+          # The secret is never printed. What is printed is the hostname the
+          # repository pins, which is in the repository already.
+          pinned=$(grep -v '^#' .github/known_hosts | awk '{print $1}' | sort -u | tr '\n' ' ')
+          if ! ssh-keygen -F "$FTP_SERVER" -f .github/known_hosts >/dev/null 2>&1; then
+            echo "::error::SPS_FTP_SERVER is not a host pinned in .github/known_hosts (which pins: $pinned)."
+            echo "Set the secret to the bare hostname only — no https://, no sftp://, no www. or ftp. prefix, no trailing space."
+            exit 1
+          fi
+          echo "Secrets present, and SPS_FTP_SERVER matches the pinned host key."
 
       - name: Record what the client's site looks like BEFORE we touch anything
         run: |
@@ -126,6 +142,10 @@ jobs:
           FTP_USERNAME: ${{ secrets.SPS_FTP_USERNAME }}
         run: |
           set -euo pipefail
+          # A secret pasted into the web form can carry a trailing space or
+          # newline, which survives into the hostname and breaks the host key
+          # match for a reason nothing in the error message mentions.
+          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '[:space:]')"
           FLAGS="--reverse --verbose --no-perms"
           [ "${{ inputs.dry_run }}" = "true" ]        && FLAGS="$FLAGS --dry-run"
           [ "${{ inputs.delete_removed }}" = "true" ] && FLAGS="$FLAGS --delete"
