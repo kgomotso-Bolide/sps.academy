@@ -476,6 +476,54 @@ function learner_progress_import(int $userId, string $courseSlug, array $tree): 
     return $added;
 }
 
+/**
+ * Progress counts for a whole page of learners, in one query.
+ *
+ * Exists because privacy.php tells learners "the academy can see your ticks and
+ * their dates, and uses them to know who needs help" — and for the first day
+ * after learner accounts shipped, no page in the administration area read the
+ * table at all. A privacy notice describing a capability nobody has is worse
+ * than one that admits the gap, so the honest fix was to build the capability
+ * rather than reword the sentence.
+ *
+ * DELIBERATELY NO PERCENTAGE. A percentage needs a denominator, the denominator
+ * is the registered curriculum, and that lives in pm-modules.js where it is
+ * generated from the provider's guides. Copying "51 topics" into PHP would
+ * create a second source of truth that silently disagrees the first time a
+ * module changes. Counts answer the question that actually gets asked — who has
+ * not started, and who has stopped — without needing one.
+ *
+ * @return array<int, array<string, array{topics:int, modules:int, last:?string}>>
+ *         user id => course slug => counts
+ */
+function learner_progress_counts_bulk(array $userIds): array
+{
+    $userIds = array_values(array_unique(array_filter(array_map('intval', $userIds))));
+    if (!$userIds) return [];
+
+    $in   = implode(',', array_fill(0, count($userIds), '?'));
+    $rows = db_optional(fn() => db_all(
+        'SELECT user_id, course_slug,
+                SUM(CASE WHEN item_code <> ? THEN 1 ELSE 0 END) AS topics,
+                SUM(CASE WHEN item_code =  ? THEN 1 ELSE 0 END) AS modules,
+                MAX(completed_at) AS last_at
+           FROM learner_progress
+          WHERE tenant_id = ? AND user_id IN (' . $in . ')
+          GROUP BY user_id, course_slug',
+        array_merge(['', '', tenant_id()], $userIds)
+    ), []);
+
+    $out = [];
+    foreach ($rows as $r) {
+        $out[(int) $r['user_id']][(string) $r['course_slug']] = [
+            'topics'  => (int) $r['topics'],
+            'modules' => (int) $r['modules'],
+            'last'    => $r['last_at'] !== null ? (string) $r['last_at'] : null,
+        ];
+    }
+    return $out;
+}
+
 /** Everything on one course, gone. The learner's own choice, from their report page. */
 function learner_progress_clear(int $userId, string $courseSlug): int
 {

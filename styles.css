@@ -1131,3 +1131,10 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .adm-act .btn{padding:8px 14px;font-size:13px}
 .adm-toggle{font-size:12.5px;font-weight:700;color:var(--ink-soft);text-decoration:underline}
 .adm-toggle:hover{color:var(--err)}
+
+/* How far a learner has got, on the Accounts page. Counts, not a percentage —
+   see learner_progress_counts_bulk(). Small and quiet: the column's first job
+   is still "what are they enrolled on". */
+.adm-prog{display:block;font-size:12px;line-height:1.5;color:var(--ink-soft);
+  margin:-2px 0 8px;padding-left:8px;border-left:2px solid var(--green)}
+.adm-prog.none{color:var(--ink-soft);border-left-color:var(--line);font-style:italic}

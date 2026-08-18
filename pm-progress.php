@@ -108,7 +108,7 @@ function old(array $old, string $field): string
     <div class="sec-head sec-head-wide reveal">
       <span class="eyebrow">Project Manager NQF 5</span>
       <h2 class="lede-h">Where you are, and something you can hand to your manager</h2>
-      <p>Tick topics off as you work through them and this keeps count. When you have finished a module, print the report for your manager to sign and send the academy a dated record — so your progress is on file without anyone having to chase you for it.</p>
+      <p>Tick topics off as you work through them and this keeps count. <strong>Sign in and it is saved to your account</strong>, so it follows you to your phone and survives a shared machine being cleared. When you have finished a module, print the report for your manager to sign and send the academy a dated record.</p>
     </div>
     <?php /* Two different true answers, and the page must give the right one:
              a signed-in learner's ticks are on the server, an anonymous one's
@@ -139,7 +139,7 @@ function old(array $old, string $field): string
       <div class="sg-card reveal" style="max-width:900px;margin:36px auto 0">
         <div class="sg-stepnum">Send it in</div>
         <h3>Put your progress on file</h3>
-        <p class="sg-intro">This sends the academy a dated summary of where you are. It goes to Centenary Networks, the accredited provider. It is the record that means nobody has to chase you for an update, and the one your progress is reported from. Send it whenever you finish a module — or sooner if you are stuck.</p>
+        <p class="sg-intro">This sends the academy a dated summary of where you are, in your own words. It goes to Centenary Networks, the accredited provider. If you are signed in they can already see the topics you have ticked — what this adds is a statement you stand behind, and the printable copy your manager signs. Send it whenever you finish a module, or sooner if you are stuck.</p>
 
         <form class="form" id="pgForm" action="pm-progress" method="POST" novalidate>
           <?= csrf_field() ?>

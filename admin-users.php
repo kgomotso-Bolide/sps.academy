@@ -137,13 +137,18 @@ if ($rows) {
     $ids = array_map(fn($r) => (int) $r['id'], $rows);
     $in  = implode(',', array_fill(0, count($ids), '?'));
     foreach (db_optional(fn() => db_all(
-        'SELECT user_id, course_title, status FROM enrolments
+        'SELECT user_id, course_slug, course_title, status FROM enrolments
           WHERE tenant_id = ? AND user_id IN (' . $in . ') ORDER BY enrolled_at',
         array_merge([tenant_id()], $ids)
     ), []) as $en) {
         $enrolByUser[(int) $en['user_id']][] = $en;
     }
 }
+
+/* And how far each of them has got. See the note on the function: counts, not
+   percentages, because the denominator is the registered curriculum and it lives
+   in pm-modules.js. */
+$progressBy = $rows ? learner_progress_counts_bulk(array_map(fn($r) => (int) $r['id'], $rows)) : [];
 
 function when_u(?string $utc): string
 {
@@ -245,6 +250,21 @@ function when_u(?string $utc): string
                 <span class="adm-none">no courses</span>
               <?php else: foreach ($mine as $en): ?>
                 <span class="adm-enrolled"><?= e((string) $en['course_title']) ?></span>
+                <?php
+                  $slug = (string) $en['course_slug'];
+                  $c = $progressBy[(int) $u['id']][$slug] ?? null;
+                ?>
+                <?php if (learner_course_tracked($slug)): ?>
+                  <span class="adm-prog<?= $c === null ? ' none' : '' ?>">
+                    <?php if ($c === null): ?>
+                      Not started
+                    <?php else: ?>
+                      <?= (int) $c['topics'] ?> topic<?= $c['topics'] === 1 ? '' : 's' ?> ticked ·
+                      <?= (int) $c['modules'] ?> module<?= $c['modules'] === 1 ? '' : 's' ?> complete
+                      <?php if ($c['last']): ?><br>Last activity <?= e(when_u($c['last'])) ?><?php endif; ?>
+                    <?php endif; ?>
+                  </span>
+                <?php endif; ?>
               <?php endforeach; endif; ?>
             </td>
             <td class="adm-when">

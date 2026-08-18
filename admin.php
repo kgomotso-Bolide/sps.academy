@@ -177,7 +177,7 @@ if ($userIds) {
        before the migration is run. A missing table must not take down the page
        Kgomotso reads every day — see the note in lib/db.php. */
     foreach (db_optional(fn() => db_all(
-        'SELECT user_id, course_title, status FROM enrolments
+        'SELECT user_id, course_slug, course_title, status FROM enrolments
           WHERE tenant_id = ? AND user_id IN (' . $in . ') ORDER BY enrolled_at',
         array_merge([tenant_id()], $userIds)
     ), []) as $en) {
