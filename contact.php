@@ -17,7 +17,7 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/registration.php';
+require __DIR__ . '/lib/registration.php';
 require __DIR__ . '/lib/chrome.php';
 /* Before a single byte is printed. The session cookie is a header, so a page
    that prints first and starts its session later gets no session at all — and
@@ -113,6 +113,13 @@ function old(array $old, string $field): string
     <div class="contact-grid">
       <div class="contact-info reveal">
         <p><span class="lbl">Academy &amp; registrations</span><a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a></p>
+        <?php /* Some companies publish a second, company-side address and some do
+                 not. Omitted entirely rather than left blank: a label with nothing
+                 after it reads as a page that failed to load, not as a company
+                 that has one address. */ ?>
+        <?php if (brand_has('enquiries_email')): ?>
+        <p><span class="lbl">General enquiries</span><a href="mailto:<?= e(brand('enquiries_email')) ?>"><?= e(brand('enquiries_email')) ?></a></p>
+        <?php endif; ?>
         <p><span class="lbl">Phone</span><a href="tel:<?= e(brand('phone_href')) ?>"><?= e(brand('phone')) ?></a></p>
         <p><span class="lbl">Office hours</span><?= e(brand('office_hours')) ?></p>
         <p><span class="lbl">Course cost</span>Fully funded by <?= e(brand('company_short')) ?></p>
