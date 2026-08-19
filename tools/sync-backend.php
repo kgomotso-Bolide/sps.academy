@@ -62,7 +62,7 @@ $shared = [
     'lib/audit.php', 'lib/auth.php', 'lib/bootstrap.php', 'lib/chrome.php',
     'lib/config.sample.php', 'lib/csrf.php', 'lib/db.php', 'lib/install.php',
     'lib/learner.php', 'lib/mail.php', 'lib/progress.php', 'lib/registration.php',
-    'lib/reset.php', 'lib/.htaccess',
+    'lib/reset.php', 'lib/materials.php', 'lib/.htaccess',
 
     // The database.
     'schema/schema.mysql.sql', 'schema/schema.sqlite.sql',
@@ -71,11 +71,18 @@ $shared = [
     'account.php', 'admin.php', 'admin-progress.php', 'admin-users.php',
     'contact.php', 'forgot.php', 'login.php', 'logout.php', 'my.php',
     'phpcheck.php', 'pm-progress.php', 'privacy.php', 'reset.php', 'setup.php',
+    'admin-materials.php', 'materials.php',
 
     // Client-side code that talks to the back end. profile.js and pm-progress.js
     // know the shape of account.php's JSON, so they are part of the application
     // and not part of the site — a stale copy of either is a broken sign-in.
-    'profile.js', 'pm-progress.js',
+    'profile.js', 'pm-progress.js', 'materials.js',
+
+    // The registered curriculum. Identical in all four repositories and read by
+    // module.html, the pathway page and the Material admin page — one source of
+    // truth for the module codes, or the admin page offers slots for modules that
+    // no longer exist.
+    'pm-modules.js',
 
     // Server configuration and the tools.
     '.htaccess',
@@ -102,7 +109,7 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    Targets
    --------------------------------------------------------------------------- */
 
-$defaultTargets = ['../fungi', '../equinix', '../maziv'];
+$defaultTargets = ['../fungi', '../Maziv', '../Equinix'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------

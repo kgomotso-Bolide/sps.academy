@@ -1188,4 +1188,44 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   border-radius:9px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
 .adm-add-form select:focus{outline:0;border-color:var(--orange)}
 
+
+/* ---- the Material page ---- */
+.mat-intro{max-width:78ch;margin:0 0 20px}
+.mat-intro p{font-size:14px;line-height:1.75;color:var(--ink-soft);margin:0 0 12px}
+/* The one paragraph on this page that somebody must not skim: it is what
+   stands between a marking memo and the open internet. */
+.mat-warn{background:var(--orange-tint);border-left:3px solid var(--orange);
+  border-radius:0 9px 9px 0;padding:14px 16px}
+.mat-count{font-size:14px;color:var(--ink-soft);margin:0 0 14px}
+.mat-mod{border:1px solid var(--line);border-radius:12px;background:#fff;
+  margin:0 0 10px;padding:0 16px}
+.mat-mod[open]{padding-bottom:16px}
+.mat-mod summary{cursor:pointer;padding:14px 0;font-size:14px;font-weight:700;
+  color:var(--grey);list-style:none;display:flex;align-items:center;gap:10px}
+.mat-mod summary::-webkit-details-marker{display:none}
+.mat-mod summary:hover{color:var(--orange)}
+.mat-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:6px;
+  padding:3px 7px;color:var(--ink-soft);flex:0 0 auto}
+.mat-have{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink-soft);
+  flex:0 0 auto}
+.mat-have.on{color:var(--green-deep)}
+.mat-fields{display:grid;gap:14px}
+/* The site's .field rules are scoped to .form, and this form is not one — it
+   is a grid of eleven module rows, not a card. Without these the label and
+   the input share a line and the input is squeezed to nothing. */
+.mat-fields .field{margin:0}
+.mat-fields label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;
+  color:var(--ink-soft)}
+.mat-fields input{width:100%;padding:11px 13px;border:1px solid var(--line);
+  border-radius:9px;font-family:inherit;font-size:14px;background:var(--bg-soft)}
+.mat-fields input:focus{outline:2px solid var(--orange);border-color:var(--orange);
+  background:#fff}
+.mat-fields .field.has-err input,.mat-fields input.has-err{border-color:var(--err);
+  background:#fffafa}
+@media(min-width:760px){.mat-fields{grid-template-columns:repeat(3,1fr)}}
+.mat-on{font-size:11px;font-weight:700;color:var(--green-deep);text-transform:uppercase;
+  letter-spacing:.04em;margin-left:6px}
+.mat-save{margin-top:18px}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */

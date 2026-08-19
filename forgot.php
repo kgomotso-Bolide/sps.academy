@@ -76,7 +76,7 @@ if (is_post()) {
           <strong>If nothing arrives in a few minutes, look in your junk mail.</strong>
           The academy's mail is still being set up properly with the domain, so messages
           from here can be filed as spam. If it is not there either, email
-          <a href="mailto:kgomotso@centenarynetworks.com">kgomotso@centenarynetworks.com</a>
+          <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a>
           and a new password will be set for you by hand — that route always works.
         </div>
 
@@ -84,8 +84,24 @@ if (is_post()) {
 
       <?php else: ?>
         <h2>Forgotten your password</h2>
-        <p class="auth-lede">Put in the email address you sign in with and we will send you a
-          link to set a new one. The link lasts an hour and works once.</p>
+
+        <?php /* The academy sets passwords by hand and always has — it is how the
+                 first one reached you. That route is put first because it is the
+                 one that reliably works today: mail sent from this server is not
+                 yet authorised by the domain's DNS and can be filed as spam.
+                 Promising an email first and mentioning the fallback afterwards
+                 had it the wrong way round. */ ?>
+        <div class="auth-note">
+          <strong>The quickest way is to ask.</strong> Email
+          <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a>
+          or phone the academy, and a new password will be set for you and handed over
+          the same way your first one was. That route always works.
+        </div>
+
+        <p class="auth-lede" style="margin-top:20px">You can also try the automatic route below.
+          Put in the email address you sign in with and we will send a link to set a new
+          password yourself. It lasts an hour and works once — but the academy's mail is
+          still being set up with the domain, so it may not arrive.</p>
 
         <form class="form" method="POST" novalidate>
           <?= csrf_field() ?>

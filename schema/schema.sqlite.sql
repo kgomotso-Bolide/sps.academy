@@ -153,3 +153,20 @@ CREATE TABLE IF NOT EXISTS progress_reports (
   purge_after   TEXT        NULL
 );
 CREATE INDEX IF NOT EXISTS ix_prog_tenant_created ON progress_reports (tenant_id, created_at);
+
+-- See the long note on this table in schema.mysql.sql. In short: we store a
+-- LINK, never a file; a "anyone with the link" Drive URL is a bearer token; and
+-- assessment material must never be entered here.
+CREATE TABLE IF NOT EXISTS materials (
+  id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT    NOT NULL,
+  module_code TEXT    NOT NULL,
+  kind        TEXT    NOT NULL,
+  url         TEXT    NOT NULL,
+  label       TEXT        NULL,
+  updated_at  TEXT    NOT NULL,
+  updated_by  INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_material_slot ON materials (tenant_id, course_slug, module_code, kind);
+CREATE INDEX IF NOT EXISTS ix_material_course ON materials (tenant_id, course_slug);

@@ -27,7 +27,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/lib/bootstrap.php';
-require __DIR__ . '/lib/db.php';
+require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/chrome.php';
 
 $version = (string) (app_config('policy_version') ?? 'unversioned');
@@ -85,6 +85,20 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <p>Once you are signed in, the topics you tick off as you study are saved <strong>to your account</strong> rather than to the computer you are using, together with the date you ticked each one. That is what lets your progress follow you to another device, and what stops the next person on a shared machine seeing your record. Before you sign in — and if you never do — those ticks stay in your browser and reach us only if you send a progress report.</p>
     <p>What you tick is <strong>your own account of what you have studied</strong>. It is not a mark, and it is not an assessment result: being found competent is Centenary's decision after assessment, and the qualification is awarded by the QCTO after the external assessment.</p>
     <p>The academy can see your ticks and their dates, and uses them to know who needs help and to report on how an intake is going. Your line manager sees them only in a progress report that you send.</p>
+    <h3>Course material, and the record of opening it</h3>
+    <p>The guides, workbooks and recordings are not stored on this website. They are held in
+      <strong>Centenary Networks' Google Workspace</strong>, and this site holds only a link to
+      each one. When you open a piece of material you are taken to Google, and Google's own
+      terms and privacy notice apply to what happens there.</p>
+    <p>We record <strong>which material you opened and when</strong>. We use it for two things:
+      to notice a learner who has not been able to get started so somebody can help, and to
+      evidence to the QCTO that material was made available to you. It is not a mark and it is
+      not an assessment.</p>
+    <p>The links we give you are for you. They are shown only to learners who are signed in and
+      enrolled on that course, and the page you see does not contain the underlying Google
+      address. Please do not forward them: anyone who has the link can open the file, so passing
+      one on shares Centenary's material with somebody who has not been enrolled.</p>
+
     <p>If you ask for a password reset, we email a one-time link to the address on your account and keep a record that a reset was asked for and when. We do not keep the link itself, only a scrambled version of it, so nobody — including us — can read it back out of our records. The link stops working after an hour or after you use it, whichever comes first.</p>
 
     <h3>Why we need it, and on what basis</h3>

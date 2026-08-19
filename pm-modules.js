@@ -8,32 +8,22 @@
    What is deliberately NOT here: the full teaching prose. The learner guides
    are Centenary's material and the downloads are access-controlled, so this
    file carries the study structure — topics, what each covers, and the
-   defining idea — and the guide itself lives behind the DOCS links.
+   defining idea — and the guide itself is a link the academy hands out.
 
    Assessment papers, marking memos and facilitator guides are never published.
 
    ---- TO PUT A DOCUMENT LIVE ----
-   Put the Drive / SharePoint sharing link in DOCS below. A null entry renders
-   as "ask HR for a copy" rather than a dead button, so partial completion is
-   fine and nothing breaks while links are still being gathered. */
+   Not here any more. Links used to sit in a DOCS map in this file, which meant
+   every one of them was public the moment it was pasted: this file is served to
+   anybody who opens the site. They now live in the database, and materials.php
+   hands them only to a learner who is signed in and enrolled. Paste them on the
+   Material page under Administration.
+
+   A module with nothing attached renders as "ask HR for a copy" rather than a
+   dead button, so partial completion is fine and nothing breaks while links are
+   still being gathered. */
 (function () {
 
-  /* Sharing links for the learner documents. Set the file's permission to the
-     people who should have it BEFORE pasting the link here — anything reachable
-     from this page is only as private as the link's own sharing setting. */
-  const DOCS = {
-    KM01: { guide: null, workbook: null, video: null },
-    KM02: { guide: null, workbook: null, video: null },
-    KM03: { guide: null, workbook: null, video: null },
-    KM04: { guide: null, workbook: null, video: null },
-    KM05: { guide: null, workbook: null, video: null },
-    KM06: { guide: null, workbook: null, video: null },
-    KM07: { guide: null, workbook: null, video: null },
-    KM08: { guide: null, workbook: null, video: null },
-    KM09: { guide: null, workbook: null, video: null },
-    KM10: { guide: null, workbook: null, video: null },
-    KM11: { guide: null, workbook: null, video: null }
-  };
 
   const MODULES = [
   {
@@ -594,9 +584,12 @@
   }
   ];
 
-  /* attach the links, keyed off the module id (KM-02 -> KM02) */
+  /* No links in this file. Every module starts with nothing attached, and
+     materials.js fills them in from the server for a learner who is entitled
+     to them. A signed-out visitor keeps the nulls, which is what makes the
+     catalogue readable to everybody without publishing the material. */
   MODULES.forEach(function (m) {
-    m.docs = DOCS[m.id.replace('-', '')] || { guide: null, workbook: null, video: null };
+    m.docs = { guide: null, workbook: null, video: null };
   });
 
   window.PM_MODULES = MODULES;

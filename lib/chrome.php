@@ -192,6 +192,7 @@ function chrome_nav(string $variant, array $o = []): void
         echo '      <a href="admin"' . $on('admin') . '>Registrations</a>' . "\n";
         echo '      <a href="admin-progress"' . $on('admin-progress') . '>Progress</a>' . "\n";
         echo '      <a href="admin-users"' . $on('admin-users') . '>Accounts</a>' . "\n";
+        echo '      <a href="admin-materials"' . $on('admin-materials') . '>Material</a>' . "\n";
         echo '      <a href="./">View the site</a>' . "\n";
         echo '      ' . chrome_signout('Sign out (' . (string) ($o['name'] ?? '') . ')') . "\n";
         echo '    </div>' . "\n";

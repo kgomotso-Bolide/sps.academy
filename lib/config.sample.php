@@ -54,7 +54,7 @@ return [
   /* Bumped whenever the privacy notice changes in a way that affects what
      people agreed to. Stored against every consent so we can answer "what
      exactly did this person agree to, and when" years later. */
-  'policy_version' => '2026-08-18',
+  'policy_version' => '2026-08-19',
 
   /* Switches setup.php on, and is the ONLY thing that does.
 

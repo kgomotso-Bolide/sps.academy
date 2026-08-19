@@ -285,3 +285,46 @@ CREATE TABLE IF NOT EXISTS progress_reports (
   CONSTRAINT fk_prog_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_prog_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Where the learning material actually lives.
+--
+-- We hold a LINK, never a file. Centenary runs Google Workspace, so the guides,
+-- workbooks and recordings sit in a Shared Drive and this table remembers which
+-- URL belongs to which module. That split is deliberate: storage, virus
+-- scanning, document viewing, video streaming and mobile apps are all solved
+-- problems, and a training platform that reimplements them is a training
+-- platform that falls over.
+--
+-- WHAT THIS TABLE DOES NOT DO, and it matters: a Drive link shared as "anyone
+-- with the link" is a bearer token. Holding the URL is holding the file. The
+-- academy controls who is GIVEN a link — sign-in, enrolment, and an audit row
+-- per open — but it cannot stop a learner forwarding one. That is an acceptable
+-- trade for a learner guide. It is not acceptable for assessment material, and
+-- summative assessments, marking memos and facilitator guides must never be
+-- entered here.
+--
+-- Scoped by tenant like everything else. Four academies may point at four
+-- different Drive folders, and one company's material is not another's.
+--
+-- kind is 'guide', 'workbook' or 'video'. Constrained in PHP rather than by an
+-- ENUM so that adding a fourth kind is a code change with a migration behind it
+-- rather than an ALTER TABLE nobody can run on hosting with no shell.
+CREATE TABLE IF NOT EXISTS materials (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  module_code VARCHAR(20)  NOT NULL,
+  kind        VARCHAR(20)  NOT NULL,
+  url         VARCHAR(500) NOT NULL,
+  label       VARCHAR(190)     NULL,
+  updated_at  DATETIME     NOT NULL,
+  updated_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  -- One link per kind per module per course per tenant. Pasting a second guide
+  -- for KM-01 replaces the first rather than quietly giving learners two.
+  UNIQUE KEY uq_material_slot (tenant_id, course_slug, module_code, kind),
+  KEY ix_material_course (tenant_id, course_slug),
+  CONSTRAINT fk_material_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_material_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
