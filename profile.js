@@ -1,17 +1,17 @@
 /* ---- SPS Academy profile (local only) ----
    No account, no password, no backend. The profile lives in this browser's
-   localStorage and never leaves the device — same reasoning as the Skills Gap
-   tool: it holds employment details, which are POPIA-regulated, and this site
-   is on public static hosting with nowhere safe to put them.
+   localStorage and never leaves the device: it holds employment details, which
+   are POPIA-regulated, and the public half of this site is static hosting with
+   nowhere safe to put them.
 
-   The difference from Skills Gap is that this one PERSISTS. On a shared or
+   Unlike the other local stores this one PERSISTS. On a shared or
    site machine the next person would see it, which is why every screen that
    touches the profile offers a visible way to clear it.
 
    Loaded on every page. It does three jobs:
      1. exposes window.SPSProfile (get/save/clear/has)
      2. upgrades the nav profile link to an initials avatar once one exists
-     3. prefills the registration form and the Skills Gap step 1 */
+     3. prefills the registration form */
 (function(){
   var KEY='sps.profile.v1';
 

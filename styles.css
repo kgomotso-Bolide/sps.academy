@@ -1228,4 +1228,28 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   letter-spacing:.04em;margin-left:6px}
 .mat-save{margin-top:18px}
 
+
+/* ---------------------------------------------------------------------------
+   The graduates page.
+   Added 19 Aug 2026. Cards are built by graduates.js from its own PEOPLE list;
+   with that list empty the page renders a .corp panel instead and none of this
+   is used, which is the state it ships in.
+
+   Deliberately NOT reusing .poster: a poster is a wide photograph with a
+   caption under it, and these are portrait-first with the text doing the work.
+   --------------------------------------------------------------------------- */
+.grads{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px}
+.grad{margin:0;padding:24px;border:1px solid var(--line);border-radius:16px;background:#fff;
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.grad-photo,.grad-initials{width:96px;height:96px;border-radius:50%;object-fit:cover;
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.grad-initials{background:var(--orange-deep);color:#fff;font-size:30px;font-weight:800;
+  letter-spacing:.02em}
+.grad figcaption{display:block}
+.grad-kind{display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--orange-deep);margin-bottom:6px}
+.grad figcaption strong{display:block;font-size:17px;color:var(--grey);margin-bottom:4px}
+.grad-course{display:block;font-size:13.5px;color:var(--ink-soft);margin-bottom:10px}
+.grad figcaption p{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink-soft)}
+@media(max-width:520px){.grads{grid-template-columns:1fr}}
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */

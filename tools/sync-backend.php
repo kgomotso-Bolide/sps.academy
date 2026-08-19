@@ -78,6 +78,12 @@ $shared = [
     // and not part of the site — a stale copy of either is a broken sign-in.
     'profile.js', 'pm-progress.js', 'materials.js',
 
+    // The graduate list. Centenary's people, not the client's, so it is the same
+    // list on all four sites and there is no reason for four copies of it to
+    // disagree about who has given consent. graduates.html is NOT here: like
+    // every other .html it carries the site's own chrome.
+    'graduates.js',
+
     // The registered curriculum. Identical in all four repositories and read by
     // module.html, the pathway page and the Material admin page — one source of
     // truth for the module codes, or the admin page offers slots for modules that

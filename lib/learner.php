@@ -57,12 +57,17 @@ const LEARNER_PROGRESS_MAX_ROWS = 2000;
  * The qualifications an SPS learner is ENROLLED on, as opposed to the courses
  * the catalogue links to.
  *
- * Only three entries, and the short list is the point. The internationally
- * recognised courses on the catalogue page are studied on Coursera or edX,
- * where the enrolment is between the learner and that provider — recording one
- * here would be inventing a record we do not hold. What Centenary enrols people
- * on is the two accredited qualifications, plus the short courses we run
- * ourselves, whose title comes from whatever the learner registered for.
+ * Two entries, and the short list is the point. The internationally recognised
+ * courses on the catalogue page are studied on Coursera or edX, where the
+ * enrolment is between the learner and that provider — recording one here would
+ * be inventing a record we do not hold. What Centenary enrols people on is the
+ * Project Manager qualification, plus the short courses we run ourselves, whose
+ * title comes from whatever the learner registered for.
+ *
+ * Computer Technician was here until August 2026 and was removed on Kgomotso's
+ * instruction. Anyone already enrolled against that slug keeps their row: this
+ * list governs what a new enrolment may be filed under, and learner_course_title()
+ * falls back to the registered wording for a slug it no longer recognises.
  *
  * 'tracked' says whether this site carries the module structure for the course.
  * Today exactly one does; pm-modules.js is that structure, and it is generated
@@ -75,11 +80,6 @@ function learner_catalogue(): array
             'title'   => 'Occupational Certificate: Project Manager',
             'note'    => 'NQF 5 · 240 credits · SAQA 101869',
             'tracked' => true,
-        ],
-        'computer-technician' => [
-            'title'   => 'Occupational Certificate: Computer Technician',
-            'note'    => 'NQF 4 · QCTO accredited',
-            'tracked' => false,
         ],
         'short-course' => [
             'title'   => null,   // whatever the registration asked for

@@ -18,7 +18,8 @@ maintain or extend it.
 in SPS's voice: courses are **fully funded by SPS**, you **register your interest with HR**,
 and the primary action is **Upskill Yourself** rather than "Talk to Our Team". The catalogue runs to
 **800 qualifications and courses** (20 live on the site today), including the nationally accredited
-**Occupational Certificate: Computer Technician**.
+**Occupational Certificate: Project Manager** — which is the one course open for enrolment, and the
+first card in every catalogue. Computer Technician was withdrawn on 19 Aug 2026 (Kgomotso).
 
 > ⚠️ **Do not reintroduce the "credit-bearing" framing.** An earlier revision positioned the product
 > as credit-bearing modules laddering toward a qualification, with B-BBEE Skills Development returns
@@ -29,9 +30,9 @@ and the primary action is **Upskill Yourself** rather than "Talk to Our Team". T
 
 The three supporting pillars on the home page:
 
-1. **800 Courses and Growing** — the catalogue spans technical, business, compliance, safety and admin, so this isn't only for the people whose jobs already touch AI.
+1. **Fully Funded** — SPS pays; you register your interest and square the timing with your manager.
 2. **Built Around Your Job** — every course is grounded in the work we actually do, so what you learn this week you can use next week.
-3. **Fully Online** — study from any site or from home; no travel, no lost shifts, training that fits around operational duties.
+3. **Online or In Person** — study from home, from any site, or in a classroom with a facilitator.
 
 > ⚠️ **Structure is shared with the Fungi and Equinix academies.** The three sites run the same pages,
 > components and JS; only brand, palette, logo and industry vocabulary differ. Change the structure
@@ -44,15 +45,16 @@ to field, sales, admin and management. No technical background assumed.
 technical and AI capability. Practical courses that fit around the working day, and a credentialed
 path for anyone who wants to take it further as the energy sector goes digital."*
 
-**Industry vocabulary** (what changes from the Fungi original): metering → solar/PV. The Skills Gap
-roles are Solar Installer / PV Technician · Field Operations & Maintenance · Sales & Projects ·
-Customer Care · Data & Systems · Team Lead · Manager · Admin & Support. Same eight keys as the other
-two sites — `skills-gap.js`, `profile.html` and `profile-page.js` must agree on them.
+**Industry vocabulary** (what changes from the Fungi original): metering → solar/PV.
+
+> The Skills Gap tool was removed on 19 Aug 2026. Its eight role keys lived in `skills-gap.js`,
+> `profile.html` and `profile-page.js` and had to agree; all three have been unwired, and the
+> role/years/qualification/background block has gone from the profile form with it.
 
 **Primary calls to action:** `Explore Courses` · `Upskill Yourself`
 
 ### Approved hero copy (current)
-- **Badge / eyebrow:** AI · Live & Hands-On — Our In-House Academy · Online · For SPS Employees
+- **Badge / eyebrow:** AI · Live & Hands-On — Our In-House Academy · Online & In Person · For SPS Employees
 - **Headline:** AI Skills, Built *In-House*
 - **Subtext:** SPS Academy is our own training academy — open to you, funded by SPS, and delivered
   online so it fits around your work. AI is where we started, and our catalogue now runs to 800
@@ -119,15 +121,19 @@ sps/
 ├── courses.html            # Courses hub: search + credential/subject filters, three bands
 │                           #   (ours · more AI · free international), accreditation badges
 ├── about.html              # About: positioning, industry line, accreditation, photo posters
-├── skills-gap.html         # Skills Gap Analysis — 3-step self-assessment, runs in-browser
-├── rpl.html                # Recognition of Prior Learning: the three QCTO purposes,
-│                           #   portfolio of evidence, the process, and what RPL is not
+├── graduates.html          # Where our learners are now — Centenary graduates and interns
+├── graduates.js            # THE GRADUATE LIST. One PEOPLE array, one entry per person.
+│                           #   Nobody is published without consent:true — read the note
+│                           #   at the top of the file before adding anyone
+├── skills-gap.html         # STUB → /courses. The tool was removed 19 Aug 2026
+├── rpl.html                # STUB → /contact. The explainer was removed 19 Aug 2026
 ├── locks.js                # WHICH COURSES ARE OPEN — single source of truth. Edit this
 │                           #   file (OPEN_TITLES / OPEN_SLUGS) to reopen a course.
 ├── module.html             # ONE data-driven KNOWLEDGE MODULE template — renders any of
 │                           #   the 11 via ?m=KM-02
 ├── pm-modules.js           # The 11 knowledge modules: topics, weightings, what each
-│                           #   covers, the defining idea. PUT DRIVE LINKS IN `DOCS` HERE.
+│                           #   covers, the defining idea. NO LINKS HERE — this file is public;
+│                           #   material links are pasted on /admin-materials
 ├── pm-progress.php         # Learner progress report: submit to HR, print for manager signature
 ├── pm-progress.js          # Progress store. TWO stores: the learner's ACCOUNT when signed in,
 │                           #   localStorage when not. Fires 'pmprogress:sync' when it knows which.
@@ -139,7 +145,7 @@ sps/
 │                           #   and how the 240 credits are actually earned
 ├── profile.html            # Optional LOCAL profile (localStorage only) — NOT the academy
 │                           #   account; the page says so and links to sign-in
-├── ai-in-action.html       # Interactive AI demo + impact stats
+├── ai-in-action.html       # STUB → /courses. The page was removed 19 Aug 2026
 ├── contact.php             # Contact details + working registration form (writes to the database)
 │
 │  ── the back end (xneelo-backend branch only; none of it runs on GitHub Pages) ──
@@ -174,11 +180,9 @@ sps/
 ├── cards.js                # SHARED: course-card photo banners + links (Home + Courses)
 ├── courses-index.js        # Courses page: search/filter, external cards, badge popovers
 ├── profile.js              # SHARED: profile store, nav avatar, form prefill, save-a-course
-├── profile-page.js         # Profile page: hydrate form, skills snapshot, saved courses
-├── skills-gap.js           # Skills Gap model + rendering (also runs headless under Node)
+├── profile-page.js         # Profile page: hydrate form, saved courses
 ├── assistant.js            # SHARED: client-side "Ask the Academy" AI assistant
 ├── neural.js               # Home hero neural-network canvas (motion PAUSED — see file)
-├── demo.js                 # AI-in-Action typewriter demo + counters
 │
 ├── images/gm-photo.svg     # PLACEHOLDER — General Manager portrait, awaiting the real photo
 ├── images/poster-1.svg     # PLACEHOLDER — academy photograph 1
@@ -281,19 +285,49 @@ Two answers, because there are two branches and they are genuinely different sit
 > accredited by the **Quality Council for Trades and Occupations (QCTO)** as a Skills Development
 > Provider. Accreditation No. **07-QCTO/SDP180526182035**, valid **15 May 2026 – 14 May 2031**.
 
-The accredited qualification itself is the **Occupational Certificate: Computer Technician**
-(NQF 5, Qualification ID **101408**, 282 credits).
+The accredited qualification itself is the **Occupational Certificate: Project Manager**
+(NQF 5, SAQA ID **101869**, 240 credits, curriculum code 121905000).
+
+Computer Technician (NQF 5, ID 101408, 282 credits) was on this site until 19 Aug 2026 and was
+withdrawn on Kgomotso's instruction. It is gone from the catalogue, the course template, the
+assistant and `learner_catalogue()`. Anyone already enrolled against the old slug keeps their row.
 
 Per the boss, this block should appear on the **credentials / about section** (it's rendered in the
 About section's accreditation note) as well as the footer.
 
-Non-accredited short courses must be labelled as such; only the Computer Technician pathway is the
+Non-accredited short courses must be labelled as such; only the Project Manager pathway is the
 accredited qualification.
 
 ---
 
 ## 8. Roadmap / Open Items
 
+- [x] **Kgomotso's five changes (19 Aug 2026)** — his list, in his order:
+  1. **Computer Technician withdrawn.** Gone from `cards.js`, `courses.html`, `index.html`,
+     `course.html` (record and its `MOD_TECH` curriculum), `assistant.js` and `learner_catalogue()`.
+     The catalogue counter reads 27, the TECHNICAL subject chip disappears with the card that fed it,
+     and a search for "technician" now returns nothing. Existing enrolment rows are untouched.
+  2. **Project Manager is first** in both catalogues, first in `cards.js` and `assistant.js`, and is
+     what a bare `/course` renders — the default was `ai-fundamentals`.
+  3. **Online *and* in person.** Every in-house card reads ONLINE OR IN PERSON, the hero eyebrow and
+     lede say it, and `mode:` on the six courses we deliver ourselves says it. The international
+     courses still say ONLINE, because they are Coursera and Google and that is the truth.
+  4. **Simplified.** ~19% of the words are gone from Home, Courses, About and Profile. The
+     accreditation essay is one sentence, the "Ask us" panel is gone, About lost two brochure
+     paragraphs and three of seven bullets. **Skills Gap, RPL and AI in Action were removed** —
+     left as redirect stubs rather than deleted, because links to them have already been emailed
+     to managers and a 404 on this host serves the client's homepage. `skills-gap.js` and `demo.js`
+     are deleted; the profile page lost its skills snapshot and the four background selects that
+     existed only to feed it.
+  5. **Graduates page added** — `graduates.html` + `graduates.js`, in the nav between Courses and
+     Contact. Ships with an empty list on purpose: it renders an honest "we are still collecting
+     these" panel rather than invented people, and `consent:true` is required per entry because a
+     name, a photograph and an employer on a public page are personal information under POPIA.
+
+  SPS only for now, by instruction — Fungi, Maziv and Equinix still carry the old catalogue.
+  `lib/learner.php`, `lib/chrome.php`, `profile.js`, `profile-page.js` and the shared region of
+  `styles.css` are on the sync manifest, so `tools/sync-backend.php --check` will report drift
+  against the other three until this is rolled out to them. That is expected, not a fault.
 - [x] **Reverted to courses-first positioning (30 Jul 2026)** — removed all credit-bearing / stackable-credits / B-BBEE language site-wide, restored the SPS orange+green palette, renamed `modules.html` → `courses.html` and "Modules" → "Courses" throughout. See the warning in §1.
 - [x] **Per-course outlines** — each of the 20 courses has its own tailored curriculum (`MOD_*` arrays in `course.html`).
 - [x] **Working contact form** — wired to **FormSubmit.co → accounts@cn.co.za** (redirects to `thanks.html`); real email/phone in place. *First submission triggers a one-time activation email to accounts@cn.co.za — click it to start receiving enquiries.*

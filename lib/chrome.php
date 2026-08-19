@@ -150,10 +150,9 @@ function chrome_nav(string $variant, array $o = []): void
     if ($variant === 'site') {
         echo '    <div class="nav-links" id="navLinks">' . "\n";
         echo '      <a href="./" data-nav="home">Home</a>' . "\n";
-        echo '      <a href="ai-in-action" data-nav="ai">AI in Action</a>' . "\n";
         echo '      <a href="about" data-nav="about">About</a>' . "\n";
         echo '      <a href="courses" data-nav="courses">Courses</a>' . "\n";
-        echo '      <a href="skills-gap" data-nav="skills">Skills Gap</a>' . "\n";
+        echo '      <a href="graduates" data-nav="graduates">Graduates</a>' . "\n";
         echo '      <a href="contact" data-nav="contact"' . $on('contact') . '>Contact</a>' . "\n";
         echo '      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile">'
            . '<span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" '
@@ -262,11 +261,9 @@ function chrome_footer(string $variant, array $o = []): void
         echo '      <div class="foot-nav">' . "\n";
         foreach ([
             './'           => 'Home',
-            'ai-in-action' => 'AI in Action',
             'about'        => 'About',
             'courses'      => 'Courses',
-            'skills-gap'   => 'Skills Gap',
-            'rpl'          => 'RPL',
+            'graduates'    => 'Graduates',
             'profile'      => 'Profile',
             'contact'      => 'Contact',
             'privacy'      => 'Privacy',

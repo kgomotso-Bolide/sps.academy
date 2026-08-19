@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Profile — SPS Academy</title>
-<meta name="description" content="An optional profile that saves your details on this device, so registration forms and the Skills Gap check fill themselves in. Separate from your academy sign-in.">
-<link rel="stylesheet" href="styles.css?v=20260818">
+<meta name="description" content="An optional profile that saves your details on this device, so registration forms fill themselves in. Separate from your academy sign-in.">
+<link rel="stylesheet" href="styles.css?v=20260819">
 </head>
 <body>
 <nav id="nav">
@@ -13,10 +13,9 @@
     <a href="./" class="brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></a>
     <div class="nav-links" id="navLinks">
       <a href="./" data-nav="home">Home</a>
-      <a href="ai-in-action" data-nav="ai">AI in Action</a>
       <a href="about" data-nav="about">About</a>
       <a href="courses" data-nav="courses">Courses</a>
-      <a href="skills-gap" data-nav="skills">Skills Gap</a>
+      <a href="graduates" data-nav="graduates">Graduates</a>
       <a href="contact" data-nav="contact">Contact</a>
       <a href="profile" data-nav="profile" class="nav-profile active" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
       <a href="contact" class="nav-cta">Upskill Yourself</a>
@@ -30,7 +29,7 @@
     <div class="sec-head reveal">
       <span class="eyebrow">Your Profile</span>
       <h2 id="pf-greet">Save your details once</h2>
-      <p>Entirely optional, and separate from your academy sign-in. Fill it in and the registration form and the Skills Gap check will fill themselves in for you, so you type your details once. Skip it and everything still works exactly as it does now — including your course progress, which is kept in your academy account either way.</p>
+      <p>Entirely optional, and separate from your academy sign-in. Fill it in and the registration form fills itself in for you, so you type your details once. Skip it and everything still works exactly as it does now — including your course progress, which is kept in your academy account either way.</p>
     </div>
     <div class="sg-assure reveal">
       <span class="lbl">Where things are kept</span>
@@ -68,66 +67,11 @@
           <div class="field"><label for="pf-phone">Contact number</label><input type="tel" id="pf-phone" placeholder="+27"></div>
         </div>
 
-        <div class="sg-stepnum" style="margin-top:30px">Your background</div>
-        <h3>Where you're coming from</h3>
-        <p class="sg-intro">These four feed straight into the Skills Gap check, so you only answer them once.</p>
-
-        <!-- values must match ROLES / YEARS / QUALS / BACKGROUNDS in skills-gap.js -->
-        <div class="two">
-          <div class="field"><label for="pf-role">Your role at SPS</label><select id="pf-role">
-            <option value="">Choose…</option>
-            <option value="install">Solar Installer / PV Technician</option>
-            <option value="field">Field Operations &amp; Maintenance</option>
-            <option value="sales">Sales &amp; Projects</option>
-            <option value="care">Customer Care</option>
-            <option value="datasys">Data &amp; Systems</option>
-            <option value="lead">Team Lead / Supervisor</option>
-            <option value="manager">Manager / Head of Department</option>
-            <option value="support">Admin &amp; Support</option>
-          </select></div>
-          <div class="field"><label for="pf-years">Years doing this kind of work</label><select id="pf-years">
-            <option value="">Choose…</option>
-            <option value="lt1">Less than a year</option>
-            <option value="1-2">1–2 years</option>
-            <option value="3-5">3–5 years</option>
-            <option value="6-10">6–10 years</option>
-            <option value="10+">More than 10 years</option>
-          </select></div>
-        </div>
-        <div class="two">
-          <div class="field"><label for="pf-qual">Highest qualification</label><select id="pf-qual">
-            <option value="">Choose…</option>
-            <option value="none">No formal qualification yet</option>
-            <option value="matric">Matric / NQF 4</option>
-            <option value="cert">Certificate / NQF 5</option>
-            <option value="diploma">National Diploma / NQF 6</option>
-            <option value="degree">Degree / NQF 7</option>
-            <option value="post">Postgraduate / NQF 8+</option>
-          </select></div>
-          <div class="field"><label for="pf-bg">What you did before</label><select id="pf-bg">
-            <option value="">Choose…</option>
-            <option value="energy">Solar / energy</option>
-            <option value="technical">Technical or a trade</option>
-            <option value="service">Retail or customer service</option>
-            <option value="office">Office / admin</option>
-            <option value="finance">Finance</option>
-            <option value="it">IT</option>
-            <option value="first">This is my first job</option>
-            <option value="other">Something else</option>
-          </select></div>
-        </div>
-
         <div class="sg-nav">
           <button type="submit" class="btn btn-primary" id="pf-save">Save my profile</button>
           <span class="pf-saved" id="pf-saved" hidden>Saved</span>
         </div>
       </form>
-
-      <div class="sg-card reveal" id="pf-skills">
-        <div class="sg-stepnum">Your skills</div>
-        <h3>Skills snapshot</h3>
-        <div id="pf-skills-body"></div>
-      </div>
 
       <div class="sg-card reveal" id="pf-courses">
         <div class="sg-stepnum">Saved courses</div>
@@ -153,16 +97,12 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow">What it saves you</span>
-      <h2>Three fewer things to retype</h2>
+      <h2>Two fewer things to retype</h2>
     </div>
     <div class="features">
       <div class="feat reveal">
         <h3>Registering for a course</h3>
         <p>Name, employee number, department, line manager, email and number all arrive filled in. You check them and send.</p>
-      </div>
-      <div class="feat reveal">
-        <h3>The Skills Gap check</h3>
-        <p>Step one is answered before you get there, and you can save your ratings so a repeat check next year starts from where you were.</p>
       </div>
       <div class="feat reveal">
         <h3>Keeping a shortlist</h3>
@@ -178,11 +118,9 @@
       <div class="foot-brand"><img src="sps-dark-logo.svg" alt="SPS — Sustainable Power Solutions"></div>
       <div class="foot-nav">
         <a href="./">Home</a>
-        <a href="ai-in-action">AI in Action</a>
         <a href="about">About</a>
         <a href="courses">Courses</a>
-        <a href="skills-gap">Skills Gap</a>
-        <a href="rpl">RPL</a>
+        <a href="graduates">Graduates</a>
         <a href="profile">Profile</a>
         <a href="contact">Contact</a>
         <a href="privacy">Privacy</a>
@@ -195,8 +133,8 @@
     <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Our catalogue is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification, and not everything in it is listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
-<script src="site.js?v=20260818"></script>
-<script src="profile.js?v=20260818"></script>
-<script src="profile-page.js?v=20260818"></script>
-<script src="assistant.js?v=20260818"></script>
+<script src="site.js?v=20260819"></script>
+<script src="profile.js?v=20260819"></script>
+<script src="profile-page.js?v=20260819"></script>
+<script src="assistant.js?v=20260819"></script>
 </body></html>

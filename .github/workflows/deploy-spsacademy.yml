@@ -242,7 +242,7 @@ jobs:
 
           # 3. Our pages have to be OUR pages. Every one of them carries the
           #    academy name in its <title>, and the client's homepage does not.
-          for p in "/" "/contact" "/privacy" "/login" "/forgot" "/reset"; do
+          for p in "/" "/courses" "/graduates" "/contact" "/privacy" "/login" "/forgot" "/reset"; do
             body=$(curl -sS --max-time 30 "$base$p" || echo '')
             case "$body" in
               *"SPS Academy"*) printf '  %-22s ok\n' "$p" ;;

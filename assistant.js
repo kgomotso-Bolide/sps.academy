@@ -30,13 +30,12 @@
   var st=document.createElement('style'); st.appendChild(document.createTextNode(css)); document.head.appendChild(st);
 
   var COURSES=[
+   {t:"Occupational Certificate: Project Manager",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders procurement quality delivery accredited qualification nqf 5 240 credits saqa 101869 qcto portfolio evidence eisa"},
    {t:"AI Fundamentals for the Workplace",slug:"ai-fundamentals",cat:"Beginner · Business",kw:"basics fundamentals introduction beginner workplace nontechnical everyday start"},
    {t:"AI Tools for Productivity",slug:"ai-tools-productivity",cat:"Beginner · Business",kw:"tools productivity writing email research automation workflow assistants admin"},
    {t:"Responsible & Ethical AI Use",slug:"responsible-ai",cat:"Compliance",kw:"responsible ethical ethics privacy bias safe compliance policy popia data"},
    {t:"AI for Leaders & Managers",slug:"ai-leaders",cat:"Leadership",kw:"leaders managers leadership management decision adoption teams executives boss"},
    {t:"AI & New Venture Creation",slug:"new-venture",cat:"Business",kw:"venture startup entrepreneur business innovation founder"},
-   {t:"Occupational Certificate: Computer Technician",slug:"computer-technician",cat:"Technical",kw:"computer technician hardware systems networking support technical accredited certificate installer repair maintenance qualification"},
-   {t:"Occupational Certificate: Project Manager",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders procurement quality delivery accredited qualification nqf 5 240 credits saqa 101869 qcto portfolio evidence eisa"},
    {t:"Deploying TinyML",slug:"deploying-tinyml",cat:"Advanced · Computer Science",kw:"tinyml deploy microcontroller tensorflow embedded edge iot device sensors coding"},
    {t:"Fundamentals of TinyML",slug:"fundamentals-tinyml",cat:"Computer Science",kw:"tinyml fundamentals machine learning embedded basics iot sensors"},
    {t:"AI Strategy for Business Leaders",slug:"ai-strategy",cat:"Executive · Business",kw:"strategy business leaders value roi executive transformation hype impact"},
@@ -72,7 +71,7 @@
     function has(){for(var i=0;i<arguments.length;i++){if(s.indexOf(arguments[i])>=0)return true;}return false;}
     if(/^(hi|hello|hey|howzit|good (morning|afternoon|day)|yo|hi there)\b/.test(s)) return [T("Howzit! I'm the Academy assistant. I can help you <b>find a course</b>, explain how the academy works, or point you to HR to register. What are you after?"),CH(["Find a course","How does it work?","What does it cost?","Register my interest"])];
     if(has("catalogue","catalog","new courses","what else","more courses","beyond ai","non-ai","other courses")) return [T("The catalogue goes well beyond AI — technical, business, compliance, safety and admin. What you see listed on this site is what's live so far, and more is being loaded in. If you want something that isn't here yet, <a href='contact'>ask HR</a> — if we can arrange it, you can do it."),CH(["Find a course","Register my interest"])];
-    if(has("accredit","qcto","centenary","qualification","nqf","credential")) return [T("Accreditation details for the academy are set out in the footer of every page. If you're after a full qualification rather than a short course, the <b>Occupational Certificate: Computer Technician</b> is the formal technical route — or <a href='contact'>ask HR</a>, since not everything in the catalogue is on the site yet."),C([COURSES[5]])];
+    if(has("accredit","qcto","centenary","qualification","nqf","credential")) return [T("Accreditation details for the academy are set out in the footer of every page. If you're after a full qualification rather than a short course, the <b>Occupational Certificate: Project Manager</b> is the formal route — or <a href='contact'>ask HR</a>, since not everything in the catalogue is on the site yet."),C([COURSES[0]])];
     if(has("price","pricing","cost","fee","how much","rate","quote","afford","pay","free")) return [T("Nothing — every course is <b>fully funded by SPS</b>. You just need to <a href='contact'>register your interest</a> and square the timing with your line manager."),CH(["Register my interest"])];
     if(has("contact","talk","human","agent","call","speak","reach","phone","email","enquire","enquiry","hr","register")) return [T("Send it through to <a href='mailto:kgomotso@centenarynetworks.com'>kgomotso@centenarynetworks.com</a> or call <a href='tel:0123456789'>012 345 6789</a>, or fill in the <a href='contact'>registration form</a> and they'll come back to you.")];
     if(has("download","pdf","workbook","resource","slides","material","handout")) return [T("Every course comes with downloadable <b>PDF resources</b> — workbooks, slides, cheat sheets and reading lists — on each course page under “Downloadable resources.”")];
@@ -82,7 +81,7 @@
     if(has("find","recommend","suggest","browse","which","what course","learn","interested","topic","looking for","explore","study")){
       var f1=search(s);
       if(f1.length) return [T("Here are courses that fit:"),C(f1)];
-      return [T("Sure — what topic? For example:"),CH(["Cybersecurity","AI for managers","TinyML","AI in medicine","Computer Technician"])];
+      return [T("Sure — what topic? For example:"),CH(["Project management","Cybersecurity","AI for managers","TinyML","AI in medicine"])];
     }
     var f=search(s);
     if(f.length) return [T("Here's what matches:"),C(f)];
