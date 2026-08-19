@@ -1,8 +1,29 @@
-/* ---- Profile page: hydrate the form, render the snapshot panels ----
+/* ---- Profile page: hydrate the form, render the saved courses ----
    Only runs on profile.html. The store itself lives in profile.js. */
 (function(){
   var form=document.getElementById('pf-form'); if(!form) return;
-  var P=window.SPSProfile;
+
+  /* FIND THE STORE BY WHAT IT DOES, NOT BY WHAT IT IS CALLED.
+     profile.js is shared and names its API window.SPSProfile. The other three
+     academies were branded separately and their own copy of this file read
+     window.FungiProfile / MazivProfile / EquinixProfile — so on the day
+     profile.js was first synced out of SPS, that name stopped existing and this
+     page died on its first line. It failed silently, because a profile page
+     that renders nothing looks exactly like a profile page nobody has filled
+     in, and it stayed broken on three client sites until 19 Aug 2026.
+     pm-progress.js already searches window for whatever implements the API, for
+     this same reason. Doing it here too means a fifth academy cannot repeat it. */
+  var P=(function(){
+    if(window.SPSProfile) return window.SPSProfile;
+    for(var k in window){
+      if(!/Profile$/.test(k)) continue;
+      var o; try{ o=window[k]; }catch(e){ continue; }   // cross-origin frames throw
+      if(o&&typeof o.get==='function'&&typeof o.save==='function'&&
+         typeof o.available==='function') return o;
+    }
+    return null;
+  })();
+  if(!P) return;
 
   var FIELDS=['name','empno','dept','manager','email','phone'];
   function el(k){ return document.getElementById('pf-'+k); }
@@ -36,7 +57,7 @@
     flag.textContent=ok?'Saved to this device':'Could not save — storage is blocked';
     flag.classList.toggle('bad',!ok);
     if(ok&&P.firstName()) greet.textContent='Welcome back, '+P.firstName();
-    window.dispatchEvent(new Event('sps-profile-changed'));
+    window.dispatchEvent(new Event('academy-profile-changed'));
     setTimeout(function(){ flag.hidden=true; },4000);
   });
 
@@ -84,7 +105,7 @@
     var flag=document.getElementById('pf-saved');
     flag.hidden=false; flag.classList.remove('bad'); flag.textContent='Profile deleted from this device';
     setTimeout(function(){ flag.hidden=true; },4000);
-    window.dispatchEvent(new Event('sps-profile-changed'));
+    window.dispatchEvent(new Event('academy-profile-changed'));
   });
 
   document.getElementById('pf-print').addEventListener('click',function(){ window.print(); });

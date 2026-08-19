@@ -73,10 +73,15 @@ $shared = [
     'phpcheck.php', 'pm-progress.php', 'privacy.php', 'reset.php', 'setup.php',
     'admin-materials.php', 'materials.php',
 
+    // profile-page.js joined this list on 19 Aug 2026, after the four copies had
+    // been allowed to diverge and three of them broke: profile.js is shared and
+    // names its API window.SPSProfile, while their profile-page.js still looked
+    // for window.FungiProfile and friends. Nothing about that file is the client.
+    //
     // Client-side code that talks to the back end. profile.js and pm-progress.js
     // know the shape of account.php's JSON, so they are part of the application
     // and not part of the site — a stale copy of either is a broken sign-in.
-    'profile.js', 'pm-progress.js', 'materials.js',
+    'profile.js', 'profile-page.js', 'pm-progress.js', 'materials.js',
 
     // The graduate list. Centenary's people, not the client's, so it is the same
     // list on all four sites and there is no reason for four copies of it to
