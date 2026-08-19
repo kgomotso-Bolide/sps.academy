@@ -1007,8 +1007,13 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 /* A way in, injected by profile.js rather than added to seventeen navs. It is a
    plain link and not a second CTA — there is already one, and two buttons
    competing in a nav makes neither read as the main thing. */
-.nav-links a.nav-signin{color:var(--ink-soft)}
-.nav-links a.nav-signin:hover{color:var(--orange)}
+/* No colour of its own, on purpose. It used to be var(--ink-soft), which is
+   right on SPS's white nav and illegible on a coloured one — Fungi, Maziv and
+   Equinix all have a solid brand bar across the top, and this was body-grey
+   sitting on it. Shared CSS cannot assume the nav is white. It now takes
+   whatever colour the site already gives its nav links, and just sits back. */
+.nav-links a.nav-signin{opacity:.75}
+.nav-links a.nav-signin:hover{opacity:1}
 .nav-profile.signed-in .np-av{background:var(--green);color:#fff;border-color:var(--green)}
 
 /* ---- the learner's own page ---- */
