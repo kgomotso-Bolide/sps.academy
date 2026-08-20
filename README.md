@@ -302,6 +302,20 @@ accredited qualification.
 
 ## 8. Roadmap / Open Items
 
+- [x] **The three focus lines (20 Aug 2026)** — Kgomotso: Project Management, AI short
+  courses, AI & Software Development, on all four sites. The third did not exist, so it
+  was built: `ai-software-development`, eight modules, a card second in both catalogues,
+  an entry in `cards.js`, the assistant and `learner_catalogue()` so somebody can be
+  enrolled on it rather than merely shown it, and three tiles at the top of
+  `/courses` naming the three lines. **Its syllabus is ours, not a registered
+  curriculum** — the course page says so in a box until Kgomotso signs it off.
+  The card artwork is drawn in `var(--accent)` and `var(--green)` rather than literal
+  hexes, so the same markup is orange on SPS, teal on Fungi, purple on Maziv and red on
+  Equinix. Every earlier card was hand-painted, which is why porting one has always
+  meant repainting it.
+- [x] **Course locks off (20 Aug 2026)** — `LOCKS_ON = false`, on Kgomotso's "no locking".
+  Two of the three focus lines were padlocked here and open on the other three sites, so
+  SPS was the odd one out. The lists in `locks.js` are left intact: one word puts it back.
 - [x] **Kgomotso's five changes (19 Aug 2026)** — his list, in his order:
   1. **Computer Technician withdrawn.** Gone from `cards.js`, `courses.html`, `index.html`,
      `course.html` (record and its `MOD_TECH` curriculum), `assistant.js` and `learner_catalogue()`.

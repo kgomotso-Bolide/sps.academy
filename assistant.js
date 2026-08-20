@@ -31,6 +31,7 @@
 
   var COURSES=[
    {t:"Occupational Certificate: Project Manager",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders procurement quality delivery accredited qualification nqf 5 240 credits saqa 101869 qcto portfolio evidence eisa"},
+   {t:"AI & Software Development",slug:"ai-software-development",cat:"Software Development",kw:"ai & software development software development programme code coding programming python git api database testing deployment ai assistants copilot build applications developers"},
    {t:"AI Fundamentals for the Workplace",slug:"ai-fundamentals",cat:"Beginner · Business",kw:"basics fundamentals introduction beginner workplace nontechnical everyday start"},
    {t:"AI Tools for Productivity",slug:"ai-tools-productivity",cat:"Beginner · Business",kw:"tools productivity writing email research automation workflow assistants admin"},
    {t:"Responsible & Ethical AI Use",slug:"responsible-ai",cat:"Compliance",kw:"responsible ethical ethics privacy bias safe compliance policy popia data"},

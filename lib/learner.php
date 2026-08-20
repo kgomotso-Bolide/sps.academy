@@ -81,6 +81,11 @@ function learner_catalogue(): array
             'note'    => 'NQF 5 · 240 credits · SAQA 101869',
             'tracked' => true,
         ],
+        'ai-software-development' => [
+            'title'   => 'AI & Software Development',
+            'note'    => 'A professional programme, not an accredited qualification',
+            'tracked' => false,   // no module structure on the site yet
+        ],
         'short-course' => [
             'title'   => null,   // whatever the registration asked for
             'note'    => 'A short course, not an accredited qualification',

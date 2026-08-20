@@ -165,6 +165,7 @@
     "Compliance":["Recognise the key risks and obligations","Protect privacy and sensitive data","Spot and reduce bias and inaccuracy","Use AI safely in a professional setting","Help shape a simple, practical AI policy"],
     "Leadership":["Set a clear AI vision for your department","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
     "Project Management":["Initiate, plan, execute and close a project end to end","Build a scope statement, schedule and cost projection","Manage risk, quality and procurement on a live project","Lead a project team and handle stakeholder communication","Build the portfolio of evidence the qualification requires"],
+    "Software Development":["Read an unfamiliar codebase and find your way around","Write, test and debug code that works","Store, query and move data without losing any","Use AI coding assistants without trusting them blindly","Ship a working feature and keep it running"],
     "Technical":["Build job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Come away with a qualification that is yours to keep","Open up clear career pathways"]
   };
 
@@ -334,8 +335,19 @@
     ]}
   ];
 
+  const MOD_AISD=[
+    {t:"How Software Actually Gets Built",lessons:["What a codebase is, and how to read one","Version control and why every change is a branch","Code review, and what \"done\" means","Environments: local, staging, production"]},
+    {t:"Programming Foundations",lessons:["Values, variables and types","Decisions, loops and functions","Lists, dictionaries and how data is shaped","Reading other people's code before writing your own"]},
+    {t:"Working with Data",lessons:["Files, CSV and JSON","A real database, and what SQL is for","Querying without breaking anything","Backups, and why you test the restore"]},
+    {t:"APIs: Using Them and Building Them",lessons:["HTTP in plain terms","Calling somebody else's API","Keys, tokens and not leaking either","Publishing an endpoint of your own"]},
+    {t:"AI Coding Assistants, Used Properly",lessons:["Asking for code and reading what comes back","Where assistants are confidently wrong","What must never be pasted into one","Reviewing generated code as if a stranger wrote it"]},
+    {t:"Building an AI-Powered Feature",lessons:["Putting a model behind something real","Prompts as part of the codebase","Cost, latency and rate limits","What happens when the model is unavailable"]},
+    {t:"Testing, Debugging and Not Breaking Production",lessons:["Automated tests, and what to test first","Reading a stack trace","Logs that are worth having","Rolling back without panic"]},
+    {t:"Shipping It",lessons:["Deploying, and doing it twice","Configuration and secrets","Monitoring and knowing it is still up","Handing it over to whoever maintains it"]}
+  ];
   const COURSES={
     "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",starts:"10 September 2026",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
+    "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
     "ai-tools-productivity":{title:"AI Tools for Productivity",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1581091226825-a6a2a5aee158",lead:"Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools and workflow automation."},
     "responsible-ai":{title:"Responsible & Ethical AI Use",cat:"Compliance",mode:"Online or in person",level:"Intermediate",img:"1620712943543-bcc4688e7485",lead:"Using AI safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of AI in a professional setting."},
@@ -412,6 +424,17 @@
        simplification, so there is no page to send anyone to. RPL itself has not
        gone away — it is a conversation with the academy, and the enrol button
        already starts that conversation. */
+    /* Courses whose curriculum we wrote rather than inherited say so. The
+       Project Manager modules come out of the QCTO documents and are not ours
+       to change; these are ours, and until Kgomotso has signed them off the
+       page should not let anyone assume otherwise. */
+    const draftNote = c.draftSyllabus
+      ? '<div class="c-rplnote"><strong>This outline is still being signed off.</strong> '+
+        'The modules below are what the programme is planned to cover. They are not a '+
+        'registered qualification and carry no NQF credits. Ask the academy before '+
+        'committing to dates.</div>'
+      : '';
+
     const rplNote = '';
 
     /* Some qualifications have an international course that covers part of the
@@ -430,7 +453,7 @@
         ' <a href="'+c.plan.href+'">'+ESC(c.plan.cta)+'</a></div>'
       : '';
 
-    document.getElementById('c-rpl').innerHTML = rplNote + pathNote + planNote;
+    document.getElementById('c-rpl').innerHTML = draftNote + rplNote + pathNote + planNote;
 
     /* A locked course still renders — people arrive on bookmarks and on the
        legacy /ai-fundamentals redirect — but it must not offer enrolment. The

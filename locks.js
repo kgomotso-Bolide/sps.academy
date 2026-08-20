@@ -22,7 +22,13 @@
    are ignored — they are left intact on purpose, so turning it back on restores
    exactly the state it had before without anyone having to remember it. */
 (function () {
-  var LOCKS_ON = true;
+  /* Off since 20 Aug 2026. Kgomotso: no locking, and the three lines we are
+     selling — Project Management, AI short courses, AI & Software Development —
+     have to be available on all four sites. Two of the three were padlocked here
+     and open on Fungi, Maziv and Equinix, so SPS was the odd one out.
+     The lists below are left intact on purpose: turning this back on restores
+     exactly the state it had before, without anyone having to remember it. */
+  var LOCKS_ON = false;
 
   var OPEN_TITLES = [
     'Occupational Certificate: Project Manager',
