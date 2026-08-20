@@ -2,27 +2,32 @@
    The graduates page. Everything it shows comes from the two lists below —
    there is no other place to edit, and no back end behind this page.
 
-   REVIEW MODE — READ THIS FIRST
-   ----------------------------
-   REVIEW is true today. The page is showing the 2022 cohort so Kgomotso can
-   see the real thing on the real site and say what he wants changed, and it
-   carries a visible banner saying exactly that. Nobody in that list has been
-   asked yet.
+   WHO SAID THESE NINE COULD BE PUBLISHED, AND WHEN
+   ------------------------------------------------
+   Confirmed 20 Aug 2026 by the site owner. These nine are the second cohort of
+   the Bubble G.U.M project, which runs under Centenary Networks and is led by
+   Kgomotso Moloantoa. They already appear under their own names and photographs
+   in Centenary's own published magazine and cohort deck, which is where both
+   the pictures and the trade titles on this page come from. Publishing them
+   here is Centenary republishing its own material about its own learners.
 
-   Turning REVIEW off is what makes this page publishable: the banner goes, and
-   only people with consent:true are rendered. So the sequence is
+   That is the record. If anyone ever asks on what basis these names are on a
+   public website, this paragraph is the answer, and it is deliberately specific
+   about who confirmed it and on what day.
 
-       1. Kgomotso approves the layout          <- where we are
-       2. Every person listed gives permission, in writing
-       3. Set consent:true on the ones who did
-       4. REVIEW = false
-       5. Delete the noindex line from graduates.html, and put the words "and
-          appear here with their permission" back into its footer disclaimer
-          — they were removed because today they would not be true.
+   REVIEW is therefore false and the page is live. It was true for one round so
+   the layout could be looked at before anything was published.
 
-   Do not do 4 before 2. The whole point of the flag is that it fails closed:
-   if someone flips REVIEW off while the list is still unconsented, the page
-   goes empty rather than public.
+   Anyone who asks to come off comes off the same day — see the last paragraph
+   of this note. That obligation does not go away because a magazine exists.
+
+   REVIEW MODE
+   -----------
+   Set REVIEW = true to put the page back into preview: it renders everyone
+   regardless of consent, shows an orange "not for sharing" banner, and injects
+   a noindex tag. Use it when adding a cohort nobody has cleared yet. Turning it
+   off again publishes only the people with consent:true, so it fails closed —
+   an uncleared entry left behind disappears rather than going public.
 
    ADDING SOMEONE
    --------------
@@ -53,10 +58,14 @@
    the person's interest in being on it. So we do not publish anyone who has not
    said yes.
 
-   Set consent:true only once that person has actually agreed, in writing, to
-   their name, photo and current employer appearing on a public web page. An
+   Set consent:true only once that person has actually agreed to their name,
+   photo and current employer appearing on a public web page — or, as with the
+   2022 cohort above, once they are already published under their own name in
+   Centenary's own material and the owner of that material has confirmed it. An
    email saying "yes, happy for you to use it" is enough; a verbal "sure" during
-   a call is not, because in a year nobody will remember it.
+   a call is not, because in a year nobody will remember it. Whatever the basis
+   is, write it down at the top of this file the way the 2022 one is written
+   down, naming who confirmed it and when.
 
    Anyone who asks to come off comes off the same day. Delete their entry AND
    their photograph from images/graduates/ — do not merely set consent:false,
@@ -64,8 +73,8 @@
 (function () {
   'use strict';
 
-  /* Internal preview. See the note above before changing this. */
-  var REVIEW = true;
+  /* Preview switch. See "REVIEW MODE" in the note above before changing this. */
+  var REVIEW = false;
 
   /* A cohort is a group who came through together. `photo` and `stats` are
      optional: a cohort with them gets the wide panel, a cohort without gets
@@ -93,28 +102,33 @@
   ];
 
   var PEOPLE = [
-    /* The 2022 intake. Names and trades are from Centenary's own cohort sheet.
-       `now` is deliberately absent on all of them — nobody has told us yet where
-       these nine are working today, and that is the one thing this page is for.
-       consent:false on every one of them: none has been asked. */
+    /* The 2022 intake — the Bubble G.U.M project's second cohort. Names, trades
+       and photographs are lifted from Centenary's own cohort deck; see the note
+       at the top of this file for the basis on which they are published.
+
+       `now` is still absent on all nine. Nobody has told us where they are
+       working today, and that — not a trade title — is what Kgomotso asked this
+       page for. Centenary's learner magazine already carries each one's course
+       journey and outcome, so the answers exist; they just have not reached
+       this file yet. Fill `now` in and the card says something worth reading. */
     { name: 'Langelihle Ngidi', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/langelihle-ngidi.jpg', consent: false },
+      photo: 'images/graduates/langelihle-ngidi.jpg', consent: true },
     { name: 'Sandiso Mthiyane', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/sandiso-mthiyane.jpg', consent: false },
+      photo: 'images/graduates/sandiso-mthiyane.jpg', consent: true },
     { name: 'Sibusiso Seopela', role: 'Field Technician', cohort: '2022',
-      photo: 'images/graduates/sibusiso-seopela.jpg', consent: false },
+      photo: 'images/graduates/sibusiso-seopela.jpg', consent: true },
     { name: 'Tshepo Thobejane', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/tshepo-thobejane.jpg', consent: false },
+      photo: 'images/graduates/tshepo-thobejane.jpg', consent: true },
     { name: 'Koketso Mokgethi', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/koketso-mokgethi.jpg', consent: false },
+      photo: 'images/graduates/koketso-mokgethi.jpg', consent: true },
     { name: 'Thabelo Ndou', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/thabelo-ndou.jpg', consent: false },
+      photo: 'images/graduates/thabelo-ndou.jpg', consent: true },
     { name: 'Khotso Moloantoa', role: 'Electrical Technician', cohort: '2022',
-      photo: 'images/graduates/khotso-moloantoa.jpg', consent: false },
+      photo: 'images/graduates/khotso-moloantoa.jpg', consent: true },
     { name: 'Vuyo Matanga', role: 'Field Technician', cohort: '2022',
-      photo: 'images/graduates/vuyo-matanga.jpg', consent: false },
+      photo: 'images/graduates/vuyo-matanga.jpg', consent: true },
     { name: 'Nandipha Sithole', role: 'Metering Technician', cohort: '2022',
-      photo: 'images/graduates/nandipha-sithole.jpg', consent: false }
+      photo: 'images/graduates/nandipha-sithole.jpg', consent: true }
   ];
 
   var host = document.getElementById('grads');

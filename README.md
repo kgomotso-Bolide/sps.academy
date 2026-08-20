@@ -346,17 +346,25 @@ accredited qualification.
      `.face` cards. `.grads`/`.grad` were deleted rather than left beside the new rules, because
      two card designs for one page means the next person edits the wrong one.
 
-     **It is an internal preview, not a publication.** `graduates.js` has `REVIEW = true`: the
-     page renders the nine people so Kgomotso can react to the real thing, shows an orange
-     banner saying nothing on it is approved, and `graduates.html` carries `noindex, nofollow`.
-     Every entry is `consent:false`. Turning REVIEW off with the list unconsented empties the
-     page rather than publishing it — it fails closed on purpose. The five steps to go live are
-     listed at the top of `graduates.js`; do not do them out of order.
+     **Published 20 Aug 2026.** It shipped for one round as an internal preview (`REVIEW = true`,
+     orange banner, `noindex`) so the layout could be looked at before anything went out. The
+     owner then confirmed the basis for publication: these nine are the second cohort of the
+     **Bubble G.U.M project**, which runs under Centenary Networks and is led by Kgomotso
+     Moloantoa, and they already appear under their own names and photographs in Centenary's own
+     magazine and cohort deck. That confirmation is recorded at the top of `graduates.js` — who
+     said it and on what day — because that paragraph is the answer if anyone ever asks why these
+     names are on a public website.
+
+     `REVIEW` is still there and still works. Set it true when adding a cohort nobody has cleared:
+     it renders everyone, banners the page and injects a `noindex`. Turning it off publishes only
+     `consent:true` entries, so an uncleared entry disappears rather than going live. It fails
+     closed on purpose.
 
      Two things the page still cannot say. Nobody has told us where these nine work **now**, and
-     that — not a job title — is what Kgomotso asked for. And the photographs are crops from a
-     screenshot of a slide, 167×150px each, so they are soft on a phone; the originals would fix
-     that for free.
+     that — not a trade title — is what Kgomotso asked for; Centenary's learner magazine already
+     carries each one's course journey and outcome, so the answers exist and just have not reached
+     `graduates.js`. And the photographs are crops from a screenshot of a slide, 167×150px each,
+     so they are soft on a phone; the originals would fix that for free.
 
   SPS only for now, by instruction — Fungi, Maziv and Equinix still carry the old catalogue.
   `lib/learner.php`, `lib/chrome.php`, `profile.js`, `profile-page.js` and the shared region of
