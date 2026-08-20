@@ -360,13 +360,36 @@ accredited qualification.
      `consent:true` entries, so an uncleared entry disappears rather than going live. It fails
      closed on purpose.
 
-     Two things the page still cannot say. Nobody has told us where these nine work **now**, and
-     that — not a trade title — is what Kgomotso asked for; Centenary's learner magazine already
-     carries each one's course journey and outcome, so the answers exist and just have not reached
-     `graduates.js`. And the photographs are crops from a screenshot of a slide, 167×150px each,
-     so they are soft on a phone; the originals would fix that for free.
+  7. **Eighteen people, from the deck itself (20 Aug 2026).** The Bubble G.U.M `.pptx` was found in
+     `~/Downloads`. A `.pptx` is a zip, so the original photographs were sitting in `ppt/media/` all
+     along — 366px to 2131px wide, against the 167×150px screenshot crops the page shipped with
+     that morning. Every picture was replaced, the Dartcom group shot included, and the cards moved
+     from a 168/150 window to **4:5 portrait**, which is what a headshot wants.
 
-  SPS only for now, by instruction — Fungi, Maziv and Equinix still carry the old catalogue.
+     Slide 14 added **nine more named learners**, so the second cohort now shows in the two halves
+     the deck itself uses: **Trades-preneurs** (slide 12, trade titles, working) and **Learners**
+     (slide 14, named by the field they are training in). That distinction is the source's, not
+     ours. "Trades-preneurs" is Centenary's own word — a trade plus the business skill to sell it.
+
+     **Faces were paired to names by slide geometry, not document order.** PowerPoint stores shapes
+     in z-order, and on slide 14 the caption order is *not* the reading order — zipping the two
+     lists would have put four of the nine faces under the wrong person's name. `map-slide.php`
+     matches each caption to the picture directly above it and prints the gap, so a bad pairing is
+     visible instead of silent. Run against slide 12 it reproduced the nine already-live pairings
+     exactly, which is what makes the slide-14 result trustworthy.
+
+     **Not used:** slide 13's five photographs (no names on them) and slide 15's group shot. An
+     unnamed face on a public page is somebody who cannot be told they are on it, and cannot ask
+     to come off.
+
+     **If more cohorts arrive, ask for the deck, not screenshots.** Same pictures at ten times the
+     resolution, and the names come out as text rather than as pixels to be read by eye.
+
+     Still missing: where these eighteen work **now**. That — not a trade title — is what Kgomotso
+     asked for, and Centenary's learner magazine already carries each one's course journey and
+     outcome, so the answers exist and just have not reached `graduates.js`.
+
+  Rolled out to all four academies 20 Aug 2026.
   `lib/learner.php`, `lib/chrome.php`, `profile.js`, `profile-page.js` and the shared region of
   `styles.css` are on the sync manifest, so `tools/sync-backend.php --check` will report drift
   against the other three until this is rolled out to them. That is expected, not a fault.

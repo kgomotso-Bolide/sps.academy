@@ -4,12 +4,29 @@
 
    WHO SAID THESE NINE COULD BE PUBLISHED, AND WHEN
    ------------------------------------------------
-   Confirmed 20 Aug 2026 by the site owner. These nine are the second cohort of
-   the Bubble G.U.M project, which runs under Centenary Networks and is led by
+   Confirmed 20 Aug 2026 by the site owner. These eighteen are the second cohort
+   of the Bubble G.U.M project, which runs under Centenary Networks and is led by
    Kgomotso Moloantoa. They already appear under their own names and photographs
    in Centenary's own published magazine and cohort deck, which is where both
-   the pictures and the trade titles on this page come from. Publishing them
-   here is Centenary republishing its own material about its own learners.
+   the pictures and the titles on this page come from. Publishing them here is
+   Centenary republishing its own material about its own learners.
+
+   WHERE THE PICTURES CAME FROM
+   ----------------------------
+   Straight out of the deck, which is a .pptx and therefore a zip: the originals
+   are in ppt/media/. Slides 12 and 14 carry the two halves of the cohort, and
+   slide 11 the Dartcom group photograph. They run from 366px to 2131px wide, so
+   the cards are sharp on a phone.
+
+   The first version of this page used crops taken from a screenshot of the
+   slides at 167x150px, because the deck had not been found yet. If more cohorts
+   arrive as screenshots, ask for the deck before cropping anything: it is the
+   same pictures at ten times the resolution and it carries the names as text
+   rather than as pixels to be read by eye.
+
+   Slide 13 has five more photographs with no names on them at all, and slide 15
+   a second group shot. Neither is used: an unnamed face on a public page is
+   somebody who cannot be told they are on it, and cannot ask to come off.
 
    That is the record. If anyone ever asks on what basis these names are on a
    public website, this paragraph is the answer, and it is deliberately specific
@@ -94,10 +111,21 @@
         { n: '2021–24', l: 'Apprenticeship' }
       ]
     },
+    /* The deck splits the second cohort in two and gives each half its own
+       heading, so the page does too. The difference is real: the first nine
+       have trade titles and are working, the second nine are named by the
+       field they are training in. Collapsing them into one grid would lose
+       that. "Trades-preneurs" is Centenary's own word for the first group,
+       off slide 12 — a trade plus the business skill to sell it. */
     {
-      id: '2022',
-      eyebrow: 'Second cohort',
-      title: 'Electrical & civil learners'
+      id: '2022-trades',
+      eyebrow: 'Second cohort · electrical & civil',
+      title: 'Trades-preneurs'
+    },
+    {
+      id: '2022-learners',
+      eyebrow: 'Second cohort · electrical & civil',
+      title: 'Learners'
     }
   ];
 
@@ -111,24 +139,54 @@
        page for. Centenary's learner magazine already carries each one's course
        journey and outcome, so the answers exist; they just have not reached
        this file yet. Fill `now` in and the card says something worth reading. */
-    { name: 'Langelihle Ngidi', role: 'Electrical Technician', cohort: '2022',
+    /* Slide 12 — the trades-preneurs, in the order the deck lays them out. */
+    { name: 'Langelihle Ngidi', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/langelihle-ngidi.jpg', consent: true },
-    { name: 'Sandiso Mthiyane', role: 'Electrical Technician', cohort: '2022',
+    { name: 'Sandiso Mthiyane', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/sandiso-mthiyane.jpg', consent: true },
-    { name: 'Sibusiso Seopela', role: 'Field Technician', cohort: '2022',
+    { name: 'Sibusiso Seopela', role: 'Field Technician', cohort: '2022-trades',
       photo: 'images/graduates/sibusiso-seopela.jpg', consent: true },
-    { name: 'Tshepo Thobejane', role: 'Electrical Technician', cohort: '2022',
+    { name: 'Tshepo Thobejane', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/tshepo-thobejane.jpg', consent: true },
-    { name: 'Koketso Mokgethi', role: 'Electrical Technician', cohort: '2022',
+    { name: 'Koketso Mokgethi', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/koketso-mokgethi.jpg', consent: true },
-    { name: 'Thabelo Ndou', role: 'Electrical Technician', cohort: '2022',
+    { name: 'Thabelo Ndou', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/thabelo-ndou.jpg', consent: true },
-    { name: 'Khotso Moloantoa', role: 'Electrical Technician', cohort: '2022',
+    { name: 'Khotso Moloantoa', role: 'Electrical Technician', cohort: '2022-trades',
       photo: 'images/graduates/khotso-moloantoa.jpg', consent: true },
-    { name: 'Vuyo Matanga', role: 'Field Technician', cohort: '2022',
+    { name: 'Vuyo Matanga', role: 'Field Technician', cohort: '2022-trades',
       photo: 'images/graduates/vuyo-matanga.jpg', consent: true },
-    { name: 'Nandipha Sithole', role: 'Metering Technician', cohort: '2022',
-      photo: 'images/graduates/nandipha-sithole.jpg', consent: true }
+    { name: 'Nandipha Sithole', role: 'Metering Technician', cohort: '2022-trades',
+      photo: 'images/graduates/nandipha-sithole.jpg', consent: true },
+
+    /* Slide 14 — the learners. The deck labels these nine by the field they are
+       training in ("Profession: Civil Engineering") rather than by a job title,
+       which is why their cards read differently from the nine above. That is
+       the source's distinction, not ours, so it is kept.
+
+       Face-to-name pairing was taken from the slide GEOMETRY, not from the
+       order the shapes happen to sit in the file — PowerPoint stores shapes in
+       z-order, and on this slide the caption order is not the reading order.
+       Zipping the two lists together would have put four of these nine faces
+       under the wrong person's name. */
+    { name: 'Portia Mokgomogane', role: 'Civil Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/portia-mokgomogane.jpg', consent: true },
+    { name: 'Pfukani Baloyi', role: 'Civil Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/pfukani-baloyi.jpg', consent: true },
+    { name: 'Ndumiso Sithebe', role: 'Electrical Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/ndumiso-sithebe.jpg', consent: true },
+    { name: 'Muvhoni Tshisimni', role: 'Civil Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/muvhoni-tshisimni.jpg', consent: true },
+    { name: 'Nonjabulo Khanile', role: 'Electrical Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/nonjabulo-khanile.jpg', consent: true },
+    { name: 'Nhlavutelo Makhuvele', role: 'Civil Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/nhlavutelo-makhuvele.jpg', consent: true },
+    { name: 'Layer Mathebula', role: 'Civil Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/layer-mathebula.jpg', consent: true },
+    { name: 'Zanele Tambani', role: 'Electrical Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/zanele-tambani.jpg', consent: true },
+    { name: 'Murendeni Netshikhudini', role: 'Electrical Engineering', cohort: '2022-learners',
+      photo: 'images/graduates/murendeni-netshikhudini.jpg', consent: true }
   ];
 
   var host = document.getElementById('grads');
