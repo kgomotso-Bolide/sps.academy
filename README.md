@@ -122,9 +122,11 @@ sps/
 │                           #   (ours · more AI · free international), accreditation badges
 ├── about.html              # About: positioning, industry line, accreditation, photo posters
 ├── graduates.html          # Where our learners are now — Centenary graduates and interns
-├── graduates.js            # THE GRADUATE LIST. One PEOPLE array, one entry per person.
-│                           #   Nobody is published without consent:true — read the note
-│                           #   at the top of the file before adding anyone
+├── graduates.js            # THE GRADUATE LIST. COHORTS (a group, its photo and its
+│                           #   figures) + PEOPLE (one entry per person). Nobody is
+│                           #   published without consent:true, and REVIEW must be false
+│                           #   — read the note at the top of the file before adding
+│                           #   anyone or before turning REVIEW off
 ├── skills-gap.html         # STUB → /courses. The tool was removed 19 Aug 2026
 ├── rpl.html                # STUB → /contact. The explainer was removed 19 Aug 2026
 ├── locks.js                # WHICH COURSES ARE OPEN — single source of truth. Edit this
@@ -337,6 +339,24 @@ accredited qualification.
      Contact. Ships with an empty list on purpose: it renders an honest "we are still collecting
      these" panel rather than invented people, and `consent:true` is required per entry because a
      name, a photograph and an employer on a public page are personal information under POPIA.
+
+  6. **Graduates page rebuilt round cohorts (20 Aug 2026)** — Centenary's own cohort photographs
+     went in: the 2021–24 apprenticeship as a wide `.cohort` panel carrying its three figures
+     (100% pass rate, R16k starting salary, 2021–24), and the 2022 electrical intake as nine
+     `.face` cards. `.grads`/`.grad` were deleted rather than left beside the new rules, because
+     two card designs for one page means the next person edits the wrong one.
+
+     **It is an internal preview, not a publication.** `graduates.js` has `REVIEW = true`: the
+     page renders the nine people so Kgomotso can react to the real thing, shows an orange
+     banner saying nothing on it is approved, and `graduates.html` carries `noindex, nofollow`.
+     Every entry is `consent:false`. Turning REVIEW off with the list unconsented empties the
+     page rather than publishing it — it fails closed on purpose. The five steps to go live are
+     listed at the top of `graduates.js`; do not do them out of order.
+
+     Two things the page still cannot say. Nobody has told us where these nine work **now**, and
+     that — not a job title — is what Kgomotso asked for. And the photographs are crops from a
+     screenshot of a slide, 167×150px each, so they are soft on a phone; the originals would fix
+     that for free.
 
   SPS only for now, by instruction — Fungi, Maziv and Equinix still carry the old catalogue.
   `lib/learner.php`, `lib/chrome.php`, `profile.js`, `profile-page.js` and the shared region of

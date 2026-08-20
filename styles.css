@@ -1236,27 +1236,69 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 
 /* ---------------------------------------------------------------------------
    The graduates page.
-   Added 19 Aug 2026. Cards are built by graduates.js from its own PEOPLE list;
-   with that list empty the page renders a .corp panel instead and none of this
-   is used, which is the state it ships in.
+   Added 19 Aug 2026, rebuilt round cohorts 20 Aug 2026. Everything here is
+   built by graduates.js from its own COHORTS and PEOPLE lists; with both empty
+   the page renders a .corp panel instead and none of this is used.
+
+   A cohort is a group who came through together. One with a photograph and
+   figures gets the wide .cohort panel; one without gets a plain heading over
+   its faces. That is the difference between "here is a class photo" and "here
+   is what happened to them", and the page is worth having only for the second.
 
    Deliberately NOT reusing .poster: a poster is a wide photograph with a
    caption under it, and these are portrait-first with the text doing the work.
    --------------------------------------------------------------------------- */
-.grads{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px}
-.grad{margin:0;padding:24px;border:1px solid var(--line);border-radius:16px;background:#fff;
-  display:flex;flex-direction:column;align-items:center;text-align:center}
-.grad-photo,.grad-initials{width:96px;height:96px;border-radius:50%;object-fit:cover;
-  display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-.grad-initials{background:var(--orange-deep);color:#fff;font-size:30px;font-weight:800;
-  letter-spacing:.02em}
-.grad figcaption{display:block}
-.grad-kind{display:block;font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.09em;color:var(--orange-deep);margin-bottom:6px}
-.grad figcaption strong{display:block;font-size:17px;color:var(--grey);margin-bottom:4px}
-.grad-course{display:block;font-size:13.5px;color:var(--ink-soft);margin-bottom:10px}
-.grad figcaption p{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink-soft)}
-@media(max-width:520px){.grads{grid-template-columns:1fr}}
+.cohort{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;
+  margin-bottom:34px}
+.cohort-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch}
+/* aspect-ratio, not height:100% alone: the source is a portrait photograph and
+   without it the picture drives the row to its own 4:5 height, leaving half a
+   screen of white space beside the text */
+.cohort-top img{width:100%;height:100%;aspect-ratio:16/11;object-fit:cover;
+  object-position:50% 88%}
+.cohort-body{padding:32px 34px;display:flex;flex-direction:column;justify-content:center}
+.cohort-body h3{font-size:24px;margin:8px 0 10px}
+.cohort-body>p{color:var(--ink-soft);font-size:15.5px;margin-bottom:22px}
+.cohort-stats{display:flex;gap:30px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+.cohort-stats div strong{display:block;font-size:26px;color:var(--orange-deep);line-height:1.1}
+.cohort-stats div span{font-size:12.5px;color:var(--ink-soft);letter-spacing:.02em}
+.grad-sub{margin:44px 0 22px}
+.grad-sub h3{font-size:25px}
+
+.facegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:22px}
+.face{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+  transition:box-shadow .2s,transform .2s}
+.face:hover{box-shadow:0 10px 26px rgba(0,0,0,.09);transform:translateY(-2px)}
+/* The initials sit UNDERNEATH the photograph rather than instead of it, so an
+   image that 404s reveals them when graduates.js removes the <img>. A missing
+   file is then a card that looks deliberate, not a broken-image icon on a
+   client's website. */
+.face-shot{position:relative;display:block;aspect-ratio:168/150;background:var(--orange-deep)}
+.face-ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:34px;font-weight:800;letter-spacing:.02em}
+.face-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.face figcaption{padding:13px 15px 15px}
+.face figcaption strong{display:block;font-size:15px;color:var(--grey);letter-spacing:-.01em}
+.face figcaption span{display:block;font-size:12.5px;color:var(--orange-deep);font-weight:600;
+  margin-top:3px}
+.face figcaption em{display:block;font-style:normal;font-size:12px;color:var(--ink-soft);margin-top:3px}
+
+/* Shown only while graduates.js has REVIEW on. It is loud on purpose: this
+   page is reachable by anyone with the address, so it has to say for itself
+   that it is a draft. */
+.grad-review{border:1px solid var(--orange);background:var(--orange-tint);border-radius:14px;
+  padding:20px 24px;margin-bottom:34px}
+.grad-review strong{display:block;font-size:15px;color:var(--orange-deep);margin-bottom:8px}
+.grad-review p{margin:0 0 8px;font-size:14.5px;line-height:1.6;color:var(--ink-soft)}
+.grad-review p:last-child{margin-bottom:0}
+
+@media(max-width:760px){
+  .cohort-top{grid-template-columns:1fr}
+  .cohort-top img{aspect-ratio:16/10}
+  .cohort-body{padding:26px 22px}
+  .facegrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+  .grad-sub h3{font-size:22px}
+}
 
 /* ---------------------------------------------------------------------------
    The three focus lines, at the top of the catalogue.
