@@ -24,12 +24,11 @@
    it fails closed — an uncleared entry left behind disappears rather than going
    public. This is the same switch, and the same wiring, as graduates.js.
 
-   IT WAS TRUE while the page was being built and reviewed locally. It went
-   FALSE on 24 Aug 2026, the moment these four sites were deployed, and that is
-   the whole point of the switch: REVIEW renders everyone regardless of consent,
-   which is exactly right on a laptop and exactly wrong on a live client site
-   linked from every page's nav. Neither trainer has been asked yet, so with
-   REVIEW off the page publishes nobody and says so in plain words.
+   IT WAS TRUE while the page was being built and reviewed locally, and went
+   FALSE on 24 Aug 2026 the moment these sites were deployed. That is the whole
+   point of the switch: REVIEW renders everyone regardless of consent, which is
+   exactly right on a laptop and exactly wrong on a live client site linked from
+   every page's nav.
 
    Turning it back on is a LOCAL preview action. If you turn it on, do not
    deploy until you have turned it off again.
@@ -54,14 +53,32 @@
    THE consent FIELD IS NOT A FORMALITY
    ------------------------------------
    A name, a photograph and a named employer together are personal information
-   under POPIA, and this page is public on four domains. There is a second
+   under POPIA, and this page is public on five domains. There is a second
    problem on top of the first: listing somebody as "your trainer" asserts a
-   commercial relationship. If the engagement is not signed, that assertion is
+   commercial relationship. If the engagement is not agreed, that assertion is
    not ours to publish, however flattering it is to both sides.
 
    Set consent:true only once that person has agreed to their name and
    professional history appearing on a public web page, AND the engagement is
    actually agreed.
+
+   BOTH ARE TRUE AS OF 24 AUG 2026. Sibusiso: they can be named, and both are
+   highly interested in joining the programme. That is what turned the two
+   flags below from false to true.
+
+   STILL OUTSTANDING: PHOTOGRAPHS. Neither has one, so both cards fall back to
+   initials, which looks deliberate rather than broken. Drop a file into
+   images/trainers/ and set the `photo` key — see the note in that folder for
+   the naming.
+
+   CONSENT ALONE IS NOT ENOUGH TO PUBLISH
+   --------------------------------------
+   A trainer also needs something worth reading. `pending` marks somebody we
+   have permission to name but nothing yet to say about — and a card carrying a
+   name and no substance invites "who is this?" on a client's website, which is
+   worse for that person than not being listed for another week. So the filter
+   below is consent AND NOT pending, and Fiston appears the moment his profile
+   arrives without anyone having to remember a second switch.
 
    WHAT WE DO NOT PUBLISH, EVER
    ----------------------------
@@ -89,9 +106,13 @@
        marketing document, written to be shown — plus the qualifications page of
        the CV, and nothing else.
 
-       consent:false until two things are true: Tarryn has said her name and
-       history may go on four public academy sites, and the engagement is
-       agreed. Neither has happened yet. */
+       Cleared to publish 24 Aug 2026.
+
+       No photograph yet. When one arrives, save it as
+       images/trainers/tarryn-norris.jpg and add:
+           photo: 'images/trainers/tarryn-norris.jpg',
+       Until then the card shows her initials, and a file that 404s falls back
+       to the same initials, so a missing photo cannot break a client's site. */
     {
       name: 'Tarryn Norris',
       role: 'Procurement, sourcing and supplier development',
@@ -108,7 +129,7 @@
            'new-entrant suppliers — which is the ground this course covers for people ' +
            'working for service providers.',
       linkedin: '',          // ask her for the URL, or leave it off
-      consent: false
+      consent: true
     },
 
     /* Solar and electrical. Kgomotso, 22 Aug 2026: "Then I will share one on
@@ -128,10 +149,32 @@
       name: 'Fiston',
       role: 'Solar and electrical',
       pending: true,
-      consent: false
+      consent: true
     }
 
   ];
+
+  /* Who may actually appear on a public page. Consent, and something to say.
+     See the two notes above for why both halves are needed. */
+  var shown = TRAINERS.filter(function (t) {
+    return t.name && (REVIEW || (t.consent === true && !t.pending));
+  });
+
+  /* THE SINGLE SOURCE OF TRUTH FOR "MAY WE NAME THIS PERSON".
+     -------------------------------------------------------
+     course.html has its own facilitator panel, and until 24 Aug 2026 it had its
+     own copy of the answer — which meant Tarryn's name, employer and
+     qualifications went live on the course page while this page was still
+     correctly publishing nobody. One consent decision in two places is not a
+     consent decision, it is a bug waiting for the day somebody withdraws.
+
+     So the list is published here and course.html looks people up in it. If the
+     script has not loaded, the lookup finds nothing and the course page falls
+     back to its "the academy team" wording — it fails closed, which is the only
+     acceptable direction for this particular check. */
+  window.ACADEMY_TRAINERS = shown.map(function (t) {
+    return { name: t.name, role: t.role, org: t.org, creds: t.creds };
+  });
 
   var host = document.getElementById('trainers');
   if (!host) return;
@@ -184,10 +227,6 @@
       '</div>' +
     '</article>';
   }
-
-  var shown = TRAINERS.filter(function (t) {
-    return t.name && (REVIEW || t.consent === true);
-  });
 
   /* Nobody cleared yet, and not in preview. Says what is true rather than
      pretending the page is coming soon. */

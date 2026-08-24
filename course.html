@@ -149,6 +149,11 @@
      open, pm-modules.js says which modules have a study guide to link to -->
 <script src="locks.js?v=20260820"></script>
 <script src="pm-modules.js?v=20260820"></script>
+<!-- Loaded here, BEFORE the catalogue script below, because that script calls
+     render() synchronously and the facilitator panel asks this file who may be
+     named. Loaded later, the check would silently find nothing and the panel
+     would quietly fall back to the academy-team wording. -->
+<script src="trainers.js?v=20260824"></script>
 <script>
   // Placeholder intro clip: "A Designer Interacting With a Chatbot" (Coverr).
   // Coverr licence: free for commercial use, no attribution required. Self-hosted
@@ -537,15 +542,28 @@
 
     document.getElementById('c-rpl').innerHTML = draftNote + rplNote + pathNote + planNote;
 
-    /* Named facilitator, where the course record carries one. The markup already
-       holds the academy-team wording, so a course without one is left alone
-       rather than being given an empty panel. */
+    /* Named facilitator, where the course record carries one AND that person is
+       on the published trainer list.
+
+       THE SECOND HALF OF THAT IS NOT BELT AND BRACES. This panel had no consent
+       check until 24 Aug 2026, and the result was that Tarryn's name, employer
+       and qualifications went live on four sites while /trainers — which does
+       have the check — was correctly publishing nobody. The record of who may be
+       named lives in trainers.js and nowhere else; this reads it.
+
+       trainers.js is loaded above this script and publishes window.ACADEMY_TRAINERS.
+       If it ever fails to load, the lookup finds nothing and the panel keeps the
+       academy-team wording already in the markup. It fails closed, which is the
+       only acceptable direction for this particular check. */
     if(c.facilitator){
       const f=c.facilitator;
-      document.getElementById('c-fac-name').textContent='Facilitated by '+f.name;
-      document.getElementById('c-fac-role').textContent=f.role;
-      document.getElementById('c-fac-bio').textContent=f.bio;
-      document.getElementById('c-fac-more').hidden=false;
+      const named=(window.ACADEMY_TRAINERS||[]).some(t=>t.name===f.name);
+      if(named){
+        document.getElementById('c-fac-name').textContent='Facilitated by '+f.name;
+        document.getElementById('c-fac-role').textContent=f.role;
+        document.getElementById('c-fac-bio').textContent=f.bio;
+        document.getElementById('c-fac-more').hidden=false;
+      }
     }
 
     /* A locked course still renders — people arrive on bookmarks and on the
