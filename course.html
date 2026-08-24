@@ -16,6 +16,7 @@
       <a href="./" data-nav="home">Home</a>
       <a href="about" data-nav="about">About</a>
       <a href="courses" data-nav="courses" class="active">Courses</a>
+      <a href="trainers" data-nav="trainers">Trainers</a>
       <a href="graduates" data-nav="graduates">Graduates</a>
       <a href="contact" data-nav="contact">Contact</a>
       <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
@@ -107,9 +108,10 @@
       <img class="logo" src="sps-dark-logo.svg" alt="SPS Academy">
       <div>
         <div class="ieyebrow">Your facilitator</div>
-        <h3>Facilitated by the SPS Academy team</h3>
-        <div class="role">AI Skills &amp; Workforce Development</div>
-        <p>Your courses are delivered by experienced facilitators. Lessons are practical and built around the work we do here — designed so anyone at SPS can follow along, whatever your technical background.</p>
+        <h3 id="c-fac-name">Facilitated by the SPS Academy team</h3>
+        <div class="role" id="c-fac-role">AI Skills &amp; Workforce Development</div>
+        <p id="c-fac-bio">Your courses are delivered by experienced facilitators. Lessons are practical and built around the work we do here — designed so anyone at SPS can follow along, whatever your technical background.</p>
+        <a id="c-fac-more" href="trainers" hidden style="display:inline-block;margin-top:12px;font-size:13.5px;font-weight:700;color:var(--orange-deep);text-decoration:underline">Meet the trainers</a>
       </div>
     </div>
   </div>
@@ -165,6 +167,7 @@
     "Compliance":["Recognise the key risks and obligations","Protect privacy and sensitive data","Spot and reduce bias and inaccuracy","Use AI safely in a professional setting","Help shape a simple, practical AI policy"],
     "Leadership":["Set a clear AI vision for your department","Lead AI-enabled teams with confidence","Put governance and risk controls in place","Drive responsible adoption and change","Measure the impact of your AI investment"],
     "Project Management":["Initiate, plan, execute and close a project end to end","Build a scope statement, schedule and cost projection","Manage risk, quality and procurement on a live project","Lead a project team and handle stakeholder communication","Build the portfolio of evidence the qualification requires"],
+    "Procurement":["Build a category strategy instead of buying item by item","Run a tender from the bid pack through to evaluation and award","Write contracts and SLAs that can actually be measured","Negotiate, and build the cost model that backs your position","Hold the line on risk, governance and the audit trail"],
     "Software Development":["Read an unfamiliar codebase and find your way around","Write, test and debug code that works","Store, query and move data without losing any","Use AI coding assistants without trusting them blindly","Ship a working feature and keep it running"],
     "Technical":["Build job-ready technical skills","Practise hands-on, real-world competencies","Prepare thoroughly for assessment","Come away with a qualification that is yours to keep","Open up clear career pathways"]
   };
@@ -345,9 +348,88 @@
     {t:"Testing, Debugging and Not Breaking Production",lessons:["Automated tests, and what to test first","Reading a stack trace","Logs that are worth having","Rolling back without panic"]},
     {t:"Shipping It",lessons:["Deploying, and doing it twice","Configuration and secrets","Monitoring and knowing it is still up","Handing it over to whoever maintains it"]}
   ];
+
+  /* Procurement — the course Centenary is building for the SPS procurement
+     office, and the first thing here written for one department rather than for
+     everybody. Two specialists are behind it, and the division of labour is
+     Kgomotso's: the procurement specialist gives the HEADINGS, the second
+     specialist supplies PDF MATERIAL against those headings.
+
+     MOST OF THE MODULE TITLES BELOW ARE HERS, ONE FOR ONE: the seven teachable
+     items from pillar 3 — Learning / Development — of the Waria Consulting
+     service offering, in her own order and her own words.
+
+     WHICH PILLAR MATTERS. The profile has four: Consulting, Supplier Engagement
+     / Performance, Learning / Development, and Operations / Project Management.
+     Only the third is training. Procurement Value Chain Optimization, Systems
+     and the SRM Framework and Scorecard sit under Consulting and Supplier
+     Engagement — things Waria is engaged to DO for a client, not things she
+     teaches — so they are not modules here, and a syllabus that promised them
+     would be promising lessons nobody offered to give.
+
+     THE ONE EXCEPTION IS MODULE 02, and it is deliberate. Strategic Sourcing is
+     a pillar-1 item and was cut on that reasoning, then put back on 24 Aug 2026
+     when Kgomotso sent a benchmark course she wants ours to resemble:
+
+         https://prospen.co.za/advanced-strategic-procurement-planning-
+         tendering-bidding-and-award-management/
+
+     That course leads with strategic procurement planning, sourcing strategy
+     and commodity strategy before it reaches tendering — and her brief was to
+     "find a similar course as per her skills", which is a wider instruction than
+     "take her pillar-3 list". Strategic sourcing is also the deepest thing on
+     Tarryn's CV: Senior Sourcing Specialist and Senior Sourcing Consultant at
+     Standard Bank, FNB and Absa, building commodity strategies and category
+     plans for a living. Teaching it is well within what she can stand up.
+
+     ⚠ THE BENCHMARK IS A BENCHMARK, NOT A SOURCE. ProsPen's module list is
+     another training provider's curriculum and it is not copied here — not a
+     heading, not a bullet. Module 02's lessons are written from the vocabulary
+     on Tarryn's own CV. Lifting a competitor's syllabus onto five public sites
+     is a legal problem and an embarrassing one; if anyone is ever tempted, the
+     answer is no.
+
+     Two items in pillar 3 are deliberately NOT modules: "Masterclasses" and
+     "Coaching / Mentoring – Procurement" are how she delivers, not what the
+     course covers, so they are in the course lead instead.
+
+     THE LESSON TITLES ARE OURS — she gave headings, not a lesson plan, and the
+     accordion needs something under each one. They are the first thing to check
+     against the second specialist's material when it arrives.
+
+     draftSyllabus stays TRUE until Kgomotso signs it off and the material is in
+     — the headings being real does not make the course ready to date. */
+  /* A named facilitator, for the courses that have one. Everything else falls
+     back to the academy-team wording in the markup — most of the catalogue is
+     delivered by whoever is free, and inventing a face for it would be worse
+     than saying so.
+
+     Only what a person has published about themselves goes here. The bio below
+     is drawn from the Waria Consulting profile, which is a marketing document
+     written to be shown, and from the qualifications on her CV. The client
+     savings figures, the schooling and the personal section of that CV are NOT
+     here: a CV is sent to be read, not to be published, and a facilitator bio
+     needs credentials rather than someone's sports. */
+  const FAC_WARIA={
+    name:"Tarryn Norris",
+    role:"Managing Director, Waria Consulting (Pty) Ltd · MCIPS",
+    bio:"Over twenty years in procurement, sourcing and operations across financial services and insurance — Hollard, Absa, First National Bank and Standard Bank — covering strategic sourcing, category management, tenders, contract and supplier relationship management. She founded Waria Consulting in 2017 and consults on procurement strategy and supplier development. MCIPS, through the Chartered Institute of Procurement & Supply; B.Com in Business Management and Marketing; currently reading for an MBA in Supply Chain."
+  };
+
+  const MOD_PROC=[
+    {t:"Procurement Fundamentals",lessons:["What procurement is for, and where the office sits","The procurement cycle, end to end","The language: RFQ, RFP, RFx, PO, SLA","Policy, process, and the approvals that bind you"]},
+    {t:"Strategic Sourcing and Category Strategy",lessons:["Category spend analysis and segmentation","Building a commodity strategy and a category plan","Make or buy, and where outsourcing actually pays","Benchmarking, and a business case that gets approved"]},
+    {t:"Tender / Bid Management Process",lessons:["Procurement methods: open, restricted, negotiated","Planning the bid, and a timetable that holds","Writing a specification a supplier can price","The bid pack, and what goes into it","Bidder questions, answered once and the same way"]},
+    {t:"Tender / Bid Evaluation",lessons:["Setting the criteria before the bids arrive","Scoring: price, quality, capability, transformation","Moderation, and defending a decision","Award, regret letters and the record"]},
+    {t:"Procurement Contract & Service Level Agreements",lessons:["What a purchase order already commits you to","The contract terms that decide the argument later","Service level agreements you can actually measure","After signature: variations, change control, contract management"]},
+    {t:"Negotiations",lessons:["Preparing: your position, their position, the walk-away","Total cost of ownership as a negotiating position","Tactics, and the ones to refuse","Closing without damaging the relationship"]},
+    {t:"Risk and Governance",lessons:["Risk across the procurement cycle","Governance: delegation of authority, and who signs","Conflict of interest, gifts and fraud red flags","The audit file, and the trail that protects you"]},
+    {t:"Cost Models",lessons:["What a cost model is, and when to build one","Breaking a supplier's price into its parts","Benchmarking, and what it should cost","Tracking the saving after the deal is signed"]}
+  ];
   const COURSES={
     "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",starts:"10 September 2026",pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
+    "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,facilitator:FAC_WARIA,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
     "ai-tools-productivity":{title:"AI Tools for Productivity",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1581091226825-a6a2a5aee158",lead:"Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools and workflow automation."},
     "responsible-ai":{title:"Responsible & Ethical AI Use",cat:"Compliance",mode:"Online or in person",level:"Intermediate",img:"1620712943543-bcc4688e7485",lead:"Using AI safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of AI in a professional setting."},
@@ -454,6 +536,17 @@
       : '';
 
     document.getElementById('c-rpl').innerHTML = draftNote + rplNote + pathNote + planNote;
+
+    /* Named facilitator, where the course record carries one. The markup already
+       holds the academy-team wording, so a course without one is left alone
+       rather than being given an empty panel. */
+    if(c.facilitator){
+      const f=c.facilitator;
+      document.getElementById('c-fac-name').textContent='Facilitated by '+f.name;
+      document.getElementById('c-fac-role').textContent=f.role;
+      document.getElementById('c-fac-bio').textContent=f.bio;
+      document.getElementById('c-fac-more').hidden=false;
+    }
 
     /* A locked course still renders — people arrive on bookmarks and on the
        legacy /ai-fundamentals redirect — but it must not offer enrolment. The

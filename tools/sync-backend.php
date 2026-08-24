@@ -89,6 +89,15 @@ $shared = [
     // every other .html it carries the site's own chrome.
     'graduates.js',
 
+    // The trainer list, for exactly the same reason. Centenary engages the
+    // specialists and they teach on every academy, so one list decides who has
+    // consented and who has not — four copies would eventually disagree, and the
+    // thing they would disagree about is whether a named person may be published.
+    // trainers.html is NOT here, and neither is styles.css: both carry the site's
+    // own chrome and have to be copied into a target repo by hand before this
+    // file or lib/chrome.php is synced into it, or the nav link 404s there.
+    'trainers.js',
+
     // The registered curriculum. Identical in all four repositories and read by
     // module.html, the pathway page and the Material admin page — one source of
     // truth for the module codes, or the admin page offers slots for modules that

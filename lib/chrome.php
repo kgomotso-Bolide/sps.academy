@@ -152,6 +152,13 @@ function chrome_nav(string $variant, array $o = []): void
         echo '      <a href="./" data-nav="home">Home</a>' . "\n";
         echo '      <a href="about" data-nav="about">About</a>' . "\n";
         echo '      <a href="courses" data-nav="courses">Courses</a>' . "\n";
+        /* ⚠ trainers.html is NOT on the sync manifest — like every other .html it
+           carries its own site's chrome, so each academy needs its own copy. This
+           file IS synced. Copy trainers.html (and the trainer styles in
+           styles.css) into a target repo BEFORE syncing chrome.php into it, or
+           this link 404s on that site. Same footing as the Graduates link below,
+           which has always had the same requirement. */
+        echo '      <a href="trainers" data-nav="trainers">Trainers</a>' . "\n";
         echo '      <a href="graduates" data-nav="graduates">Graduates</a>' . "\n";
         echo '      <a href="contact" data-nav="contact"' . $on('contact') . '>Contact</a>' . "\n";
         echo '      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile">'
@@ -263,6 +270,7 @@ function chrome_footer(string $variant, array $o = []): void
             './'           => 'Home',
             'about'        => 'About',
             'courses'      => 'Courses',
+            'trainers'     => 'Trainers',
             'graduates'    => 'Graduates',
             'profile'      => 'Profile',
             'contact'      => 'Contact',

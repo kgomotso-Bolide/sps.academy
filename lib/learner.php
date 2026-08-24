@@ -57,12 +57,12 @@ const LEARNER_PROGRESS_MAX_ROWS = 2000;
  * The qualifications an SPS learner is ENROLLED on, as opposed to the courses
  * the catalogue links to.
  *
- * Two entries, and the short list is the point. The internationally recognised
- * courses on the catalogue page are studied on Coursera or edX, where the
- * enrolment is between the learner and that provider — recording one here would
- * be inventing a record we do not hold. What Centenary enrols people on is the
- * Project Manager qualification, plus the short courses we run ourselves, whose
- * title comes from whatever the learner registered for.
+ * The short list is the point. The internationally recognised courses on the
+ * catalogue page are studied on Coursera or edX, where the enrolment is between
+ * the learner and that provider — recording one here would be inventing a
+ * record we do not hold. What Centenary enrols people on is the Project Manager
+ * qualification, the programmes we run ourselves, and a catch-all short course
+ * whose title comes from whatever the learner registered for.
  *
  * Computer Technician was here until August 2026 and was removed on Kgomotso's
  * instruction. Anyone already enrolled against that slug keeps their row: this
@@ -84,6 +84,14 @@ function learner_catalogue(): array
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
             'note'    => 'A professional programme, not an accredited qualification',
+            'tracked' => false,   // no module structure on the site yet
+        ],
+        /* "Skills course" is Kgomotso's own label for these, given 22 Aug 2026:
+           a customised short course, built with a specialist, deliberately not
+           accredited. Only the Project Manager route is the qualification. */
+        'procurement' => [
+            'title'   => 'Procurement Skills',
+            'note'    => 'A skills course — customised, and not accredited',
             'tracked' => false,   // no module structure on the site yet
         ],
         'short-course' => [

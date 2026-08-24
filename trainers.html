@@ -3,9 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graduates — SPS Academy</title>
-<meta name="description" content="People who have come through Centenary Networks — where they studied, and where they are now.">
-<link rel="stylesheet" href="styles.css?v=20260820">
+<!-- REVIEW MODE. Remove this tag only when trainers.js has REVIEW = false and
+     every published trainer has consent:true. trainers.js re-adds it if it is
+     missing while REVIEW is on, but a tag in the source is stronger than one
+     added by script — this is the plan, that is the backstop. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Meet the Trainers — SPS Academy</title>
+<meta name="description" content="The specialists who deliver our skills courses — who they are, what they have done, and what they teach.">
+<link rel="stylesheet" href="styles.css?v=20260824">
 </head>
 <body>
 <nav id="nav">
@@ -15,8 +20,8 @@
       <a href="./" data-nav="home">Home</a>
       <a href="about" data-nav="about">About</a>
       <a href="courses" data-nav="courses">Courses</a>
-      <a href="trainers" data-nav="trainers">Trainers</a>
-      <a href="graduates" data-nav="graduates" class="active">Graduates</a>
+      <a href="trainers" data-nav="trainers" class="active">Trainers</a>
+      <a href="graduates" data-nav="graduates">Graduates</a>
       <a href="contact" data-nav="contact">Contact</a>
       <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
       <a href="contact" class="nav-cta">Upskill Yourself</a>
@@ -28,23 +33,24 @@
 <section class="page-top">
   <div class="wrap">
     <div class="sec-head reveal">
-      <span class="eyebrow">Graduates &amp; interns</span>
-      <h2>Where our learners are now</h2>
-      <p>Centenary Networks has been training and placing people since 2021. These are the people who came through.</p>
+      <span class="eyebrow">Meet the trainers</span>
+      <h2>Who teaches the skills courses</h2>
+      <p>Our accredited qualification is delivered against a registered curriculum. Our <strong>skills courses</strong> are different: they are built with a specialist who has actually done the work, and they are not accredited. These are those specialists.</p>
     </div>
 
-    <!-- Filled by graduates.js from its PEOPLE list. Nobody is added by editing
-         this file. See the notes at the top of graduates.js, in particular the
-         part about consent — these are real named people on a public page. -->
-    <div id="grads" class="reveal"></div>
+    <!-- Filled by trainers.js from its TRAINERS list. Nobody is added by editing
+         this file. See the notes at the top of trainers.js, in particular the
+         part about consent — these are real named people on a public page, and
+         listing somebody as a trainer also asserts that we have engaged them. -->
+    <div id="trainers" class="reveal"></div>
 
   </div>
 </section>
 
 <section class="cta-band">
   <div class="wrap">
-    <h2>Our next intake is open</h2>
-    <p>Register your interest with HR and we'll confirm your place on the next intake.</p>
+    <h2>Want one of these courses?</h2>
+    <p>Register your interest with HR and we'll confirm your place on the next intake. Fully funded by SPS.</p>
     <a href="contact" class="btn btn-primary">Upskill Yourself</a>
   </div>
 </section>
@@ -68,12 +74,12 @@
       <strong>Accreditation</strong>
       <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
     </div>
-    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. People shown on this page studied with Centenary Networks and appear here with their permission; where they work now is their own information and is not an endorsement by their employer. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
+    <p class="disclaimer">SPS Academy is the in-house training academy of SPS — Sustainable Power Solutions, for SPS employees. Trainers shown on this page are specialists engaged through Centenary Networks and appear here with their permission; their professional history is their own information. Skills courses are non-accredited short courses — only the Occupational Certificate: Project Manager is an accredited qualification. SPS Academy operates in association with Centenary Networks. © 2026 SPS — Sustainable Power Solutions. All rights reserved.</p>
   </div>
 </footer>
 <script src="site.js?v=20260820"></script>
 <script src="profile.js?v=20260820"></script>
-<script src="graduates.js?v=20260820"></script>
+<script src="trainers.js?v=20260824"></script>
 <script src="assistant.js?v=20260820"></script>
 </body>
 </html>

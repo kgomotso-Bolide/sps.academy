@@ -127,6 +127,13 @@ sps/
 │                           #   published without consent:true, and REVIEW must be false
 │                           #   — read the note at the top of the file before adding
 │                           #   anyone or before turning REVIEW off
+├── trainers.html           # Meet the trainers — the specialists who deliver the skills
+│                           #   courses. Kgomotso's instruction, 22 Aug 2026
+├── trainers.js             # THE TRAINER LIST, same consent machinery as graduates.js:
+│                           #   REVIEW + consent:true, fails closed. Listing somebody
+│                           #   here also asserts we have engaged them — read the note at
+│                           #   the top of the file. ON THE SYNC MANIFEST; trainers.html
+│                           #   is not, so copy it into a target repo by hand
 ├── skills-gap.html         # STUB → /courses. The tool was removed 19 Aug 2026
 ├── rpl.html                # STUB → /contact. The explainer was removed 19 Aug 2026
 ├── locks.js                # WHICH COURSES ARE OPEN — single source of truth. Edit this
@@ -273,7 +280,11 @@ Two answers, because there are two branches and they are genuinely different sit
 
 - **Add a course** → add one entry to the `COURSES` object in `course.html`, and one
   `["<title fragment>","<slug>","<unsplash-id>"]` row to the `CARDS` array in `cards.js`.
-  No new file needed.
+  No new file needed. That much gives it a page and a working card. To finish the job:
+  a `.ccard` in the right band of `courses.html` (the card is markup, not generated),
+  a row in the `COURSES` array in `assistant.js` so the assistant can find it, and — only
+  if somebody is to be **enrolled** on it rather than merely shown it — an entry in
+  `learner_catalogue()` in `lib/learner.php`.
 - **Swap in a real video** → set the lesson's `data-src` to the video URL in the catalog.
 - **Swap a PDF** → replace the file in `resources/` with the same filename.
 - **Change copy** → hero copy lives in `index.html`; course copy in the `COURSES` catalog.
@@ -595,6 +606,127 @@ accredited qualification.
 - [ ] **Confirm the QCTO accreditation number** — the site footer carries `07-QCTO/SDP180526182035`
   (valid 15 May 2026 – 14 May 2031); `Centenary_Course_Options_DRAFT.pdf` (29 Jul 2026) carries
   `07-QCTO/SDP120426174903`. Only one can be current, and it is on every page.
+- [x] **Procurement Skills (24 Aug 2026)** — Kgomotso: Centenary is to train the SPS
+  procurement office on procurement. A **customised, non-accredited short course**, built
+  with two specialists — one supplies the headings out of her own skills list, the other
+  supplies PDF material against those headings — and then opened to external learners as
+  well. Added as `procurement`: a course record and a seven-module outline in `course.html`,
+  a `Procurement` entry in `LEARN`, a card third in `/courses`, a row in `cards.js` and in
+  the assistant, and an entry in `learner_catalogue()` so somebody can actually be enrolled
+  on it. Card artwork is drawn in `var(--accent)`/`var(--green)`, so it ports to the other
+  three sites unrepainted.
+  **Where the outline stands:**
+  - [x] **The headings are hers, one for one (24 Aug 2026).** The Waria Consulting profile
+    and CV arrived the same day. `MOD_PROC` is now the seven teachable items from
+    **pillar 3 of the service offering, Learning / Development**, in her order and her
+    words. *Masterclasses* and *Coaching / Mentoring* are how she delivers rather than
+    what she covers, so they are in the course lead, not the accordion.
+  - [x] **Read the right pillar.** The profile has four — Consulting; Supplier Engagement /
+    Performance; Learning / Development; Operations / Project Management — and only the
+    third is training. An earlier cut of `MOD_PROC` pulled Strategic Sourcing, Procurement
+    Value Chain Optimization and the SRM Scorecard into the syllabus. Those sit under
+    Consulting and Supplier Engagement: things Waria is engaged to **do** for a client, not
+    things she offered to **teach**. They are out. Anything from pillars 1, 2 and 4 is a
+    future course to be agreed, not a heading to borrow.
+  - [x] **The facilitator is named, and the block is data-driven.** `FAC_WARIA` in
+    `course.html`, rendered through `#c-fac-name` / `#c-fac-role` / `#c-fac-bio`. A course
+    with no `facilitator` key keeps the academy-team wording already in the markup. The bio
+    uses the Waria profile — a marketing document, written to be shown — plus the
+    qualifications from the CV. The client savings figures, the schooling and the personal
+    section of that CV are deliberately **not** published: a CV is sent to be read, not to
+    be posted.
+  - [ ] **Confirm the naming, with Kgomotso and with Tarryn.** Built on the reading that the
+    profile was forwarded *so it could be used for the academy*. Nobody has said so in
+    writing. Tumelo is still not named anywhere — no profile has come for them.
+  - [ ] **The lesson titles under those headings are still ours.** She gave headings, not a
+    lesson plan, and the accordion needs something under each. Check them against Tumelo's
+    PDF material when it lands — that is the pairing Kgomotso described, and it is the
+    point at which the outline stops being provisional.
+  - [ ] **Not signed off, and no material yet.** `draftSyllabus:true` stays until Kgomotso
+    signs it off, so the page says the outline is awaiting sign-off and the card says
+    *Coming Soon* rather than *Available Now*. Real headings do not make the course ready
+    to date.
+  Home page untouched on purpose: its copy commits to Kgomotso's **three lines**
+  (Project Management, AI short courses, AI & Software Development), and procurement is a
+  fourth. Promoting it there — a card on `index.html`, a fourth focus tile on `/courses` —
+  is her call, not a tidy-up.
+- [x] **Meet the Trainers, and the skills-course line (24 Aug 2026)** — Kgomotso's original
+  brief, which only surfaced after the procurement course was already built:
+
+  > "I am going to email you information on someone's Procurement profile that we will add
+  > as a course, short course we call those **skills courses** and they are not accredited.
+  > I need you to find a similar course as per her skills and **we upload on all the
+  > companies academies**. Taryn will be the specialist who will be training. Then I will
+  > share one on **Solar and electrical**. **Fiston** will be the specialist. **You will ask
+  > both for their CV and or maybe use their linkedin profiles under meet the trainers.**
+  > SPS will be training their employees already on this training."
+
+  Four things follow from it, and three are done:
+  - [x] **"Skills course" is the house term** for a customised, non-accredited short course.
+    The procurement course and `learner_catalogue()` now use her words. Only the Project
+    Manager route is the accredited qualification; that distinction does not move.
+  - [x] **`trainers.html` + `trainers.js`** — the "meet the trainers" page she asked for,
+    built on the same consent machinery as `graduates.js`: a `REVIEW` flag, `consent:true`
+    per person, fails closed. `trainers.js` is on the sync manifest because the specialists
+    are Centenary's and teach on every academy — one list, four sites, no argument about
+    who agreed to what.
+  - [x] **Nav and footer carry Trainers** on every page, including `lib/chrome.php`. ⚠ That
+    file is synced and `trainers.html` is not: copy the page and the `.trainer` styles into
+    a target repo BEFORE syncing chrome into it, or the link 404s there.
+  - [x] **All four academies now have it (24 Aug 2026).** Kgomotso confirmed: *"For all as
+    we now have an expert to teach. So we can do for all."* Fungi, Maziv and Equinix each
+    got the course record, the eight-module outline, the catalogue card third in their own
+    band, the `cards.js` and `assistant.js` rows, the `learner_catalogue()` entry, the
+    data-driven facilitator block, `trainers.js` verbatim, their own `trainers.html` built
+    from their own `graduates.html` chrome, the trainer CSS, and Trainers in nav and footer
+    on every page. Each site keeps its own wording — "Fully funded by Fungi", *Meet the
+    Trainers — Maziv Academy* — because the port was driven off each site's own chrome
+    rather than copying SPS pages over.
+    The port script asserted on every insertion point and refused to write anything unless
+    all of them matched, so no site got a half-applied change. It is not in the repo: it was
+    a one-off, and the next course goes in by hand or by writing a fresh one.
+
+  **Consent is still false for both trainers, and `REVIEW` is still true.** Kgomotso
+  directing us to use their CVs and LinkedIn profiles is authority to build the page, not
+  a yes from the two people going on it — and naming somebody as your trainer also asserts
+  an engagement that is not signed. Two yeses and a signature turn it on.
+
+  **What is deliberately not published:** Tarryn's covering email describes her as a Black
+  female professional who is ADHD specially abled. That was written to one person, in
+  confidence, to make a case for herself. Health information and demographic detail do not
+  become publishable because they arrived in an email we were forwarded, and none of it is
+  on the site or in any file. If she wants it on her own profile, she can say so herself.
+
+- [ ] **Solar & Electrical skills course (Fiston)** — announced 22 Aug 2026, nothing received
+  yet: no surname, no company, no CV, no LinkedIn, no syllabus. `trainers.js` holds a
+  `pending:true` slot so the gap is visible rather than forgotten. Worth chasing first on
+  **this** site of the four: SPS is a solar business, so a solar and electrical skills course
+  is the most on-brand thing either specialist could teach here.
+- [x] **Strategic sourcing, put back (24 Aug 2026)** — a reversal, recorded because the
+  reasoning matters more than the outcome. Module 02 of the procurement course was cut on
+  the grounds that Strategic Sourcing sits under Waria's *Consulting* pillar, not its
+  *Learning / Development* pillar. Then Kgomotso sent a benchmark she wants ours to
+  resemble — ProsPen's *Advanced Strategic Procurement Planning, Tendering, Bidding and
+  Award Management* — which leads with strategic procurement planning, sourcing strategy
+  and commodity strategy before it reaches tendering. Her brief was to "find a similar
+  course as per her skills", which is wider than "take her pillar-3 list", and strategic
+  sourcing is the deepest thing on Tarryn's CV: Senior Sourcing Specialist and Senior
+  Sourcing Consultant at Standard Bank, FNB and Absa. So it went back in, as module 02,
+  written from her CV's vocabulary.
+  ⚠ **The benchmark is a benchmark, not a source.** ProsPen's module list is another
+  training provider's curriculum and none of it is copied — not a heading, not a bullet.
+  Lifting a competitor's syllabus onto five public sites is a legal problem and an
+  embarrassing one. The note above `MOD_PROC` in `course.html` says the same thing where
+  somebody would actually be tempted.
+
+- [ ] **A fifth academy: Tracker** — Kgomotso, 22 Aug 2026: *"I was with the Tracker CEO at
+  Rufby today, we should include in the list and I will go sell it to him."* Not sold yet,
+  so nothing is built. When it is, it is the same shape as the other four: a repo, its own
+  `lib/brand.php`, its own logo and palette, its own `.html` chrome — and everything on the
+  `sync-backend.php` manifest comes across unchanged. Worth noting that the manifest is now
+  doing real work: five copies that are allowed to drift is five codebases, and the thing
+  they would eventually disagree about is which named trainers have consented.
+
 - [ ] **Sign off the Skills Gap role targets** — the eight per-role targets in `skills-gap.js` were
   written from this site's own description of the work and have **not** been reviewed by the people who
   run those teams. The page says so; get them checked before anyone treats the output as authoritative.

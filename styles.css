@@ -1292,6 +1292,41 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .grad-review p{margin:0 0 8px;font-size:14.5px;line-height:1.6;color:var(--ink-soft)}
 .grad-review p:last-child{margin-bottom:0}
 
+/* ---- Meet the trainers --------------------------------------------------
+   A trainer card carries a paragraph of professional history, so it is a wide
+   two-column card rather than one of the small .face tiles the graduates page
+   uses. Same portrait treatment, same initials fallback. */
+.trainergrid{display:grid;gap:22px}
+.trainer{display:grid;grid-template-columns:180px 1fr;gap:0;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;background:#fff}
+.tr-shot{position:relative;display:block;background:var(--orange-deep);min-height:100%}
+.tr-ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font:700 42px/1 Inter,sans-serif;color:#fff;letter-spacing:-.02em}
+.tr-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tr-body{padding:24px 26px 26px}
+.tr-body h3{font-size:21px;letter-spacing:-.015em;color:var(--grey);margin:0 0 4px}
+.tr-role{margin:0 0 2px;font-size:13.5px;font-weight:700;color:var(--orange-deep);
+  text-transform:uppercase;letter-spacing:.05em}
+.tr-org{margin:0 0 2px;font-size:14.5px;color:var(--ink)}
+.tr-creds{margin:0 0 14px;font-size:13px;color:var(--ink-soft)}
+.tr-bio{margin:0;font-size:15px;line-height:1.7;color:var(--ink-soft)}
+.tr-pending{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink-soft);font-style:italic}
+.tr-courses{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+.tr-courses>span{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-soft);font-weight:700}
+.tr-course{font-size:13px;font-weight:700;color:var(--orange-deep);border:1px solid var(--line);
+  border-radius:30px;padding:5px 12px;text-decoration:none}
+.tr-course:hover{border-color:var(--orange);background:var(--orange-tint)}
+.tr-link{display:inline-block;margin-top:14px;font-size:13.5px;font-weight:700;
+  color:var(--orange-deep);text-decoration:underline}
+
+@media(max-width:760px){
+  .trainer{grid-template-columns:1fr}
+  .tr-shot{aspect-ratio:16/9;min-height:0}
+  .tr-ini{font-size:34px}
+  .tr-body{padding:20px 20px 22px}
+}
+
 @media(max-width:760px){
   .cohort-top{grid-template-columns:1fr}
   .cohort-top img{aspect-ratio:16/10}
