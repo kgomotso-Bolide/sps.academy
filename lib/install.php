@@ -79,6 +79,12 @@ function install_seed_tenants(?string $contact = null): int
         ['fungi',   'Fungi Utilities (Pty) Ltd',         'Fungi Academy'],
         ['equinix', 'Equinix',                           'Equinix Academy'],
         ['maziv',   'Maziv',                             'Maziv Academy'],
+        /* Tracker is the fifth, added 24 Aug 2026 while it was still being
+           pitched. Seeding it costs nothing and is the whole point of the
+           tenants table describing the platform rather than the installation:
+           if it is sold, standing the site up is configuration, not a
+           migration. If it is not, an unused row does no harm. */
+        ['tracker', 'Tracker',                           'Tracker Academy'],
     ];
 
     $added = 0;
