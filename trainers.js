@@ -108,11 +108,7 @@
 
        Cleared to publish 24 Aug 2026.
 
-       No photograph yet. When one arrives, save it as
-       images/trainers/tarryn-norris.jpg and add:
-           photo: 'images/trainers/tarryn-norris.jpg',
-       Until then the card shows her initials, and a file that 404s falls back
-       to the same initials, so a missing photo cannot break a client's site. */
+       Photograph supplied and cleared for use, 25 Aug 2026. */
     {
       name: 'Tarryn Norris',
       role: 'Procurement, sourcing and supplier development',
@@ -128,6 +124,7 @@
            'marketing categories, and designing an enterprise development programme for ' +
            'new-entrant suppliers — which is the ground this course covers for people ' +
            'working for service providers.',
+      photo: 'images/trainers/tarryn-norris.jpg',
       linkedin: '',          // ask her for the URL, or leave it off
       consent: true
     },
@@ -142,10 +139,10 @@
 
        ⚠ DO NOT USE HIS LINKEDIN. Kgomotso suggested taking his LinkedIn photo
        and profile; he replied to the same thread, to all of us: "Please allow me
-       to submit a different one." So his own profile and his own photograph are
-       coming from him, and until they arrive nothing is scraped from anywhere.
-       Replace the summary below with whatever he sends, and put his photograph
-       at images/trainers/fiston-nselike.jpg.
+       to submit a different one." He then did, and THAT is the photograph below,
+       cleared for use 25 Aug 2026. Nothing here came from LinkedIn and nothing
+       should. His own written profile is still to come — replace the summary
+       below with it when it arrives.
 
        There is no narrative bio here on purpose. He has asked to write his own,
        and a bio we composed about a man who is in the middle of sending us his
@@ -165,6 +162,7 @@
            'welding and fabrication, plumbing, and workplace and employability programmes. ' +
            'Registered with the Engineering Council of South Africa as a Professional ' +
            'Engineering Technologist.',
+      photo: 'images/trainers/fiston-nselike.jpg',
       linkedin: '',          // NOT to be filled from LinkedIn — see the note above
       consent: true
     }

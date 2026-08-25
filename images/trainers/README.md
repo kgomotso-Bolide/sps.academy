@@ -1,8 +1,15 @@
 # Trainer photographs
 
-Empty on purpose. Neither trainer has sent a photograph yet, and until one
-arrives their card shows their initials on a brand-coloured tile — which looks
-deliberate rather than broken.
+`tarryn-norris.jpg` and `fiston-nselike.jpg` are in, cleared for use 25 Aug 2026.
+Both are 400x400, which is under the 600px asked for below but comfortably enough
+for a card whose image column is 180px wide.
+
+Fiston’s is the photograph HE supplied. He was asked for his LinkedIn one and
+replied asking to send a different one instead — so this is that one, and his
+LinkedIn is still not to be used for anything.
+
+Anyone without a file here falls back to their initials on a brand-coloured tile,
+which looks deliberate rather than broken.
 
 ## Adding one
 
