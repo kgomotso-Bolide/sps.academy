@@ -272,6 +272,7 @@ function chrome_footer(string $variant, array $o = []): void
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
             'graduates'    => 'Graduates',
+            'scorecard'    => 'Scorecard',
             'profile'      => 'Profile',
             'contact'      => 'Contact',
             'privacy'      => 'Privacy',

@@ -15,3 +15,10 @@ lib/config.local.php
 *.sqlite
 *.sqlite-journal
 private/
+
+# B-BBEE verification reports and anything else in private/.
+# private/ is 404'd by .htaccess and excluded from the deploy mirror, so a file
+# in here cannot be served — but it must not reach the repository either. The
+# verification report carries the company registration number, VAT number,
+# physical address and the ownership percentages.
+private/

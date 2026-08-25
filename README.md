@@ -315,6 +315,52 @@ accredited qualification.
 
 ## 8. Roadmap / Open Items
 
+- [x] **Skills Development scorecard (25 Aug 2026)** — `/scorecard`, from the Final BEE
+  Verification Report for SPS RSA (Pty) Ltd (certificate **SPSGEN069**, measured
+  **01 Mar 2025 – 28 Feb 2026** against the **Amended Construction Sector Codes**, issued
+  03 Aug 2026, expires **02 Aug 2027**). The report's twelve Skills Development indicators,
+  each transcribed verbatim and each expandable into what it measures and which part of the
+  academy feeds it. **24.63 of 26 points** — the second-largest of the five element scores
+  behind a **Level 2 / 95.03**. Two lines are short and one of them, *black employees
+  registered as candidates with professional bodies* (33.33% against a 60% target), is
+  **97% of the whole shortfall** — the natural place for the academy to push, and the CTA
+  on the page. Data and copy live in `scorecard.js`; read its header before touching it.
+  Only Skills Development is broken down — the other four elements are totals and stay that way.
+  > ⚠️ This is **reporting, not the B-BBEE sales angle §1 forbids.** It tells SPS what its own
+  > academy did for a scorecard SPS already has. It must never become a reason to enrol, which
+  > is why the page says so itself and why the link sits under the schools rather than in the pitch.
+
+  Two things found while building it, both worth keeping:
+  - **The report PDF was in the web root.** The deploy mirror uploads `./` with no `*.pdf`
+    exclude, so `Final Report - SPS RSA (Pty) Ltd.pdf` — company registration number, VAT
+    number, physical address, ownership percentages — would have been published and
+    downloadable. Moved to `private/` (404'd by `.htaccess`, already excluded from the mirror),
+    `private/` added to `.gitignore`, and three named `-X` patterns added to the workflow as
+    belt and braces. No blanket `*.pdf` exclude: `resources/` holds real course PDFs that must
+    keep deploying. **Nothing off that report beyond certificate-level figures is on the page**,
+    and a test asserts it.
+  - **The report loses a cent to rounding.** Its five element scores as printed add to 95.04;
+    it states 95.03. Each element is rounded to two decimals and the total is struck from the
+    unrounded figures. The page discloses this and says the certificate's 95.03 governs —
+    do not "fix" it by nudging an element score.
+- [x] **Four schools on `/courses` (25 Aug 2026)** — the catalogue is entered one school at
+  a time instead of as one thirty-card wall: **Business**, **Technology**, **Engineering**,
+  **Wellness & Health**. Landing on `/courses` shows the four school cards and nothing else;
+  picking one reveals just that school's courses, in the bands they already sat in.
+  Every card carries `data-school`, so putting a course in a school is a matter of tagging
+  the card — `courses-index.js` needs no edit, and the counts on the school cards are read
+  off the cards so they cannot drift. The open school lives in the URL hash (`/courses#business`),
+  which makes a school linkable and makes the browser Back button step out of it for free;
+  `#ours` and `#technical`, the old in-page band anchors, alias to Business and Engineering.
+  Search now spans all four schools and stays on screen in both views. Three things went in
+  the process: the three focus tiles below (the schools replace them as the way in), the
+  **Subject** chip row (`data-cat` is still on every card and still drives the card's own
+  category line — it just no longer has a filter row), and the accreditation explainer's
+  place above the fold, which is now a fold-away `<details>`. With JS off the page is the
+  old one: every band visible, one long list. **The split is ours, not a registered
+  faculty structure** — Business is 16 cards, Technology 8, Engineering 3, Wellness & Health 3,
+  and the Project Manager qualification is in Business. Not yet ported to Fungi, Maziv,
+  Equinix or Tracker.
 - [x] **The three focus lines (20 Aug 2026)** — Kgomotso: Project Management, AI short
   courses, AI & Software Development, on all four sites. The third did not exist, so it
   was built: `ai-software-development`, eight modules, a card second in both catalogues,

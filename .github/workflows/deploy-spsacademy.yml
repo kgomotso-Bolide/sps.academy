@@ -163,6 +163,14 @@ jobs:
           set net:reconnect-interval-multiplier 1.5
           # Shared hosting throttles concurrent SFTP channels; one at a time is
           # slower but survives a few dozen files.
+          #
+          # The three Report excludes below are belt and braces, not the control.
+          # The B-BBEE verification report carries the company registration
+          # number, VAT number, physical address and the ownership percentages,
+          # and it was dropped in the web root once already (25 Aug 2026) where
+          # this mirror would have published it. It belongs in private/, which
+          # is excluded above and 404'd by .htaccess. resources/ holds real
+          # course PDFs that must keep deploying, so there is no blanket *.pdf.
           set mirror:parallel-transfer-count 1
           open -u "$FTP_USERNAME","" sftp://$FTP_SERVER
           mirror $FLAGS \
@@ -173,6 +181,7 @@ jobs:
             -X 'SPS-AI-Micro-Learning-Onepager.*' \
             -X 'SPS-AI-Micro-Learning-Onepager.files/' \
             -X '*.md' -X '*.docx' -X '*.zip' \
+            -X 'Final Report*' -X '*Verification Report*' -X '*BEE Report*' \
             -X 'config.local.php' -X 'config.sample.php' \
             ./ "${{ inputs.server_dir }}"
           bye

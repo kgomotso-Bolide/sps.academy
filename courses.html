@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courses — SPS Academy</title>
 <meta name="description" content="Browse the courses open to SPS employees — accredited qualifications and short courses, fully funded, online or in person.">
-<link rel="stylesheet" href="styles.css?v=20260820">
+<link rel="stylesheet" href="styles.css?v=20260825">
 </head>
 <body>
 <nav id="nav">
@@ -26,50 +26,63 @@
 </nav>
 <section id="courses" class="page-top">
   <div class="wrap">
-    <div class="sec-head reveal">
+    <!-- The catalogue is entered through four schools, not as one thirty-card wall.
+         You pick a school first; its courses only then open up. courses-index.js
+         does the switching and keeps the choice in the URL hash (#business), so a
+         school is linkable and the browser Back button works. With JS off every
+         band is simply visible — the old page, still perfectly usable.
+         DOM order here is deliberate: #schoolHead sits above #cx so that once a
+         school is open the back link and the school title are the first things
+         above the filters and the cards. -->
+    <div class="sec-head reveal" id="schoolIntro">
       <span class="eyebrow">Our Courses</span>
-      <h2>What you can study</h2>
-      <p>Fully funded by SPS. <strong>Online or in person</strong> — tell HR which suits you.</p>
-      <p style="font-size:15px;color:var(--ink-soft);line-height:1.7;margin-top:14px"><strong>The Occupational Certificate: Project Manager</strong> is the accredited qualification, and it is first below. Ask <a href="contact" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">HR</a> for anything that is not listed.</p>
+      <h2>Four schools. Pick one.</h2>
+      <p>Fully funded by SPS. <strong>Online or in person</strong> &mdash; tell HR which suits you.</p>
+      <p style="font-size:15px;color:var(--ink-soft);line-height:1.7;margin-top:14px">Choose a school and the courses inside it open up. The one accredited qualification, the <strong>Occupational Certificate: Project Manager</strong>, is in the Business School. Ask <a href="contact" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">HR</a> for anything that is not listed.</p>
     </div>
 
-    <div class="sec-head reveal" style="margin-bottom:22px;max-width:820px">
-      <span class="eyebrow">Accreditation</span>
-      <h3 style="font-size:clamp(20px,2.4vw,26px);margin-bottom:12px">What the badges mean</h3>
-      <p style="font-size:15.5px;color:var(--ink-soft);line-height:1.7"><strong>Locally accredited</strong> — a real qualification on South Africa's NQF, so it counts with another employer and towards further study. <strong>Internationally recognised</strong> — a certificate from Google, Microsoft or Coursera; respected anywhere, but not on the NQF. Everything else is a short course.</p>
-      <div class="nqf-flow" style="max-width:640px">
-        <div class="nqf-step"><b>QCTO</b><span>Designs and quality-assures the qualification</span></div>
-        <div class="nqf-arrow" aria-hidden="true">→</div>
-        <div class="nqf-step"><b>SAQA</b><span>Registers it on the NQF, with its own ID</span></div>
-        <div class="nqf-arrow" aria-hidden="true">→</div>
-        <div class="nqf-step"><b>Provider</b><span>Accredited to deliver it to you</span></div>
-      </div>
+    <!-- Filled in by courses-index.js once a school is open. -->
+    <div class="school-head" id="schoolHead" hidden>
+      <a class="pg-back" href="courses" id="schoolBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>All four schools</a>
+      <span class="eyebrow" id="schoolEyebrow">School</span>
+      <h2 id="schoolTitle"></h2>
+      <p id="schoolBlurb"></p>
     </div>
 
-    <!-- The three things Centenary is selling, said once and in order.
-         Anything else in the catalogue is real, but it is not the pitch. -->
-    <div class="focus reveal">
-      <a class="focus-item" href="course?c=project-management">
-        <span class="focus-kicker">Accredited qualification</span>
-        <strong>Project Management</strong>
-        <span class="focus-line">NQF 5, SAQA 101869, 240 credits. Twenty-eight modules and a portfolio of evidence.</span>
+    <div class="schools reveal" id="schools">
+      <a class="school" href="#business" data-school="business">
+        <span class="school-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/><path d="M10 13v2h4v-2"/></svg></span>
+        <strong>Business School</strong>
+        <span class="school-line">Project management, procurement, leadership, strategy &mdash; and the AI courses written for the people running the work.</span>
+        <span class="school-foot"><span class="school-n" data-school-count="business"></span><span class="school-go">Open the school &rarr;</span></span>
       </a>
-      <a class="focus-item" href="#ours">
-        <span class="focus-kicker">Short courses</span>
-        <strong>AI</strong>
-        <span class="focus-line">Practical AI for every role — everyday tools, prompting, using it responsibly, and leading a team that does.</span>
+      <a class="school" href="#technology" data-school="technology">
+        <span class="school-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 17-5-5 5-5"/><path d="m16 7 5 5-5 5"/><path d="m13 4-2 16"/></svg></span>
+        <strong>Technology School</strong>
+        <span class="school-line">Software development, generative and agentic AI, cybersecurity, and the computing underneath all of it.</span>
+        <span class="school-foot"><span class="school-n" data-school-count="technology"></span><span class="school-go">Open the school &rarr;</span></span>
       </a>
-      <a class="focus-item" href="course?c=ai-software-development">
-        <span class="focus-kicker">Programme</span>
-        <strong>AI &amp; Software Development</strong>
-        <span class="focus-line">From how a codebase works to shipping an AI-powered feature. No development background needed.</span>
+      <a class="school" href="#engineering" data-school="engineering">
+        <span class="school-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+        <strong>Engineering School</strong>
+        <span class="school-line">Artisan and trade pathways, electrical compliance, solar PV, welding and plumbing &mdash; plus embedded machine learning.</span>
+        <span class="school-foot"><span class="school-n" data-school-count="engineering"></span><span class="school-go">Open the school &rarr;</span></span>
+      </a>
+      <a class="school" href="#wellness" data-school="wellness">
+        <span class="school-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M2.5 12h4l1.5-3 2 6 1.5-3h4" stroke-width="1.4"/></svg></span>
+        <strong>Wellness &amp; Health School</strong>
+        <span class="school-line">AI in medicine &mdash; clinical foundations, biomedical signals, and the language models being used on medical records.</span>
+        <span class="school-foot"><span class="school-n" data-school-count="wellness"></span><span class="school-go">Open the school &rarr;</span></span>
       </a>
     </div>
 
+    <!-- Search spans all four schools, so it stays on screen whether or not a
+         school is open. The credential chips and the count only mean something
+         once there are cards on screen, so courses-index.js hides them until then. -->
     <div class="cx reveal" id="cx">
       <div class="cx-search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="cxq" placeholder="Search courses — try &quot;ethics&quot;, &quot;leadership&quot;, &quot;cybersecurity&quot;…" aria-label="Search courses">
+        <input type="search" id="cxq" placeholder="Search all four schools &mdash; try &quot;ethics&quot;, &quot;welding&quot;, &quot;cybersecurity&quot;&hellip;" aria-label="Search courses">
       </div>
       <div class="cx-row" id="cxAcc">
         <span class="cx-lbl">Credential</span>
@@ -78,18 +91,42 @@
         <button class="cx-chip" data-acc="intl">Internationally recognised</button>
         <button class="cx-chip" data-acc="none">Short courses</button>
       </div>
-      <div class="cx-row" id="cxCat">
-        <span class="cx-lbl">Subject</span>
-        <button class="cx-chip on" data-cat="all">All</button>
-      </div>
       <div class="cx-count" id="cxCount"></div>
     </div>
+
+    <!-- The scorecard link. It sits under the schools rather than in the pitch
+         above them on purpose: what the catalogue is worth to SPS's B-BBEE is
+         real and worth reading, but it is not the reason to do a course, and
+         the README's standing instruction is that it never becomes one. -->
+    <a class="sc-strip reveal" href="scorecard">
+      <span class="sc-strip-n">24.63</span>
+      <span class="sc-strip-t"><strong>What this catalogue is worth on the B-BBEE scorecard</strong>
+        Skills Development scored 24.63 of 26 points on SPS&rsquo;s last verification &mdash; the second-largest
+        of the five elements behind a Level 2. See which courses feed which line.</span>
+      <span class="sc-strip-go" aria-hidden="true">&rarr;</span>
+    </a>
+
+    <!-- Reference, not navigation. It used to sit above the catalogue and pushed
+         every course below the fold; it is folded away here instead. -->
+    <details class="badge-note reveal" id="badgeNote">
+      <summary>What the accreditation badges mean</summary>
+      <div class="badge-note-body">
+        <p><strong>Locally accredited</strong> &mdash; a real qualification on South Africa's NQF, so it counts with another employer and towards further study. <strong>Internationally recognised</strong> &mdash; a certificate from Google, Microsoft or Coursera; respected anywhere, but not on the NQF. Everything else is a short course.</p>
+        <div class="nqf-flow" style="max-width:640px">
+          <div class="nqf-step"><b>QCTO</b><span>Designs and quality-assures the qualification</span></div>
+          <div class="nqf-arrow" aria-hidden="true">&rarr;</div>
+          <div class="nqf-step"><b>SAQA</b><span>Registers it on the NQF, with its own ID</span></div>
+          <div class="nqf-arrow" aria-hidden="true">&rarr;</div>
+          <div class="nqf-step"><b>Provider</b><span>Accredited to deliver it to you</span></div>
+        </div>
+      </div>
+    </details>
 
     <div class="course-band-label reveal" id="ours"><span class="tag">Our own courses</span><span class="ln"></span></div>
     <div class="course-grid" id="courseGrid">
 
       <!-- Card 1 — Project Manager. First on purpose: it is the one qualification open for enrolment, so it is the first card on the page. -->
-      <div class="ccard reveal" data-title="Occupational Certificate: Project Manager" data-cat="PROJECT MANAGEMENT" data-acc="local" data-text="occupational certificate: project manager project management pm nqf 5 240 credits saqa 101869 qcto accredited registered qualification knowledge practical workplace modules portfolio of evidence the formal route for anyone running projects at sps.">
+      <div class="ccard reveal" data-title="Occupational Certificate: Project Manager" data-school="business" data-cat="PROJECT MANAGEMENT" data-acc="local" data-text="occupational certificate: project manager project management pm nqf 5 240 credits saqa 101869 qcto accredited registered qualification knowledge practical workplace modules portfolio of evidence the formal route for anyone running projects at sps.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1c1508 0%,#5c3a12 45%,#a86a1f 78%,#f37424 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><line x1="92" y1="36" x2="92" y2="152" stroke="#fff" stroke-width="1" opacity=".55"/><line x1="92" y1="152" x2="336" y2="152" stroke="#fff" stroke-width="1" opacity=".55"/><rect x="102" y="48" width="118" height="12" rx="4" fill="#faa819" opacity=".85"/><rect x="140" y="70" width="152" height="12" rx="4" fill="#fff" opacity=".45"/><rect x="182" y="92" width="92" height="12" rx="4" fill="#4da446" opacity=".85"/><rect x="214" y="114" width="106" height="12" rx="4" fill="#fff" opacity=".3"/><path d="M320 120 l-8 -8 M320 120 l8 -8" stroke="#fff" stroke-width="1.4" opacity=".5" stroke-linecap="round"/><circle cx="320" cy="128" r="7" fill="#f37424"/></svg>
@@ -110,7 +147,7 @@
       <!-- Card 2 — AI &amp; Software Development. One of the three lines Centenary
            is selling; see the focus tiles at the top of the catalogue. The eight
            modules are OURS, unlike Project Manager's, and are awaiting sign-off. -->
-      <div class="ccard reveal" data-title="AI &amp; Software Development" data-cat="SOFTWARE DEVELOPMENT" data-acc="none" data-text="ai & software development software development programme code coding programming python git api database testing deployment ai assistants copilot build applications developers build software, and build it with ai. eight modules from how a codebase works to shipping an ai-powered feature — no development background needed.">
+      <div class="ccard reveal" data-title="AI &amp; Software Development" data-school="technology" data-cat="SOFTWARE DEVELOPMENT" data-acc="none" data-text="ai & software development software development programme code coding programming python git api database testing deployment ai assistants copilot build applications developers build software, and build it with ai. eight modules from how a codebase works to shipping an ai-powered feature — no development background needed.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#101826 0%,#1b2b45 42%,#243a5e 70%,var(--accent) 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><rect x="58" y="34" width="176" height="112" rx="8" fill="none" stroke="#fff" stroke-width="1.2"/><line x1="58" y1="58" x2="234" y2="58" stroke="#fff" stroke-width="1" opacity=".5"/><circle cx="72" cy="46" r="3.4" fill="var(--accent)"/><circle cx="84" cy="46" r="3.4" fill="var(--green)" opacity=".85"/><circle cx="96" cy="46" r="3.4" fill="#fff" opacity=".45"/><path d="M104 84 l-16 16 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><path d="M188 84 l16 16 -16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><line x1="132" y1="120" x2="160" y2="80" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><rect x="72" y="70" width="52" height="7" rx="3" fill="#fff" opacity=".28"/><circle cx="304" cy="90" r="30" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/><circle cx="304" cy="90" r="8" fill="var(--accent)"/><circle cx="266" cy="62" r="4.5" fill="var(--green)"/><circle cx="346" cy="68" r="4.5" fill="var(--green)"/><circle cx="272" cy="126" r="4.5" fill="#fff" opacity=".65"/><circle cx="344" cy="120" r="4.5" fill="#fff" opacity=".65"/><line x1="304" y1="90" x2="266" y2="62" stroke="var(--green)" stroke-width="1"/><line x1="304" y1="90" x2="346" y2="68" stroke="var(--green)" stroke-width="1"/><line x1="304" y1="90" x2="272" y2="126" stroke="#fff" stroke-width="1" opacity=".5"/><line x1="304" y1="90" x2="344" y2="120" stroke="#fff" stroke-width="1" opacity=".5"/></svg>
@@ -135,7 +172,7 @@
            card says Coming Soon rather than Available Now. Artwork is drawn in
            var(--accent) and var(--green) so the same markup ports to the other
            academy sites without being repainted. -->
-      <div class="ccard reveal" data-title="Procurement Skills" data-cat="PROCUREMENT" data-acc="none" data-text="procurement skills buying purchasing supply chain supplier vendor sourcing strategic sourcing category strategy commodity strategy spend analysis make or buy outsourcing benchmarking procurement fundamentals cost models tco total cost of ownership rfq rfp rfx tender bid management process open restricted negotiated tender bid evaluation scoring award quote quotation purchase order po specification procurement contract service level agreements sla contract management negotiations negotiating risk and governance compliance conflict of interest fraud bbbee transformation audit trail masterclasses coaching mentoring tarryn norris waria consulting mcips procurement taught by someone who has run it. eight modules from fundamentals and strategic sourcing through tender and bid management, evaluation, contracts and slas, negotiations, risk and governance, and cost models.">
+      <div class="ccard reveal" data-title="Procurement Skills" data-school="business" data-cat="PROCUREMENT" data-acc="none" data-text="procurement skills buying purchasing supply chain supplier vendor sourcing strategic sourcing category strategy commodity strategy spend analysis make or buy outsourcing benchmarking procurement fundamentals cost models tco total cost of ownership rfq rfp rfx tender bid management process open restricted negotiated tender bid evaluation scoring award quote quotation purchase order po specification procurement contract service level agreements sla contract management negotiations negotiating risk and governance compliance conflict of interest fraud bbbee transformation audit trail masterclasses coaching mentoring tarryn norris waria consulting mcips procurement taught by someone who has run it. eight modules from fundamentals and strategic sourcing through tender and bid management, evaluation, contracts and slas, negotiations, risk and governance, and cost models.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#12141a 0%,#1e2630 42%,#3a3524 72%,var(--accent) 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><rect x="56" y="30" width="132" height="120" rx="8" fill="none" stroke="#fff" stroke-width="1.2"/><rect x="98" y="22" width="48" height="16" rx="5" fill="none" stroke="#fff" stroke-width="1.2"/><rect x="74" y="58" width="96" height="8" rx="3" fill="#fff" opacity=".45"/><rect x="74" y="76" width="70" height="8" rx="3" fill="var(--accent)" opacity=".9"/><rect x="74" y="94" width="86" height="8" rx="3" fill="#fff" opacity=".28"/><path d="m76 122 8 8 16-16" fill="none" stroke="var(--green)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M196 90h34" stroke="#fff" stroke-width="1.4" opacity=".6" stroke-linecap="round"/><path d="m224 84 7 6-7 6" fill="none" stroke="#fff" stroke-width="1.4" opacity=".6" stroke-linecap="round" stroke-linejoin="round"/><rect x="242" y="70" width="40" height="40" rx="3" fill="none" stroke="#fff" stroke-width="1.2"/><line x1="242" y1="82" x2="282" y2="82" stroke="#fff" stroke-width="1" opacity=".55"/><rect x="290" y="70" width="40" height="40" rx="3" fill="none" stroke="#fff" stroke-width="1.2"/><line x1="290" y1="82" x2="330" y2="82" stroke="#fff" stroke-width="1" opacity=".55"/><rect x="266" y="118" width="40" height="40" rx="3" fill="var(--accent)" opacity=".55"/><line x1="266" y1="130" x2="306" y2="130" stroke="#fff" stroke-width="1" opacity=".5"/><circle cx="344" cy="46" r="14" fill="none" stroke="var(--green)" stroke-width="1.6"/><path d="M338 46h12M344 40v12" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -154,7 +191,7 @@
       </div>
 
       <!-- Card 4 -->
-      <div class="ccard reveal" data-title="AI Fundamentals for the Workplace" data-cat="BUSINESS" data-acc="none" data-text="ai fundamentals for the workplace business a practical introduction to ai for non-technical staff — what it is, how it works, and how to use everyday ai tools confidently and responsibly.">
+      <div class="ccard reveal" data-title="AI Fundamentals for the Workplace" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="ai fundamentals for the workplace business a practical introduction to ai for non-technical staff — what it is, how it works, and how to use everyday ai tools confidently and responsibly.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 70%,#f37424 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.35"><circle cx="200" cy="90" r="60" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="35" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="10" fill="#f37424"/><line x1="140" y1="90" x2="365" y2="90" stroke="#fff" stroke-width=".8"/><line x1="200" y1="30" x2="200" y2="150" stroke="#fff" stroke-width=".8"/><circle cx="280" cy="55" r="4" fill="#faa819"/><circle cx="130" cy="120" r="4" fill="#faa819"/><circle cx="320" cy="130" r="4" fill="#4da446"/><line x1="200" y1="90" x2="280" y2="55" stroke="#faa819" stroke-width=".8"/><line x1="200" y1="90" x2="130" y2="120" stroke="#faa819" stroke-width=".8"/><line x1="200" y1="90" x2="320" y2="130" stroke="#4da446" stroke-width=".8"/></svg>
@@ -173,7 +210,7 @@
       </div>
 
       <!-- Card 5 -->
-      <div class="ccard reveal" data-title="AI Tools for Productivity" data-cat="BUSINESS" data-acc="none" data-text="ai tools for productivity business hands-on training in the ai tools transforming day-to-day work — writing assistants, research tools, data tools, and workflow automation.">
+      <div class="ccard reveal" data-title="AI Tools for Productivity" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="ai tools for productivity business hands-on training in the ai tools transforming day-to-day work — writing assistants, research tools, data tools, and workflow automation.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#0d2b0d 0%,#1a4a1a 40%,#2d7a2d 70%,#4da446 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="60" y="40" width="280" height="100" rx="8" fill="none" stroke="#fff" stroke-width="1"/><rect x="80" y="58" width="80" height="10" rx="3" fill="#fff" opacity=".5"/><rect x="80" y="76" width="120" height="8" rx="3" fill="#fff" opacity=".3"/><rect x="80" y="92" width="100" height="8" rx="3" fill="#fff" opacity=".3"/><rect x="80" y="108" width="60" height="8" rx="3" fill="#4da446" opacity=".8"/><rect x="260" y="58" width="60" height="72" rx="4" fill="#faa819" opacity=".2"/><path d="M270 90 l10-15 10 8 10-20 10 10" fill="none" stroke="#faa819" stroke-width="2" stroke-linecap="round"/></svg>
@@ -192,7 +229,7 @@
       </div>
 
       <!-- Card 6 -->
-      <div class="ccard reveal" data-title="Responsible & Ethical AI Use" data-cat="COMPLIANCE" data-acc="none" data-text="responsible & ethical ai use compliance using ai safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of ai in a professional setting.">
+      <div class="ccard reveal" data-title="Responsible & Ethical AI Use" data-school="business" data-cat="COMPLIANCE" data-acc="none" data-text="responsible & ethical ai use compliance using ai safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of ai in a professional setting.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#2a1a0a 0%,#5c3a12 40%,#a06020 70%,#f37424 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M175 70 l50 0 l-10 20 l-30 0 z" fill="#fff" opacity=".2"/><path d="M155 90 q0 -40 45 -40" fill="none" stroke="#faa819" stroke-width="2" stroke-dasharray="4 3"/><path d="M245 90 q0 40 -45 40" fill="none" stroke="#faa819" stroke-width="2" stroke-dasharray="4 3"/><circle cx="200" cy="90" r="8" fill="#f37424"/><line x1="200" y1="82" x2="200" y2="60" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="98" x2="212" y2="110" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -211,7 +248,7 @@
       </div>
 
       <!-- Card 7 -->
-      <div class="ccard reveal" data-title="AI for Leaders & Managers" data-cat="LEADERSHIP" data-acc="none" data-text="ai for leaders & managers leadership for sps managers and team leads: spotting ai opportunities in your department, leading ai-enabled teams, and driving responsible adoption across the business.">
+      <div class="ccard reveal" data-title="AI for Leaders & Managers" data-school="business" data-cat="LEADERSHIP" data-acc="none" data-text="ai for leaders & managers leadership for sps managers and team leads: spotting ai opportunities in your department, leading ai-enabled teams, and driving responsible adoption across the business.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1628 0%,#1e3a5f 50%,#2d6a9f 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="45" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="15" fill="#f37424" opacity=".7"/><line x1="155" y1="90" x2="125" y2="70" stroke="#fff" stroke-width="1"/><circle cx="115" cy="65" r="12" fill="none" stroke="#faa819" stroke-width="1.5"/><line x1="155" y1="90" x2="125" y2="115" stroke="#fff" stroke-width="1"/><circle cx="115" cy="120" r="12" fill="none" stroke="#faa819" stroke-width="1.5"/><line x1="245" y1="90" x2="275" y2="70" stroke="#fff" stroke-width="1"/><circle cx="285" cy="65" r="12" fill="none" stroke="#4da446" stroke-width="1.5"/><line x1="245" y1="90" x2="275" y2="115" stroke="#fff" stroke-width="1"/><circle cx="285" cy="120" r="12" fill="none" stroke="#4da446" stroke-width="1.5"/></svg>
@@ -230,7 +267,7 @@
       </div>
 
       <!-- Card 8 -->
-      <div class="ccard reveal" data-title="AI & New Venture Creation" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="ai & new venture creation computer science explore how ai is enabling new business models and entrepreneurial opportunities across africa's growing digital economy.">
+      <div class="ccard reveal" data-title="AI & New Venture Creation" data-school="business" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="ai & new venture creation computer science explore how ai is enabling new business models and entrepreneurial opportunities across africa's growing digital economy.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a0d2e 0%,#3d1a6e 50%,#6b35b8 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="80" y="50" width="100" height="80" rx="6" fill="none" stroke="#fff" stroke-width="1"/><rect x="220" y="50" width="100" height="80" rx="6" fill="none" stroke="#fff" stroke-width="1"/><line x1="180" y1="90" x2="220" y2="90" stroke="#faa819" stroke-width="2" stroke-dasharray="4 3"/><rect x="90" y="62" width="80" height="8" rx="2" fill="#fff" opacity=".4"/><rect x="90" y="78" width="60" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="90" y="92" width="70" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="90" y="106" width="50" height="6" rx="2" fill="#4da446" opacity=".6"/><rect x="230" y="62" width="80" height="8" rx="2" fill="#fff" opacity=".4"/><rect x="230" y="78" width="60" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="230" y="92" width="70" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="230" y="106" width="50" height="6" rx="2" fill="#f37424" opacity=".6"/></svg>
@@ -258,7 +295,7 @@
          honest about that; minting 57 cards would not be. -->
     <div class="course-band-label reveal" id="technical"><span class="tag">Technical &amp; artisan programmes</span><span class="ln"></span></div>
     <div class="course-grid">
-      <div class="ccard ccard-wide reveal" data-title="Technical &amp; Artisan Programmes" data-cat="TECHNICAL" data-acc="none" data-text="technical artisan trades programmes fisha renaissance electrician electrical trade test wireman licence certificate of compliance coc installation rules plc solar pv photovoltaic renewable energy green skills welding tig arc mig co2 brazing pipe aluminium stainless boilermaker boilermaking millwright fitter turner motor mechanic diesel plumbing pipe fitting solar geyser hot water handy person apprenticeship arpl nqf 2 3 4 5 work integrated learning wil tvet n6 placement candidacy work readiness new venture creation entrepreneurship seta project implementation fiston nselike artisan pathways, electrical compliance, solar pv, welding and plumbing — 57 programmes across seven streams, delivered with our technical training partner.">
+      <div class="ccard ccard-wide reveal" data-title="Technical &amp; Artisan Programmes" data-school="engineering" data-cat="TECHNICAL" data-acc="none" data-text="technical artisan trades programmes fisha renaissance electrician electrical trade test wireman licence certificate of compliance coc installation rules plc solar pv photovoltaic renewable energy green skills welding tig arc mig co2 brazing pipe aluminium stainless boilermaker boilermaking millwright fitter turner motor mechanic diesel plumbing pipe fitting solar geyser hot water handy person apprenticeship arpl nqf 2 3 4 5 work integrated learning wil tvet n6 placement candidacy work readiness new venture creation entrepreneurship seta project implementation fiston nselike artisan pathways, electrical compliance, solar pv, welding and plumbing — 57 programmes across seven streams, delivered with our technical training partner.">
         <div class="ccard-img">
           <div class="ccard-img-inner" style="background:linear-gradient(135deg,#12181f 0%,#1d2a36 42%,#2b3f4f 70%,var(--accent) 100%)">
             <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><path d="M64 132 L104 92" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".55"/><path d="M96 84 a18 18 0 1 0 18 18 l-6-6 a10 10 0 1 1-6-14 z" fill="var(--accent)" opacity=".9"/><rect x="150" y="60" width="86" height="64" rx="5" fill="none" stroke="#fff" stroke-width="1.4" opacity=".7"/><line x1="150" y1="82" x2="236" y2="82" stroke="#fff" stroke-width="1" opacity=".45"/><line x1="150" y1="102" x2="236" y2="102" stroke="#fff" stroke-width="1" opacity=".45"/><line x1="178" y1="60" x2="178" y2="124" stroke="#fff" stroke-width="1" opacity=".45"/><line x1="208" y1="60" x2="208" y2="124" stroke="#fff" stroke-width="1" opacity=".45"/><path d="M268 122 v-34 a16 16 0 0 1 32 0 v34" fill="none" stroke="var(--green)" stroke-width="2.4" stroke-linecap="round"/><line x1="256" y1="122" x2="312" y2="122" stroke="var(--green)" stroke-width="2.4" stroke-linecap="round"/><path d="M330 128 l0-46 M318 92 l12-12 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><circle cx="284" cy="62" r="4.5" fill="var(--accent)"/></svg>
@@ -281,7 +318,7 @@
     <div class="course-grid">
 
       <!-- Deploying TinyML -->
-      <div class="ccard reveal" data-title="Deploying TinyML" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="deploying tinyml computer science learn to program in tensorflow lite for microcontrollers so you can write the code and deploy your model to your very own tiny microcontroller — implementing an entire tinyml application.">
+      <div class="ccard reveal" data-title="Deploying TinyML" data-school="engineering" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="deploying tinyml computer science learn to program in tensorflow lite for microcontrollers so you can write the code and deploy your model to your very own tiny microcontroller — implementing an entire tinyml application.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1628 0%,#16213e 50%,#0f3460 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="150" y="55" width="100" height="70" rx="6" fill="none" stroke="#fff" stroke-width="1.2"/><rect x="170" y="75" width="60" height="30" rx="3" fill="#f37424" opacity=".5"/><line x1="150" y1="70" x2="120" y2="70" stroke="#faa819" stroke-width="1.5"/><line x1="150" y1="90" x2="120" y2="90" stroke="#faa819" stroke-width="1.5"/><line x1="150" y1="110" x2="120" y2="110" stroke="#faa819" stroke-width="1.5"/><line x1="250" y1="70" x2="280" y2="70" stroke="#4da446" stroke-width="1.5"/><line x1="250" y1="90" x2="280" y2="90" stroke="#4da446" stroke-width="1.5"/><line x1="250" y1="110" x2="280" y2="110" stroke="#4da446" stroke-width="1.5"/></svg>
         </div></div>
@@ -295,7 +332,7 @@
       </div>
 
       <!-- Fundamentals of TinyML -->
-      <div class="ccard reveal" data-title="Fundamentals of TinyML" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="fundamentals of tinyml computer science focusing on the basics of machine learning and embedded systems, such as smartphones, this course introduces you to the “language” of tinyml.">
+      <div class="ccard reveal" data-title="Fundamentals of TinyML" data-school="engineering" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="fundamentals of tinyml computer science focusing on the basics of machine learning and embedded systems, such as smartphones, this course introduces you to the “language” of tinyml.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0d2b2b 0%,#155e63 50%,#2d9596 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="150" y="55" width="100" height="70" rx="6" fill="none" stroke="#fff" stroke-width="1.2"/><rect x="170" y="75" width="60" height="30" rx="3" fill="#faa819" opacity=".5"/><line x1="150" y1="70" x2="120" y2="70" stroke="#fff" stroke-width="1.5"/><line x1="150" y1="90" x2="120" y2="90" stroke="#fff" stroke-width="1.5"/><line x1="150" y1="110" x2="120" y2="110" stroke="#fff" stroke-width="1.5"/><line x1="250" y1="70" x2="280" y2="70" stroke="#4da446" stroke-width="1.5"/><line x1="250" y1="90" x2="280" y2="90" stroke="#4da446" stroke-width="1.5"/><line x1="250" y1="110" x2="280" y2="110" stroke="#4da446" stroke-width="1.5"/></svg>
         </div></div>
@@ -309,7 +346,7 @@
       </div>
 
       <!-- AI Strategy for Business Leaders -->
-      <div class="ccard reveal" data-title="AI Strategy for Business Leaders: From Hype to Impact" data-cat="BUSINESS" data-acc="none" data-text="ai strategy for business leaders: from hype to impact business leverage new technologies to build real, measurable value for sps — moving ai from hype to impact.">
+      <div class="ccard reveal" data-title="AI Strategy for Business Leaders: From Hype to Impact" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="ai strategy for business leaders: from hype to impact business leverage new technologies to build real, measurable value for sps — moving ai from hype to impact.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#2a1505 0%,#7a3e0c 50%,#f37424 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="90" y="50" width="220" height="90" rx="6" fill="none" stroke="#fff" stroke-width="1"/><rect x="105" y="110" width="20" height="20" fill="#faa819" opacity=".6"/><rect x="135" y="95" width="20" height="35" fill="#fff" opacity=".4"/><rect x="165" y="80" width="20" height="50" fill="#4da446" opacity=".6"/><path d="M105 100 l40 -20 l40 -15 l60 -10" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
         </div></div>
@@ -323,7 +360,7 @@
       </div>
 
       <!-- AI in Medicine: Foundations -->
-      <div class="ccard reveal" data-title="AI in Medicine: Foundations and Applications in Medical Practice and Research" data-cat="HEALTH & MEDICINE" data-acc="none" data-text="ai in medicine: foundations and applications in medical practice and research health & medicine explore the foundational principles of artificial intelligence and its transformative applications in medicine and biomedical research.">
+      <div class="ccard reveal" data-title="AI in Medicine: Foundations and Applications in Medical Practice and Research" data-school="wellness" data-cat="HEALTH & MEDICINE" data-acc="none" data-text="ai in medicine: foundations and applications in medical practice and research health & medicine explore the foundational principles of artificial intelligence and its transformative applications in medicine and biomedical research.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1a2e 0%,#13456b 50%,#2d8f9f 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1"/><path d="M130 90 h35 l10 -22 l14 44 l12 -30 l8 16 h51" fill="none" stroke="#f37424" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div></div>
@@ -337,7 +374,7 @@
       </div>
 
       <!-- AI Ethics in Business -->
-      <div class="ccard reveal" data-title="AI Ethics in Business: Managing Bias and Ethical Usage" data-cat="BUSINESS" data-acc="none" data-text="ai ethics in business: managing bias and ethical usage business prepare yourself for the future and learn the best way to use new ai tools and capabilities responsibly.">
+      <div class="ccard reveal" data-title="AI Ethics in Business: Managing Bias and Ethical Usage" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="ai ethics in business: managing bias and ethical usage business prepare yourself for the future and learn the best way to use new ai tools and capabilities responsibly.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a0d2e 0%,#3d1a6e 50%,#6b35b8 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1"/><circle cx="120" cy="60" r="6" fill="#faa819"/><circle cx="120" cy="120" r="6" fill="#faa819"/><circle cx="280" cy="60" r="6" fill="#4da446"/><circle cx="280" cy="120" r="6" fill="#4da446"/><circle cx="200" cy="90" r="9" fill="#f37424"/><line x1="200" y1="90" x2="120" y2="60" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="120" y2="120" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="280" y2="60" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="280" y2="120" stroke="#fff" stroke-width=".7"/></svg>
         </div></div>
@@ -351,7 +388,7 @@
       </div>
 
       <!-- AI in Action -->
-      <div class="ccard reveal" data-title="AI in Action: Organizational Strategy for the Responsible Adoption of AI" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="ai in action: organizational strategy for the responsible adoption of ai social sciences ai in action provides the insights and tools you’ll need to understand and utilise ai in all its forms.">
+      <div class="ccard reveal" data-title="AI in Action: Organizational Strategy for the Responsible Adoption of AI" data-school="business" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="ai in action: organizational strategy for the responsible adoption of ai social sciences ai in action provides the insights and tools you’ll need to understand and utilise ai in all its forms.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0d2b18 0%,#15633e 50%,#2d9669 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="90" y="50" width="220" height="90" rx="6" fill="none" stroke="#fff" stroke-width="1"/><rect x="105" y="110" width="20" height="20" fill="#faa819" opacity=".6"/><rect x="135" y="95" width="20" height="35" fill="#fff" opacity=".4"/><rect x="165" y="80" width="20" height="50" fill="#f37424" opacity=".6"/><path d="M105 100 l40 -20 l40 -15 l60 -10" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
         </div></div>
@@ -365,7 +402,7 @@
       </div>
 
       <!-- Cybersecurity -->
-      <div class="ccard reveal" data-title="Cybersecurity: The Intersection of Policy and Technology" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="cybersecurity: the intersection of policy and technology social sciences an online executive program exploring how policy and technology, together, can address the critical threats of the cyber world.">
+      <div class="ccard reveal" data-title="Cybersecurity: The Intersection of Policy and Technology" data-school="technology" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="cybersecurity: the intersection of policy and technology social sciences an online executive program exploring how policy and technology, together, can address the critical threats of the cyber world.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a0f1a 0%,#1a2a3e 50%,#2d4a6a 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><path d="M200 40 L255 60 V100 C255 130 230 145 200 155 C170 145 145 130 145 100 V60 Z" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M180 95 l14 14 l28 -30" fill="none" stroke="#4da446" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div></div>
@@ -379,7 +416,7 @@
       </div>
 
       <!-- AI in Medicine: NLP -->
-      <div class="ccard reveal" data-title="AI in Medicine: Natural Language Processing" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="ai in medicine: natural language processing computer science learn about the advances in artificial intelligence that are transforming the use of natural language processing.">
+      <div class="ccard reveal" data-title="AI in Medicine: Natural Language Processing" data-school="wellness" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="ai in medicine: natural language processing computer science learn about the advances in artificial intelligence that are transforming the use of natural language processing.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#13102e 0%,#2a2470 50%,#4a3fb8 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><path d="M200 55 c-25 0 -40 18 -40 35 c0 18 18 30 40 30 c22 0 40 -12 40 -30 c0 -17 -15 -35 -40 -35z" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M200 55 v65 M170 75 h60 M175 100 h50" fill="none" stroke="#faa819" stroke-width="1" opacity=".7"/><circle cx="200" cy="90" r="5" fill="#f37424"/></svg>
         </div></div>
@@ -393,7 +430,7 @@
       </div>
 
       <!-- Computer Science for Lawyers -->
-      <div class="ccard reveal" data-title="Computer Science for Lawyers" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="computer science for lawyers social sciences gain a deep understanding of the legal ramifications of the technology decisions and policies we make.">
+      <div class="ccard reveal" data-title="Computer Science for Lawyers" data-school="technology" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="computer science for lawyers social sciences gain a deep understanding of the legal ramifications of the technology decisions and policies we make.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a1d24 0%,#3a4150 50%,#5a6478 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><path d="M200 50 v90 M160 140 h80" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M200 65 l-45 15 M200 65 l45 15" stroke="#fff" stroke-width="1"/><path d="M135 80 a20 12 0 0 0 40 0z" fill="none" stroke="#faa819" stroke-width="1.2"/><path d="M225 80 a20 12 0 0 0 40 0z" fill="none" stroke="#4da446" stroke-width="1.2"/></svg>
         </div></div>
@@ -407,7 +444,7 @@
       </div>
 
       <!-- AI Essentials for Business -->
-      <div class="ccard reveal" data-title="AI Essentials for Business" data-cat="BUSINESS" data-acc="none" data-text="ai essentials for business business build a foundational understanding of ai concepts and how they apply across the modern business landscape.">
+      <div class="ccard reveal" data-title="AI Essentials for Business" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="ai essentials for business business build a foundational understanding of ai concepts and how they apply across the modern business landscape.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#2a1a00 0%,#7a5000 50%,#faa819 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1"/><circle cx="120" cy="60" r="6" fill="#fff"/><circle cx="120" cy="120" r="6" fill="#fff"/><circle cx="280" cy="60" r="6" fill="#4da446"/><circle cx="280" cy="120" r="6" fill="#4da446"/><circle cx="200" cy="90" r="9" fill="#f37424"/><line x1="200" y1="90" x2="120" y2="60" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="120" y2="120" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="280" y2="60" stroke="#fff" stroke-width=".7"/><line x1="200" y1="90" x2="280" y2="120" stroke="#fff" stroke-width=".7"/></svg>
         </div></div>
@@ -421,7 +458,7 @@
       </div>
 
       <!-- Agentic AI Foundations -->
-      <div class="ccard reveal" data-title="Agentic AI Foundations: Business Applications and Risks" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="agentic ai foundations: business applications and risks computer science agentic ai is changing how professionals and teams think about work, automation, and human–ai collaboration.">
+      <div class="ccard reveal" data-title="Agentic AI Foundations: Business Applications and Risks" data-school="technology" data-cat="COMPUTER SCIENCE" data-acc="none" data-text="agentic ai foundations: business applications and risks computer science agentic ai is changing how professionals and teams think about work, automation, and human–ai collaboration.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a0a2e 0%,#4a1a8e 50%,#8b3fd8 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="160" y="58" width="80" height="64" rx="10" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="182" cy="84" r="6" fill="#faa819"/><circle cx="218" cy="84" r="6" fill="#faa819"/><path d="M182 104 h36" stroke="#4da446" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="58" x2="200" y2="44" stroke="#fff" stroke-width="1.4"/><circle cx="200" cy="40" r="4" fill="#f37424"/><line x1="160" y1="90" x2="135" y2="90" stroke="#fff" stroke-width="1.2"/><line x1="240" y1="90" x2="265" y2="90" stroke="#fff" stroke-width="1.2"/></svg>
         </div></div>
@@ -435,7 +472,7 @@
       </div>
 
       <!-- Competing in the Age of AI -->
-      <div class="ccard reveal" data-title="Competing in the Age of AI — Virtual" data-cat="BUSINESS" data-acc="none" data-text="competing in the age of ai — virtual business discover how artificial intelligence is transforming today’s businesses, and what it takes to grow sps into an ai-first energy business.">
+      <div class="ccard reveal" data-title="Competing in the Age of AI — Virtual" data-school="business" data-cat="BUSINESS" data-acc="none" data-text="competing in the age of ai — virtual business discover how artificial intelligence is transforming today’s businesses, and what it takes to grow sps into an ai-first energy business.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1828 0%,#1e4a7f 50%,#2d8fcf 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="90" y="50" width="220" height="90" rx="6" fill="none" stroke="#fff" stroke-width="1"/><rect x="105" y="110" width="20" height="20" fill="#fff" opacity=".4"/><rect x="135" y="95" width="20" height="35" fill="#faa819" opacity=".6"/><rect x="165" y="80" width="20" height="50" fill="#4da446" opacity=".6"/><path d="M105 100 l40 -20 l40 -15 l60 -10" fill="none" stroke="#f37424" stroke-width="1.5"/></svg>
         </div></div>
@@ -449,7 +486,7 @@
       </div>
 
       <!-- Leadership in Emerging Technology -->
-      <div class="ccard reveal" data-title="Leadership in Emerging Technology: Security, Strategy & Risk" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="leadership in emerging technology: security, strategy & risk social sciences an executive program designed to equip leaders with the technical, strategic, and policy foundations needed to navigate critical emerging technologies.">
+      <div class="ccard reveal" data-title="Leadership in Emerging Technology: Security, Strategy & Risk" data-school="business" data-cat="SOCIAL SCIENCES" data-acc="none" data-text="leadership in emerging technology: security, strategy & risk social sciences an executive program designed to equip leaders with the technical, strategic, and policy foundations needed to navigate critical emerging technologies.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a0a0a 0%,#3a1a1a 50%,#5a2d2d 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><path d="M200 40 L255 60 V100 C255 130 230 145 200 155 C170 145 145 130 145 100 V60 Z" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M180 95 l14 14 l28 -30" fill="none" stroke="#faa819" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div></div>
@@ -463,7 +500,7 @@
       </div>
 
       <!-- AI in Medicine: Biomedical Signal Interpretation -->
-      <div class="ccard reveal" data-title="AI in Medicine: Biomedical Signal Interpretation" data-cat="HEALTH & MEDICINE" data-acc="none" data-text="ai in medicine: biomedical signal interpretation health & medicine learn about advances in interpreting biomedical signals and the use of machine learning and deep learning to aid in analysis and diagnosis.">
+      <div class="ccard reveal" data-title="AI in Medicine: Biomedical Signal Interpretation" data-school="wellness" data-cat="HEALTH & MEDICINE" data-acc="none" data-text="ai in medicine: biomedical signal interpretation health & medicine learn about advances in interpreting biomedical signals and the use of machine learning and deep learning to aid in analysis and diagnosis.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a2424 0%,#15535e 50%,#2da0a6 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1"/><path d="M130 90 h35 l10 -22 l14 44 l12 -30 l8 16 h51" fill="none" stroke="#faa819" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div></div>
@@ -489,7 +526,7 @@
            accredited qualifications because that is what it is: an international
            certificate carrying no NQF credits. Its value to SPS is as preparation for
            the NQF 5 qualification, which is what pm-pathway sets out. -->
-      <div class="ccard reveal" data-title="Google Project Management Certificate" data-cat="PROJECT MANAGEMENT" data-acc="intl" data-href="https://www.coursera.org/professional-certificates/google-project-management" data-text="google project management certificate project management coursera free to audit international recognised certificate financial aid capstone seven courses covers most of the theory behind the nqf 5 occupational certificate project manager rpl exemption pathway.">
+      <div class="ccard reveal" data-title="Google Project Management Certificate" data-school="business" data-cat="PROJECT MANAGEMENT" data-acc="intl" data-href="https://www.coursera.org/professional-certificates/google-project-management" data-text="google project management certificate project management coursera free to audit international recognised certificate financial aid capstone seven courses covers most of the theory behind the nqf 5 occupational certificate project manager rpl exemption pathway.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0b1a2b 0%,#123a5c 45%,#2f6fd0 78%,#f37424 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><line x1="96" y1="34" x2="96" y2="150" stroke="#fff" stroke-width="1" opacity=".55"/><line x1="96" y1="150" x2="330" y2="150" stroke="#fff" stroke-width="1" opacity=".55"/><rect x="106" y="48" width="104" height="11" rx="4" fill="#4285f4" opacity=".9"/><rect x="130" y="68" width="126" height="11" rx="4" fill="#ea4335" opacity=".8"/><rect x="168" y="88" width="96" height="11" rx="4" fill="#fbbc04" opacity=".9"/><rect x="196" y="108" width="82" height="11" rx="4" fill="#34a853" opacity=".85"/><rect x="238" y="128" width="58" height="11" rx="4" fill="#fff" opacity=".3"/><circle cx="308" cy="133" r="7" fill="#f37424"/></svg>
         </div></div>
@@ -505,7 +542,7 @@
       </div>
 
       <!-- Google — Introduction to Generative AI -->
-      <div class="ccard reveal" data-title="Introduction to Generative AI" data-cat="BUSINESS" data-acc="intl" data-href="https://www.skills.google/course_templates/536" data-text="introduction to generative ai business google free international recognised 45 minutes skill badge google's own 45-minute introduction: what generative ai is, what it can and can't do, and where it already sits in the tools you use every day.">
+      <div class="ccard reveal" data-title="Introduction to Generative AI" data-school="technology" data-cat="BUSINESS" data-acc="intl" data-href="https://www.skills.google/course_templates/536" data-text="introduction to generative ai business google free international recognised 45 minutes skill badge google's own 45-minute introduction: what generative ai is, what it can and can't do, and where it already sits in the tools you use every day.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0b1a2b 0%,#123a5c 50%,#e35e16 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="58" fill="none" stroke="#fff" stroke-width="1.2"/><ellipse cx="200" cy="90" rx="26" ry="58" fill="none" stroke="#fff" stroke-width=".9"/><line x1="142" y1="90" x2="258" y2="90" stroke="#fff" stroke-width=".9"/><path d="M152 62 q48 16 96 0" fill="none" stroke="#faa819" stroke-width="1"/><path d="M152 118 q48 -16 96 0" fill="none" stroke="#faa819" stroke-width="1"/><circle cx="200" cy="90" r="6" fill="#faa819"/></svg>
         </div></div>
@@ -521,7 +558,7 @@
       </div>
 
       <!-- Google — AI Essentials (Coursera) -->
-      <div class="ccard reveal" data-title="Google AI Essentials" data-cat="BUSINESS" data-acc="intl" data-href="https://www.coursera.org/specializations/ai-essentials-google" data-text="google ai essentials business google coursera free to audit international recognised certificate financial aid five-course programme on using ai day to day — writing better prompts, speeding up routine work, and using it responsibly.">
+      <div class="ccard reveal" data-title="Google AI Essentials" data-school="business" data-cat="BUSINESS" data-acc="intl" data-href="https://www.coursera.org/specializations/ai-essentials-google" data-text="google ai essentials business google coursera free to audit international recognised certificate financial aid five-course programme on using ai day to day — writing better prompts, speeding up routine work, and using it responsibly.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#101a33 0%,#1d3a6e 50%,#2f6fd0 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="110" y="48" width="180" height="88" rx="8" fill="none" stroke="#fff" stroke-width="1.2"/><rect x="128" y="66" width="84" height="9" rx="3" fill="#fff" opacity=".5"/><rect x="128" y="83" width="120" height="7" rx="3" fill="#fff" opacity=".3"/><rect x="128" y="98" width="96" height="7" rx="3" fill="#fff" opacity=".3"/><rect x="128" y="113" width="54" height="7" rx="3" fill="#faa819" opacity=".8"/><circle cx="262" cy="112" r="18" fill="none" stroke="#faa819" stroke-width="1.6"/><path d="m255 112 5 5 10-11" fill="none" stroke="#faa819" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div></div>
@@ -537,7 +574,7 @@
       </div>
 
       <!-- Microsoft Learn — Introduction to generative AI -->
-      <div class="ccard reveal" data-title="Introduction to Generative AI: Exploring the Basics" data-cat="BUSINESS" data-acc="intl" data-href="https://learn.microsoft.com/en-us/training/modules/intro-generative-ai-explore-basics/" data-text="introduction to generative ai exploring the basics business microsoft learn azure free international recognised beginner 8 units copilot microsoft's beginner module — large language models in plain terms, working with copilot, and thinking critically about what it hands back.">
+      <div class="ccard reveal" data-title="Introduction to Generative AI: Exploring the Basics" data-school="technology" data-cat="BUSINESS" data-acc="intl" data-href="https://learn.microsoft.com/en-us/training/modules/intro-generative-ai-explore-basics/" data-text="introduction to generative ai exploring the basics business microsoft learn azure free international recognised beginner 8 units copilot microsoft's beginner module — large language models in plain terms, working with copilot, and thinking critically about what it hands back.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#141420 0%,#2b2340 50%,#e35e16 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><rect x="150" y="42" width="46" height="46" fill="#fff" opacity=".45"/><rect x="204" y="42" width="46" height="46" fill="#faa819" opacity=".6"/><rect x="150" y="96" width="46" height="46" fill="#faa819" opacity=".35"/><rect x="204" y="96" width="46" height="46" fill="#fff" opacity=".25"/><circle cx="310" cy="92" r="22" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M300 92h20M310 82v20" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
         </div></div>
@@ -553,7 +590,7 @@
       </div>
 
       <!-- Microsoft — Generative AI for Beginners -->
-      <div class="ccard reveal" data-title="Generative AI for Beginners" data-cat="COMPUTER SCIENCE" data-acc="intl" data-href="https://microsoft.github.io/generative-ai-for-beginners/" data-text="generative ai for beginners computer science microsoft free international recognised 18 lessons python typescript hands-on eighteen lessons taking you from the concepts through to building your own generative ai applications, with working code.">
+      <div class="ccard reveal" data-title="Generative AI for Beginners" data-school="technology" data-cat="COMPUTER SCIENCE" data-acc="intl" data-href="https://microsoft.github.io/generative-ai-for-beginners/" data-text="generative ai for beginners computer science microsoft free international recognised 18 lessons python typescript hands-on eighteen lessons taking you from the concepts through to building your own generative ai applications, with working code.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1628 0%,#123a3a 50%,#4da446 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><rect x="108" y="46" width="184" height="94" rx="8" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M148 78 l-16 15 16 15" fill="none" stroke="#faa819" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M252 78 l16 15 -16 15" fill="none" stroke="#faa819" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M186 116 l28 -46" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>
         </div></div>
@@ -569,7 +606,7 @@
       </div>
 
       <!-- Coursera — AI For Everyone -->
-      <div class="ccard reveal" data-title="AI For Everyone" data-cat="LEADERSHIP" data-acc="intl" data-href="https://www.coursera.org/learn/ai-for-everyone" data-text="ai for everyone leadership coursera deeplearning.ai andrew ng free to audit international recognised andrew ng's course for non-engineers: what ai can realistically do, how to spot the opportunities in your own department, and how ai projects actually run.">
+      <div class="ccard reveal" data-title="AI For Everyone" data-school="business" data-cat="LEADERSHIP" data-acc="intl" data-href="https://www.coursera.org/learn/ai-for-everyone" data-text="ai for everyone leadership coursera deeplearning.ai andrew ng free to audit international recognised andrew ng's course for non-engineers: what ai can realistically do, how to spot the opportunities in your own department, and how ai projects actually run.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a1220 0%,#3d2340 50%,#a06020 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><circle cx="150" cy="72" r="16" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="200" cy="62" r="16" fill="none" stroke="#faa819" stroke-width="1.4"/><circle cx="250" cy="72" r="16" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M126 128q24-26 48 0" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M176 120q24-26 48 0" fill="none" stroke="#faa819" stroke-width="1.4"/><path d="M226 128q24-26 48 0" fill="none" stroke="#fff" stroke-width="1.4"/></svg>
         </div></div>
@@ -585,7 +622,7 @@
       </div>
 
       <!-- University of Helsinki — Elements of AI -->
-      <div class="ccard reveal" data-title="Elements of AI: Introduction to AI" data-cat="COMPUTER SCIENCE" data-acc="intl" data-href="https://www.elementsofai.com/" data-text="elements of ai introduction to ai computer science university of helsinki minnalearn free international recognised free certificate no maths no programming taken by over two million people in 170 countries.">
+      <div class="ccard reveal" data-title="Elements of AI: Introduction to AI" data-school="technology" data-cat="COMPUTER SCIENCE" data-acc="intl" data-href="https://www.elementsofai.com/" data-text="elements of ai introduction to ai computer science university of helsinki minnalearn free international recognised free certificate no maths no programming taken by over two million people in 170 countries.">
         <div class="ccard-img"><div class="ccard-img-inner" style="background:linear-gradient(135deg,#0d1b2a 0%,#1b3a5c 50%,#faa819 100%)">
           <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><path d="M200 40 L262 74 L262 122 L200 156 L138 122 L138 74 Z" fill="none" stroke="#fff" stroke-width="1.3"/><circle cx="200" cy="40" r="5" fill="#fff"/><circle cx="262" cy="74" r="5" fill="#fff"/><circle cx="262" cy="122" r="5" fill="#fff"/><circle cx="200" cy="156" r="5" fill="#fff"/><circle cx="138" cy="122" r="5" fill="#fff"/><circle cx="138" cy="74" r="5" fill="#fff"/><circle cx="200" cy="98" r="9" fill="#4da446"/><path d="M200 98 L200 40M200 98 L262 74M200 98 L262 122M200 98 L200 156M200 98 L138 122M200 98 L138 74" stroke="#fff" stroke-width=".7" opacity=".6"/></svg>
         </div></div>
@@ -627,6 +664,7 @@
         <a href="courses">Courses</a>
         <a href="trainers">Trainers</a>
         <a href="graduates">Graduates</a>
+        <a href="scorecard">Scorecard</a>
         <a href="profile">Profile</a>
         <a href="contact">Contact</a>
         <a href="privacy">Privacy</a>
@@ -641,7 +679,7 @@
 </footer>
 <script src="site.js?v=20260820"></script>
 <script src="locks.js?v=20260820"></script>
-<script src="courses-index.js?v=20260820"></script>
+<script src="courses-index.js?v=20260825"></script>
 <script src="profile.js?v=20260820"></script>
 <script src="cards.js?v=20260820"></script>
 <script src="assistant.js?v=20260820"></script>
