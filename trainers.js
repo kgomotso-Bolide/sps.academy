@@ -132,26 +132,42 @@
       consent: true
     },
 
-    /* Solar and electrical. Kgomotso, 22 Aug 2026: "Then I will share one on
-       Solar and electrical / Fiston will be the specialist."
+    /* Technical and artisan training. Kgomotso, 24 Aug 2026: "Add Fiston as the
+       subject matter trainer under our Team."
 
-       A first name is all we have. No surname, no company, no CV, no LinkedIn,
-       and no course to link to yet — so there is no bio here rather than a
-       written-around one. pending:true makes the card say that out loud, which
-       is the point: an empty slot on a preview page is a reminder, and an
-       invented one is a liability.
+       Everything below comes from HIS OWN EMAIL SIGNATURE, sent to that thread
+       on 24 Aug 2026 — name, title, company, qualifications, ECSA registration.
+       He chose to put those in writing, which is a very different thing from us
+       going and collecting them.
 
-       This file is shared by all the academies, so: the course he will teach
-       matters most on the SPS academy of the four. SPS is a solar business, and
-       a solar and electrical skills course is the most on-brand thing either
-       specialist could teach there. It is worth chasing on that basis. */
+       ⚠ DO NOT USE HIS LINKEDIN. Kgomotso suggested taking his LinkedIn photo
+       and profile; he replied to the same thread, to all of us: "Please allow me
+       to submit a different one." So his own profile and his own photograph are
+       coming from him, and until they arrive nothing is scraped from anywhere.
+       Replace the summary below with whatever he sends, and put his photograph
+       at images/trainers/fiston-nselike.jpg.
+
+       There is no narrative bio here on purpose. He has asked to write his own,
+       and a bio we composed about a man who is in the middle of sending us his
+       would be rude as well as redundant. What is below is a factual placement:
+       who he is and what his organisation does, no more.
+
+       He is no longer `pending` — the programme menu is real, published at
+       /programmes, and it is what he is the subject matter trainer for. */
     {
-      name: 'Fiston',
-      role: 'Solar and electrical',
-      pending: true,
+      name: 'Fiston Nselike',
+      role: 'Technical, artisan and renewable energy training',
+      org: 'Chief Executive Officer, Fisha Renaissance NPC',
+      creds: 'ECSA Pr. Eng. Tech · BTech Electrical Engineering · MBA · Postgrad in Business Management',
+      teaches: [['programmes', 'Technical & Artisan Programmes']],
+      bio: 'Chief Executive of Fisha Renaissance NPC, a Johannesburg training organisation ' +
+           'working across artisan development, electrical compliance, renewable energy, ' +
+           'welding and fabrication, plumbing, and workplace and employability programmes. ' +
+           'Registered with the Engineering Council of South Africa as a Professional ' +
+           'Engineering Technologist.',
+      linkedin: '',          // NOT to be filled from LinkedIn — see the note above
       consent: true
     }
-
   ];
 
   /* Who may actually appear on a public page. Consent, and something to say.
@@ -203,7 +219,13 @@
 
   function card(t) {
     var teaches = (t.teaches || []).map(function (c) {
-      return '<a class="tr-course" href="course?c=' + esc(c[0]) + '">' + esc(c[1]) + '</a>';
+      /* Most trainers teach a course, which lives at course?c=<slug>. Fiston's
+         entry points at the partner menu instead, which is a page of its own.
+         A slug with no slash is a course; anything else is taken as a path. */
+      var href = c[0].indexOf('/') < 0 && c[0] !== 'programmes'
+        ? 'course?c=' + esc(c[0])
+        : esc(c[0]);
+      return '<a class="tr-course" href="' + href + '">' + esc(c[1]) + '</a>';
     }).join('');
 
     var body = t.pending

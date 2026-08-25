@@ -98,6 +98,14 @@ $shared = [
     // file or lib/chrome.php is synced into it, or the nav link 404s there.
     'trainers.js',
 
+    // The partner programme menu — Fisha Renaissance's 57 programmes. Their
+    // offering is Centenary's to place, not any one client's, so the list is one
+    // list. Which SITES show it is a separate decision, made by whether that
+    // site's courses.html carries the band: as of 24 Aug 2026, SPS and Fungi.
+    // programmes.html is not here; like every other .html it carries the site's
+    // own chrome, and neither is the .pg-* block in styles.css.
+    'programmes.js',
+
     // The registered curriculum. Identical in all four repositories and read by
     // module.html, the pathway page and the Material admin page — one source of
     // truth for the module codes, or the admin page offers slots for modules that

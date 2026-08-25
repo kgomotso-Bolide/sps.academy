@@ -33,6 +33,7 @@
    {t:"Occupational Certificate: Project Manager",slug:"project-management",cat:"Project Management",kw:"project management pm manager planning scheduling scope budget cost risk stakeholders procurement quality delivery accredited qualification nqf 5 240 credits saqa 101869 qcto portfolio evidence eisa"},
    {t:"AI & Software Development",slug:"ai-software-development",cat:"Software Development",kw:"ai & software development software development programme code coding programming python git api database testing deployment ai assistants copilot build applications developers"},
    {t:"Procurement Skills",slug:"procurement",cat:"Procurement",kw:"procurement buying purchasing supply chain supplier vendor sourcing strategic sourcing category commodity strategy spend analysis make or buy outsourcing benchmarking fundamentals cost models tco rfq rfp rfx tender bid management open restricted negotiated evaluation scoring award quote quotation purchase order po spec specification contract service level agreement sla contract management negotiations negotiating risk governance compliance conflict of interest fraud bbbee transformation audit trail masterclass masterclasses coaching mentoring tarryn norris waria mcips stores warehouse"},
+   {t:"Technical & Artisan Programmes",slug:"programmes",href:"programmes",cat:"Technical & Artisan",kw:"technical artisan trade trades electrician electrical trade test wireman licence coc certificate of compliance installation rules plc solar pv photovoltaic renewable energy green skills welding tig arc mig co2 brazing pipe aluminium stainless boilermaker boilermaking millwright fitter turner motor mechanic diesel plumbing pipe fitting geyser hot water handy person apprenticeship arpl nqf work integrated learning wil tvet n6 placement candidacy work readiness new venture creation entrepreneurship seta fisha renaissance fiston nselike"},
    {t:"AI Fundamentals for the Workplace",slug:"ai-fundamentals",cat:"Beginner · Business",kw:"basics fundamentals introduction beginner workplace nontechnical everyday start"},
    {t:"AI Tools for Productivity",slug:"ai-tools-productivity",cat:"Beginner · Business",kw:"tools productivity writing email research automation workflow assistants admin"},
    {t:"Responsible & Ethical AI Use",slug:"responsible-ai",cat:"Compliance",kw:"responsible ethical ethics privacy bias safe compliance policy popia data"},
@@ -104,7 +105,10 @@
   var body=panel.querySelector('.aiw-body'), inp=panel.querySelector('input'), seeded=false;
   function scroll(){body.scrollTop=body.scrollHeight;}
   function addMsg(cls,html){var d=document.createElement('div');d.className='aiw-msg '+cls;d.innerHTML=html;body.appendChild(d);scroll();return d;}
-  function addCards(items){var w=document.createElement('div');w.className='aiw-cards';w.innerHTML=items.map(function(m){return '<a class="aiw-card" href="course?c='+m.slug+'"><b>'+m.t+'</b><span>'+m.cat+'</span></a>';}).join('');body.appendChild(w);scroll();}
+  function addCards(items){var w=document.createElement('div');w.className='aiw-cards';w.innerHTML=items.map(function(m){/* Most entries are courses at course?c=<slug>; an entry may instead carry
+     its own href (the partner programme menu is a page, not a course). */
+    var h=m.href||('course?c='+m.slug);
+    return '<a class="aiw-card" href="'+h+'"><b>'+m.t+'</b><span>'+m.cat+'</span></a>';}).join('');body.appendChild(w);scroll();}
   function addChips(items){var w=document.createElement('div');w.className='aiw-chipset';w.innerHTML=items.map(function(c){return '<button class="aiw-chip">'+c+'</button>';}).join('');w.querySelectorAll('.aiw-chip').forEach(function(b){b.addEventListener('click',function(){send(b.textContent);});});body.appendChild(w);scroll();}
   function botTurn(blocks){
     var t=document.createElement('div'); t.className='aiw-msg bot aiw-typing'; t.innerHTML='<span></span><span></span><span></span>'; body.appendChild(t); scroll();
