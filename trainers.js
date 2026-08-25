@@ -184,25 +184,24 @@
        employer, no qualifications, no narrative. Same discipline as Fiston's
        entry: a factual placement is honest, an invented profile is not.
 
-       A PHOTOGRAPH ARRIVED, 25 Aug 2026 — supplied by the client while this
-       record was being written, and renamed to the convention in
-       images/trainers/README.md. It is wired in below. That README asks for one
-       thing more than a file, though: whether she is happy for THAT SPECIFIC
-       photograph to be published, "not just for a photo — it is her face on
-       five public websites". Nobody has said so yet, so the file being here is
-       not the same as clearance and she stays pending.
+       PHOTOGRAPH supplied by the client on 25 Aug 2026 while this record was
+       being written, renamed to the convention in images/trainers/README.md.
 
-       PENDING, AND HERE IS WHAT UNBLOCKS IT. Two things are still missing and
-       each one is a reason on its own not to publish yet:
-         1. Her consent — to be named, and to that photograph. This file's whole
-            reason for existing is that the answer to "may we name this person"
-            lives in one place, and it fails closed.
-         2. An employer and qualifications. Without them the card is a name and
-            a job title next to two colleagues carrying an MCIPS and an ECSA
-            registration, which reads as though we know less about her than we
-            do about them.
-       Fill those in, set consent: true and delete pending, and she publishes.
-       That is the whole change — one line, once somebody confirms.
+       CLEARED TO PUBLISH 25 Aug 2026 — the client confirmed consent covering
+       both being named and this photograph, which is what that folder's README
+       asks for ("not just for a photo — it is her face on five public
+       websites"). That is what turned consent from false to true and removed
+       pending. The .htaccess rule that was holding the image back came out at
+       the same moment: leaving it would have rendered a broken image rather
+       than falling back to her initials.
+
+       STILL THIN, DELIBERATELY. We have no employer and no qualifications for
+       her, so `org` and `creds` are empty and the card simply omits both — the
+       renderer drops them rather than leaving a gap. Her card is therefore
+       shorter than Tarryn's and Fiston's, who carry an MCIPS and an ECSA
+       registration. That is a fair reflection of what we actually know and not
+       something to paper over: fill the two fields in when they arrive, and do
+       not invent them meanwhile.
 
        Her wellness teaching has nowhere to point yet: there is no wellness
        course record, and the Wellness & Health School on /courses currently
@@ -219,8 +218,7 @@
            'Occupational Certificate: Project Manager.',
       photo: 'images/trainers/taryn-mccormick.jpg',
       linkedin: '',
-      consent: false,        // ⚠ not yet given — do not flip without confirmation
-      pending: true
+      consent: true          // confirmed 25 Aug 2026 — name and photograph both
     }
   ];
 

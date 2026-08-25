@@ -332,19 +332,21 @@ accredited qualification.
     orphaned `.html`, which is a real file, and serves the ungated page — and 404s both
     orphan filenames. **Do not delete those two rules until someone has confirmed the
     server is clean.** A mirror that is not deleting will not clean it for you.
-- [ ] **Taryn McCormick — pending, needs three things (25 Aug 2026)** — added to `trainers.js`
-  on Kgomotso's instruction: wellness, HR by profession, and she will teach the Project
-  Manager qualification. Those three facts are all the record claims; nothing was invented
-  around them. She is `pending: true, consent: false`, so she does **not** appear on the site
-  yet. To publish her: **(1)** her consent to be named, **(2)** a photograph she has chosen
-  and cleared, **(3)** an employer and qualifications — without them her card is a name and a
-  job title beside colleagues carrying an MCIPS and an ECSA registration. Then `consent: true`,
-  drop `pending`, and she is live.
+- [x] **Taryn McCormick published (25 Aug 2026)** — added to `trainers.js` on Kgomotso's
+  instruction: wellness, HR by profession, and she teaches the Project Manager qualification.
+  Those three facts are all the record claims. Photograph supplied the same day and cleared,
+  along with her name — consent covers both, which is what `images/trainers/README.md` asks
+  for. The `.htaccess` rule that held the image back while she was pending came out at the
+  same moment; leaving it would have rendered a broken image rather than her initials.
+  **Her card is deliberately thinner than the other two.** We have no employer and no
+  qualifications for her, so `org` and `creds` are empty and the renderer omits both — beside
+  colleagues carrying an MCIPS and an ECSA registration it reads short, which is a fair
+  reflection of what we know. Fill the two fields in when they arrive; do not invent them.
   > ⚠️ **Taryn McCormick is not Tarryn Norris.** One letter apart, two different people:
   > Tarryn Norris is procurement, MD of Waria Consulting; Taryn McCormick is wellness and HR.
   > No shared employer, subject or photograph. Check which one you have before editing either.
 
-  Her wellness teaching has nowhere to point: there is no wellness course record, and the
+  Her wellness teaching still has nowhere to point: there is no wellness course record, and the
   Wellness & Health School on `/courses` holds only the three AI in Medicine courses. Her
   `teaches` links the qualification alone. Add a wellness course before giving her one.
 - [x] **Skills Development scorecard (25 Aug 2026)** — `/scorecard`, from the Final BEE

@@ -1,6 +1,8 @@
 # Trainer photographs
 
-`tarryn-norris.jpg` and `fiston-nselike.jpg` are in, cleared for use 25 Aug 2026.
+`tarryn-norris.jpg`, `fiston-nselike.jpg` and `taryn-mccormick.jpg` are in, all
+cleared for use 25 Aug 2026 — Taryn McCormick's covering both her name and that
+specific photograph.
 Both are 400x400, which is under the 600px asked for below but comfortably enough
 for a card whose image column is 180px wide.
 
@@ -34,10 +36,3 @@ card crops to a tall rectangle, so a wide group photo will lose most of the
 person. Ask whether they are happy for that specific photograph to be published,
 not just for "a photo" — it is their face on five public websites.
 
-## Not yet cleared
-
-`taryn-mccormick.jpg` is here and wired into her `trainers.js` entry, but she is
-`pending` and `consent: false`, so nothing renders it yet. The file arriving is
-not clearance — ask her about **that photograph**, per the section above, and
-about being named at all. See her entry in `trainers.js` for what else is
-outstanding.

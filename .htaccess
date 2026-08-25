@@ -63,21 +63,6 @@ DirectoryIndex index.html index.php
   RewriteRule ^scorecard/?$ scorecard.php [L]
   RewriteRule ^scorecard\.(html|js)$ - [R=404,L]
 
-  # Taryn McCormick's photograph, held back until she has cleared it.
-  #
-  # Her trainers.js entry is pending and consent is false, so no page renders
-  # this file — but the deploy mirror uploads images/ wholesale, so without this
-  # rule her face sits at a public URL on five domains, retrievable by anyone
-  # who has the filename. Unlinked is not the same as unpublished, and
-  # images/trainers/README.md is explicit that the question to ask is whether
-  # she is happy with THAT photograph.
-  #
-  # DELETE THIS RULE at the same moment you set consent: true in trainers.js.
-  # Leave it in place and her card will render a broken image instead of a
-  # photograph — the initials fallback only catches a missing file, not a
-  # forbidden one.
-  RewriteRule ^images/trainers/taryn-mccormick\.jpg$ - [R=404,L]
-
   # /courses -> courses.html, and /contact -> contact.php. This is what GitHub
   # Pages did for free and Apache does not; without it every internal link on
   # all seventeen pages 404s. Real files and directories are left alone.
