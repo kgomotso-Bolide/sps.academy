@@ -165,6 +165,53 @@
       photo: 'images/trainers/fiston-nselike.jpg',
       linkedin: '',          // NOT to be filled from LinkedIn — see the note above
       consent: true
+    },
+
+    /* ⚠ TARYN McCORMICK IS NOT TARRYN NORRIS. Two different people, and the
+       first names differ by one letter — Taryn / Tarryn. Tarryn Norris is the
+       procurement trainer at the top of this file, Managing Director of Waria
+       Consulting. Taryn McCormick is HR by profession and teaches wellness and
+       the Project Manager qualification. They share no employer, no subject and
+       no photograph. Before editing either record, check which one you have.
+
+       Added 25 Aug 2026, on Kgomotso's instruction relayed through the client:
+       "Taryn McCormick, wellness teacher, HR by profession, she also does
+       wellness and she will teach project manager." The three facts below are
+       exactly that sentence and nothing more has been added to them — no
+       employer, no qualifications, no narrative. Same discipline as Fiston's
+       entry: a factual placement is honest, an invented profile is not.
+
+       PENDING, AND HERE IS WHAT UNBLOCKS IT. Three things are missing and each
+       one is a reason on its own not to publish yet:
+         1. Her consent to be named. Nobody has told us she has given it, and
+            this file's whole reason for existing is that the answer to "may we
+            name this person" lives in one place. It fails closed.
+         2. A photograph she has chosen and cleared. See the Fiston note above
+            for why "just take the LinkedIn one" is not available to us.
+         3. An employer and qualifications. Without them the card is a name and
+            a job title next to two colleagues carrying an MCIPS and an ECSA
+            registration, which reads as though we know less about her than we
+            do about them.
+       Fill those in, set consent: true and delete pending, and she publishes.
+       That is the whole change — one line, once somebody confirms.
+
+       Her wellness teaching has nowhere to point yet: there is no wellness
+       course record, and the Wellness & Health School on /courses currently
+       holds the three AI in Medicine courses and nothing else. `teaches` below
+       therefore links only the qualification, which does exist. Add the wellness
+       course first; do not invent a slug for it here. */
+    {
+      name: 'Taryn McCormick',
+      role: 'Wellness, and human resources',
+      org: '',               // to be supplied — see note above
+      creds: '',             // to be supplied — see note above
+      teaches: [['project-management', 'Occupational Certificate: Project Manager']],
+      bio: 'A human resources professional by background, teaching wellness and the ' +
+           'Occupational Certificate: Project Manager.',
+      photo: '',             // none supplied; the card falls back to her initials
+      linkedin: '',
+      consent: false,        // ⚠ not yet given — do not flip without confirmation
+      pending: true
     }
   ];
 

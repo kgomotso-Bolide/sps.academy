@@ -44,6 +44,25 @@ DirectoryIndex index.html index.php
   RewriteCond %{HTTP:X-Forwarded-Proto} !=https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
+  # /scorecard is HR-only and MUST reach scorecard.php. These two rules are not
+  # tidiness — they are the gate.
+  #
+  # The page shipped public on 25 Aug 2026 as scorecard.html plus a public
+  # scorecard.js, was deployed, and was then moved behind require_admin() the
+  # same day on Kgomotso's instruction. The deploy mirror runs with
+  # delete_removed OFF, so both of those files are very likely still sitting on
+  # the server even though they are gone from the repository. Without the first
+  # rule the extensionless rewrite below finds the orphaned scorecard.html —
+  # because it is a real file — and serves the ungated page to anybody who asks.
+  # The second rule makes the two orphans unreachable by their own names, which
+  # matters most for scorecard.js: it held every figure on the page.
+  #
+  # Delete these only once you have confirmed the server has no scorecard.html
+  # and no scorecard.js. Confirm it; do not assume a later deploy removed them,
+  # because a mirror that is not deleting will not.
+  RewriteRule ^scorecard/?$ scorecard.php [L]
+  RewriteRule ^scorecard\.(html|js)$ - [R=404,L]
+
   # /courses -> courses.html, and /contact -> contact.php. This is what GitHub
   # Pages did for free and Apache does not; without it every internal link on
   # all seventeen pages 404s. Real files and directories are left alone.

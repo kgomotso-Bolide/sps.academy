@@ -199,6 +199,11 @@ function chrome_nav(string $variant, array $o = []): void
         echo '      <a href="admin-progress"' . $on('admin-progress') . '>Progress</a>' . "\n";
         echo '      <a href="admin-users"' . $on('admin-users') . '>Accounts</a>' . "\n";
         echo '      <a href="admin-materials"' . $on('admin-materials') . '>Material</a>' . "\n";
+        /* HR only, on Kgomotso's instruction of 25 Aug 2026 — it is in the admin
+           nav and nowhere else. It was briefly in the public footer; if you find
+           yourself adding it back to the 'site' variant above, re-read the note
+           at the top of scorecard.php first. */
+        echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
         echo '      <a href="./">View the site</a>' . "\n";
         echo '      ' . chrome_signout('Sign out (' . (string) ($o['name'] ?? '') . ')') . "\n";
         echo '    </div>' . "\n";
@@ -272,7 +277,6 @@ function chrome_footer(string $variant, array $o = []): void
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
             'graduates'    => 'Graduates',
-            'scorecard'    => 'Scorecard',
             'profile'      => 'Profile',
             'contact'      => 'Contact',
             'privacy'      => 'Privacy',

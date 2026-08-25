@@ -315,6 +315,38 @@ accredited qualification.
 
 ## 8. Roadmap / Open Items
 
+- [x] **Scorecard moved behind the HR login (25 Aug 2026, same day)** — Kgomotso: HR may
+  read the B-BBEE page, learners may not. `scorecard.html` → **`scorecard.php`** behind
+  `require_admin()` (on this system HR *are* the administrators), out of the public footer
+  on all eleven pages and out of `chrome_footer`, into the **admin nav as "B-BBEE"**, and the
+  teaser strip is off `/courses`. Every view is audited, like the other admin pages.
+  Two things that are the actual gate, not housekeeping:
+  - **The data moved too.** The figures were in a public `scorecard.js` that anyone could
+    fetch whether or not they could open the page. It is now **`lib/scorecard.js`** — `.htaccess`
+    404s all of `lib/` — inlined by `scorecard.php` after the gate runs. Never give it a
+    `<script src>`, and never move it back to the web root.
+  - **The public version is still on the server.** It was deployed before the instruction
+    came, and the mirror runs with `delete_removed` **off**, so `scorecard.html` and
+    `scorecard.js` are very likely still there. `.htaccess` therefore routes `/scorecard`
+    to `scorecard.php` *explicitly* — without that, the extensionless rewrite finds the
+    orphaned `.html`, which is a real file, and serves the ungated page — and 404s both
+    orphan filenames. **Do not delete those two rules until someone has confirmed the
+    server is clean.** A mirror that is not deleting will not clean it for you.
+- [ ] **Taryn McCormick — pending, needs three things (25 Aug 2026)** — added to `trainers.js`
+  on Kgomotso's instruction: wellness, HR by profession, and she will teach the Project
+  Manager qualification. Those three facts are all the record claims; nothing was invented
+  around them. She is `pending: true, consent: false`, so she does **not** appear on the site
+  yet. To publish her: **(1)** her consent to be named, **(2)** a photograph she has chosen
+  and cleared, **(3)** an employer and qualifications — without them her card is a name and a
+  job title beside colleagues carrying an MCIPS and an ECSA registration. Then `consent: true`,
+  drop `pending`, and she is live.
+  > ⚠️ **Taryn McCormick is not Tarryn Norris.** One letter apart, two different people:
+  > Tarryn Norris is procurement, MD of Waria Consulting; Taryn McCormick is wellness and HR.
+  > No shared employer, subject or photograph. Check which one you have before editing either.
+
+  Her wellness teaching has nowhere to point: there is no wellness course record, and the
+  Wellness & Health School on `/courses` holds only the three AI in Medicine courses. Her
+  `teaches` links the qualification alone. Add a wellness course before giving her one.
 - [x] **Skills Development scorecard (25 Aug 2026)** — `/scorecard`, from the Final BEE
   Verification Report for SPS RSA (Pty) Ltd (certificate **SPSGEN069**, measured
   **01 Mar 2025 – 28 Feb 2026** against the **Amended Construction Sector Codes**, issued
