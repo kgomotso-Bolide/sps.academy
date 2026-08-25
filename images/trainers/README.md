@@ -33,3 +33,11 @@ Portrait orientation, head and shoulders, at least 600px on the short edge. The
 card crops to a tall rectangle, so a wide group photo will lose most of the
 person. Ask whether they are happy for that specific photograph to be published,
 not just for "a photo" — it is their face on five public websites.
+
+## Not yet cleared
+
+`taryn-mccormick.jpg` is here and wired into her `trainers.js` entry, but she is
+`pending` and `consent: false`, so nothing renders it yet. The file arriving is
+not clearance — ask her about **that photograph**, per the section above, and
+about being named at all. See her entry in `trainers.js` for what else is
+outstanding.

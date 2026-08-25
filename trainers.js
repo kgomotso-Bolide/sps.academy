@@ -66,10 +66,13 @@
    highly interested in joining the programme. That is what turned the two
    flags below from false to true.
 
-   STILL OUTSTANDING: PHOTOGRAPHS. Neither has one, so both cards fall back to
-   initials, which looks deliberate rather than broken. Drop a file into
-   images/trainers/ and set the `photo` key — see the note in that folder for
-   the naming.
+   PHOTOGRAPHS: both arrived and were cleared on 25 Aug 2026, so this is settled
+   for the two published trainers. Taryn McCormick's is in the folder too, but a
+   file arriving is not the same as clearance — see her entry. Anyone without a
+   file falls back to initials, which looks deliberate rather than broken. Drop
+   a file into images/trainers/ and set the `photo` key; the note in that folder
+   has the naming, and asks you to check they are happy with THAT photograph
+   rather than with "a photo".
 
    CONSENT ALONE IS NOT ENOUGH TO PUBLISH
    --------------------------------------
@@ -181,14 +184,20 @@
        employer, no qualifications, no narrative. Same discipline as Fiston's
        entry: a factual placement is honest, an invented profile is not.
 
-       PENDING, AND HERE IS WHAT UNBLOCKS IT. Three things are missing and each
-       one is a reason on its own not to publish yet:
-         1. Her consent to be named. Nobody has told us she has given it, and
-            this file's whole reason for existing is that the answer to "may we
-            name this person" lives in one place. It fails closed.
-         2. A photograph she has chosen and cleared. See the Fiston note above
-            for why "just take the LinkedIn one" is not available to us.
-         3. An employer and qualifications. Without them the card is a name and
+       A PHOTOGRAPH ARRIVED, 25 Aug 2026 — supplied by the client while this
+       record was being written, and renamed to the convention in
+       images/trainers/README.md. It is wired in below. That README asks for one
+       thing more than a file, though: whether she is happy for THAT SPECIFIC
+       photograph to be published, "not just for a photo — it is her face on
+       five public websites". Nobody has said so yet, so the file being here is
+       not the same as clearance and she stays pending.
+
+       PENDING, AND HERE IS WHAT UNBLOCKS IT. Two things are still missing and
+       each one is a reason on its own not to publish yet:
+         1. Her consent — to be named, and to that photograph. This file's whole
+            reason for existing is that the answer to "may we name this person"
+            lives in one place, and it fails closed.
+         2. An employer and qualifications. Without them the card is a name and
             a job title next to two colleagues carrying an MCIPS and an ECSA
             registration, which reads as though we know less about her than we
             do about them.
@@ -208,7 +217,7 @@
       teaches: [['project-management', 'Occupational Certificate: Project Manager']],
       bio: 'A human resources professional by background, teaching wellness and the ' +
            'Occupational Certificate: Project Manager.',
-      photo: '',             // none supplied; the card falls back to her initials
+      photo: 'images/trainers/taryn-mccormick.jpg',
       linkedin: '',
       consent: false,        // ⚠ not yet given — do not flip without confirmation
       pending: true
