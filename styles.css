@@ -1419,3 +1419,43 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   .ccard-wide .ccard-img{height:100%}
   .ccard-wide .ccard-img-inner{height:100%}
 }
+
+/* ---- Programmes page: back link + responsive corrections ---------------
+   The back link exists because this page is reached from a card on /courses
+   and has no nav item of its own, so the nav cannot show you where you are.
+   Two of them: one above the heading, and one at the foot, because 57 rows is
+   a long way to scroll back up before you can go anywhere. */
+.pg-back{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;
+  color:var(--orange-deep);text-decoration:none;margin-bottom:20px;
+  border:1px solid var(--line);border-radius:30px;padding:9px 16px 9px 13px;background:#fff}
+.pg-back:hover{border-color:var(--orange);background:var(--orange-tint)}
+.pg-back svg{width:15px;height:15px;flex:0 0 auto}
+.pg-back-foot{margin:30px 0 0}
+
+/* The jump list was a flex row with the count pushed out by margin-left:auto,
+   which is fine until a stream name wraps to three lines on a phone and the
+   count ends up marooned beside the last word. Grid keeps the badge, the name
+   and the count in their own columns however the name wraps. */
+.pg-jump a{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.pg-jump i{margin-left:0}
+
+/* Long programme names — "Higher Occupational Certificate: Solar Photovoltaic
+   Standalone Service Technician — NQF 5" — must never push the page sideways. */
+.pg-item h4,.pg-head h3,.pg-jump a{overflow-wrap:anywhere}
+
+@media(max-width:560px){
+  /* Two stat tiles across reads better than one tall column of four. */
+  .pg-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .pg-stats div{padding:13px 14px}
+  .pg-stats strong{font-size:19px}
+  .pg-stats span{font-size:11px}
+  .pg-jump{grid-template-columns:1fr;gap:7px;margin-bottom:30px}
+  .pg-jump a{padding:10px 12px;font-size:13px}
+  .pg-head{gap:11px}
+  .pg-letter{width:29px;height:29px;font-size:14px}
+  .pg-head h3{font-size:18px}
+  .pg-notes{padding:18px 18px;border-radius:10px}
+  .pg-notes ul{padding-left:17px}
+  .pg-lead{font-size:16px}
+  .pg-back{width:100%;justify-content:center}
+}
