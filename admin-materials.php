@@ -1,11 +1,18 @@
 <?php
 declare(strict_types=1);
 
-/* Where an administrator pastes the links to the course material.
+/* Where an administrator pastes the links to the course material, or uploads
+ * a file when there is no Drive link to point at instead.
  *
- * The material itself lives in Centenary's Google Workspace. This page records
- * which Drive or SharePoint address belongs to which module, and materials.php
- * hands those addresses out to learners who are enrolled — logging each one.
+ * Most material still lives in Centenary's Google Workspace, and this page
+ * records which Drive or SharePoint address belongs to which module — that
+ * path is unchanged. Where the academy holds an actual file (a PDF, a
+ * workbook, sometimes a video), it can be uploaded here instead; the two are
+ * mutually exclusive per slot, admin's choice each save — see the note at the
+ * top of lib/material_files.php for why uploaded material gets its own table
+ * and its own validation rather than a branch bolted onto the link path.
+ * materials.php hands either kind out to learners who are enrolled — logging
+ * each one.
  *
  * WHY THE MODULE LIST IS NOT IN THIS FILE
  *
@@ -29,6 +36,7 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/materials.php';
+require __DIR__ . '/lib/material_files.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
@@ -44,6 +52,34 @@ if (!isset($courses[$course])) $course = (string) array_key_first($courses);
 $notice = '';
 $errors = [];
 
+/**
+ * PHP's nested-array file-upload naming (files[MODULE][KIND]) arrives split
+ * across five parallel arrays under $_FILES['files'] — 'name', 'type',
+ * 'tmp_name', 'error', 'size' — each shaped [MODULE][KIND]. Reshaped here
+ * into module => kind => the ordinary single-file array every other function
+ * in lib/material_files.php expects.
+ */
+function admin_materials_reshape_files(?array $raw): array
+{
+    if ($raw === null || !isset($raw['name']) || !is_array($raw['name'])) return [];
+
+    $out = [];
+    foreach ($raw['name'] as $module => $kinds) {
+        if (!is_string($module) || !is_array($kinds)) continue;
+        foreach (array_keys($kinds) as $kind) {
+            if (!is_string($kind)) continue;
+            $out[$module][$kind] = [
+                'name'     => $raw['name'][$module][$kind]     ?? '',
+                'type'     => $raw['type'][$module][$kind]     ?? '',
+                'tmp_name' => $raw['tmp_name'][$module][$kind] ?? '',
+                'error'    => $raw['error'][$module][$kind]    ?? UPLOAD_ERR_NO_FILE,
+                'size'     => $raw['size'][$module][$kind]     ?? 0,
+            ];
+        }
+    }
+    return $out;
+}
+
 if (is_post()) {
     if (!csrf_valid()) {
         $errors[] = 'That form had expired — nothing was saved. Please try again.';
@@ -54,29 +90,70 @@ if (is_post()) {
         } else {
             $course = $posted;
 
-            /* The form posts links[MODULE][kind]. Everything is validated here;
-               nothing trusts that the browser sent well-formed module codes. */
+            /* Three parallel inputs per slot — links[M][K], files[M][K],
+               remove[M][K] — none of them trusted to name a well-formed
+               module or kind; that is checked below regardless of source. */
             $links  = $_POST['links'] ?? [];
+            $remove = $_POST['remove'] ?? [];
+            $files  = admin_materials_reshape_files($_FILES['files'] ?? null);
             $counts = ['added' => 0, 'replaced' => 0, 'removed' => 0, 'unchanged' => 0];
 
+            // The set of (module, kind) slots the form actually mentioned —
+            // a slot with nothing in any of the three inputs is not visited.
+            $slots = [];
             if (is_array($links)) {
-                foreach ($links as $module => $kinds) {
-                    if (!is_string($module) || !is_array($kinds)) continue;
-                    if (!learner_valid_code($module, 20)) {
-                        $errors[] = 'Ignored a module code that did not look right.';
+                foreach ($links as $m => $ks) {
+                    if (is_string($m) && is_array($ks)) foreach (array_keys($ks) as $k) $slots[$m][$k] = true;
+                }
+            }
+            foreach ($files as $m => $ks) foreach (array_keys($ks) as $k) $slots[$m][$k] = true;
+
+            foreach ($slots as $module => $kinds) {
+                if (!learner_valid_code($module, 20)) {
+                    $errors[] = 'Ignored a module code that did not look right.';
+                    continue;
+                }
+                foreach (array_keys($kinds) as $kind) {
+                    if (!materials_kind_valid($kind)) continue;
+
+                    $wantRemove = !empty($remove[$module][$kind]);
+                    $file       = $files[$module][$kind] ?? null;
+                    $hasFile    = $file !== null && (int) $file['error'] !== UPLOAD_ERR_NO_FILE;
+                    $url        = trim((string) ($links[$module][$kind] ?? ''));
+
+                    if ($wantRemove) {
+                        $removedLink = materials_set($course, $module, $kind, '', (int) $me['id']);
+                        $removedFile = material_file_remove($course, $module, $kind, (int) $me['id']);
+                        $counts['removed'] += ($removedLink === 'removed' || $removedFile) ? 1 : 0;
                         continue;
                     }
-                    foreach ($kinds as $kind => $url) {
-                        if (!is_string($kind) || !is_string($url)) continue;
-                        if (!materials_kind_valid($kind)) continue;
 
-                        $url = trim($url);
-                        if ($url !== '' && !materials_url_allowed($url)) {
-                            $errors[] = $module . ' ' . $kind . ' — ' . materials_url_problem($url);
-                            continue;
+                    if ($hasFile) {
+                        // A chosen file always wins the slot — see the note on
+                        // this in the header comment above. Clears any link
+                        // that was there, same as material_file_set() already
+                        // does internally.
+                        $result = material_file_set($course, $module, $kind, $file, (int) $me['id']);
+                        if (!$result['ok']) {
+                            $errors[] = $module . ' ' . $kind . ' — ' . $result['message'];
+                        } else {
+                            $counts[$result['action']] = ($counts[$result['action']] ?? 0) + 1;
                         }
-                        $what = materials_set($course, $module, $kind, $url, (int) $me['id']);
-                        $counts[$what] = ($counts[$what] ?? 0) + 1;
+                        continue;
+                    }
+
+                    if ($url !== '' && !materials_url_allowed($url)) {
+                        $errors[] = $module . ' ' . $kind . ' — ' . materials_url_problem($url);
+                        continue;
+                    }
+                    $what = materials_set($course, $module, $kind, $url, (int) $me['id']);
+                    $counts[$what] = ($counts[$what] ?? 0) + 1;
+
+                    // A link just took the slot — an existing file there,
+                    // if any, no longer applies. A blank/unchanged url
+                    // ('unchanged') leaves any existing file untouched.
+                    if ($what === 'added' || $what === 'replaced') {
+                        material_file_remove($course, $module, $kind, (int) $me['id']);
                     }
                 }
             }
@@ -96,16 +173,32 @@ if (is_post()) {
     }
 }
 
-$existing = db_optional(fn() => materials_for_course($course), []);
+$existing     = db_optional(fn() => materials_for_course($course), []);
+$existingFile = db_optional(fn() => material_files_for_course($course), []);
 $filled   = 0;
 foreach ($existing as $kinds) $filled += count($kinds);
+foreach ($existingFile as $kinds) $filled += count($kinds);
 
-/* Only the URLs go to the browser — this page is administrator-only, and the
-   administrator is the person who pasted them in the first place. */
+/* Only the URLs and file names go to the browser — this page is
+   administrator-only, and the administrator is the person who put them
+   there. A slot is EITHER a link OR a file, never both — see the write path
+   above — so this is a plain merge, not a "which one wins" decision. */
 $forJs = [];
 foreach ($existing as $module => $kinds) {
-    foreach ($kinds as $kind => $row) $forJs[$module][$kind] = (string) $row['url'];
+    foreach ($kinds as $kind => $row) {
+        $forJs[$module][$kind] = ['url' => (string) $row['url'], 'file' => null];
+    }
 }
+foreach ($existingFile as $module => $kinds) {
+    foreach ($kinds as $kind => $row) {
+        $forJs[$module][$kind] = ['url' => '', 'file' => [
+            'name' => (string) $row['original_name'],
+            'size' => (int) $row['size_bytes'],
+        ]];
+    }
+}
+
+$uploadCapBytes = material_file_effective_upload_cap();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -136,17 +229,27 @@ foreach ($existing as $module => $kinds) {
     <?php foreach ($errors as $err): ?><p class="form-err" role="alert"><?= e($err) ?></p><?php endforeach; ?>
 
     <div class="mat-intro">
-      <p><strong>The academy does not hold the files.</strong> Guides, workbooks and recordings live
-        in Centenary&rsquo;s Google Workspace, and this page records which address belongs to which
-        module. A learner who is signed in and enrolled sees the material on the module page; nobody
-        else is given the address, and every open is logged against the learner who opened it.</p>
+      <p><strong>Most material lives in Centenary&rsquo;s Google Workspace.</strong> Paste the
+        Drive or SharePoint link and this page remembers which address belongs to which module.
+        Where the academy holds an actual file instead, upload it below — a slot is a link
+        <em>or</em> a file, never both, and a chosen file always takes the slot. Either way, a
+        learner who is signed in and enrolled sees the material on the module page; nobody else
+        is given it, and every open is logged against the learner who opened it.</p>
 
-      <p class="mat-warn"><strong>Set the sharing on the file before you paste the link here.</strong>
-        In Drive, use <em>anyone with the link &mdash; Viewer</em>. Until you do, learners will click
-        through to a request-access screen. And be clear about what that setting means: the link
-        <em>is</em> the protection &mdash; anyone who has it can open the file. So this page is for
-        learner guides, workbooks and recordings only, and
-        <strong>never for summative assessments, marking memos or facilitator guides</strong>.</p>
+      <p class="mat-warn"><strong>A link is only as private as its own sharing setting.</strong>
+        In Drive, use <em>anyone with the link &mdash; Viewer</em> before you paste it here —
+        until you do, learners will click through to a request-access screen. The link
+        <em>is</em> the protection: anyone who has it can open the file. An uploaded file is
+        different — the academy controls who is ever handed the address to open it at all — but
+        the same rule applies to both: this page is for learner guides, workbooks and recordings
+        only, and <strong>never for summative assessments, marking memos or facilitator
+        guides</strong>.</p>
+
+      <p class="mat-warn">Files can currently be up to
+        <strong><?= $uploadCapBytes >= PHP_INT_MAX
+              ? 'any size (no server limit set)'
+              : material_file_format_bytes($uploadCapBytes) ?></strong> — set by the server,
+        read fresh on this page load, not promised in advance.</p>
     </div>
 
     <?php if (count($courses) > 1): ?>
@@ -161,17 +264,17 @@ foreach ($existing as $module => $kinds) {
       </form>
     <?php endif; ?>
 
-    <p class="mat-count"><strong><?= (int) $filled ?></strong> link<?= $filled === 1 ? '' : 's' ?>
+    <p class="mat-count"><strong><?= (int) $filled ?></strong> item<?= $filled === 1 ? '' : 's' ?>
       saved for <?= e((string) ($courses[$course]['title'] ?? $course)) ?>.</p>
 
-    <form method="POST" id="mat-form">
+    <form method="POST" id="mat-form" enctype="multipart/form-data">
       <?= csrf_field() ?>
       <input type="hidden" name="course" value="<?= e($course) ?>">
       <div id="mat-rows">
         <noscript><p class="adm-empty">This page needs JavaScript, because it reads the module list
           from the curriculum file rather than keeping a second copy of it.</p></noscript>
       </div>
-      <div class="mat-save"><button type="submit" class="btn btn-primary">Save the links</button></div>
+      <div class="mat-save"><button type="submit" class="btn btn-primary">Save</button></div>
     </form>
 
   </div>
@@ -195,17 +298,36 @@ foreach ($existing as $module => $kinds) {
     return String(s).replace(/[&<>"]/g, function (c) { return ESCMAP[c]; });
   }
 
+  function fmtBytes(n) {
+    return n >= 1024 * 1024 ? (Math.round(n / 1024 / 1024 * 10) / 10) + ' MB'
+                             : Math.round(n / 1024) + ' KB';
+  }
+
   rows.innerHTML = MODS.map(function (m) {
     var have = HAVE[m.id] || {};
-    var n    = Object.keys(have).length;
+    var slots = KINDS.filter(function (k) {
+      var v = have[k[0]];
+      return v && (v.url || v.file);
+    });
+    var n = slots.length;
     var fields = KINDS.map(function (k) {
-      var v = have[k[0]] || '';
+      var v      = have[k[0]] || { url: '', file: null };
+      var id     = m.id + '-' + k[0];
+      var status = v.file
+        ? '<span class="mat-on">a file: ' + esc(v.file.name) + ' (' + fmtBytes(v.file.size) + ')</span>'
+        : (v.url ? '<span class="mat-on">a link</span>' : '');
       return '<div class="field">' +
-        '<label for="' + esc(m.id + '-' + k[0]) + '">' + esc(k[1]) +
-          (v ? ' <span class="mat-on">saved</span>' : '') + '</label>' +
-        '<input id="' + esc(m.id + '-' + k[0]) + '" type="url" ' +
+        '<label for="' + esc(id) + '-url">' + esc(k[1]) + (status ? ' ' + status : '') + '</label>' +
+        '<input id="' + esc(id) + '-url" type="url" ' +
           'name="links[' + esc(m.id) + '][' + esc(k[0]) + ']" ' +
-          'value="' + esc(v) + '" placeholder="' + esc(k[2]) + '">' +
+          'value="' + esc(v.url || '') + '" placeholder="' + esc(k[2]) + ' — or upload a file below">' +
+        '<div class="mat-file-row">' +
+          '<input id="' + esc(id) + '-file" type="file" ' +
+            'name="files[' + esc(m.id) + '][' + esc(k[0]) + ']">' +
+          ((v.url || v.file)
+            ? '<label class="mat-remove"><input type="checkbox" name="remove[' + esc(m.id) + '][' + esc(k[0]) + ']" value="1"> Remove</label>'
+            : '') +
+        '</div>' +
         '</div>';
     }).join('');
     /* Modules with nothing in them start open, because those are the ones

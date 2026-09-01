@@ -180,3 +180,59 @@ function materials_count(string $courseSlug): int
         [tenant_id(), $courseSlug]
     );
 }
+
+/**
+ * Every slot for a course, link or file, merged into the one shape
+ * materials.php hands a learner's browser.
+ *
+ * Two independent auto-increment sequences (materials.id, material_files.id)
+ * can collide numerically, so the opaque token here carries a one-letter
+ * prefix — 'l' for a link, routed through the existing redirect; 'f' for a
+ * file, streamed by material_file_stream(). A slot is one or the other, never
+ * both (enforced on the admin write path), so this is a plain merge rather
+ * than a "which one wins" decision.
+ *
+ * 'native' is true only for a file-backed 'video' row — it is what tells
+ * materials.js whether to render a real <video> element (a raw file stream
+ * has nothing else that could play it) or the existing "opens in a new tab"
+ * link card (right for a YouTube/Drive URL, which needs the destination site
+ * to render it).
+ *
+ * Each source is wrapped in db_optional() SEPARATELY, not as one call around
+ * the whole function. material_files arrived in a later release than
+ * materials; on a deploy that has not been migrated yet (see the note on
+ * db_optional() in lib/db.php), a missing material_files table must degrade
+ * to "no file-backed material" without taking the existing, already-working
+ * link material down with it.
+ *
+ * @return array<string, array<string, array{open:string, native:bool, name:?string}>>
+ */
+function materials_slots_for_course(string $courseSlug): array
+{
+    $out = [];
+
+    foreach (db_optional(fn() => materials_for_course($courseSlug), []) as $module => $kinds) {
+        foreach ($kinds as $kind => $row) {
+            $out[$module][$kind] = [
+                'open' => 'materials.php?open=l' . (int) $row['id'],
+                'native' => false,
+                'name' => null,
+            ];
+        }
+    }
+
+    // material_files_for_course() lives in lib/material_files.php, which this
+    // file does not require — every caller of materials_slots_for_course()
+    // already requires both, same as materials.php and admin-materials.php do.
+    foreach (db_optional(fn() => material_files_for_course($courseSlug), []) as $module => $kinds) {
+        foreach ($kinds as $kind => $row) {
+            $out[$module][$kind] = [
+                'open' => 'materials.php?open=f' . (int) $row['id'],
+                'native' => $kind === 'video',
+                'name' => (string) $row['original_name'],
+            ];
+        }
+    }
+
+    return $out;
+}

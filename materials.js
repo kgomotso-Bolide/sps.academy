@@ -5,10 +5,13 @@
  * moment it was pasted. This asks the server instead, and the server answers
  * only for a learner who is signed in and enrolled on the course.
  *
- * WHAT COMES BACK IS NOT A DRIVE LINK. It is a URL back to materials.php, which
- * logs the open and then redirects. So the page never contains the real
- * address: a screenshot, a shared browser history or "copy link address" gives
- * away nothing that works for somebody else.
+ * WHAT COMES BACK IS NEVER THE REAL ADDRESS — not a Drive link, and not a
+ * path to a file the academy holds. Every slot is a URL back to
+ * materials.php, which logs the open and then either redirects (a link) or
+ * streams the bytes itself (a file — see lib/material_files.php). Either way
+ * the page never contains the real thing: a screenshot, a shared browser
+ * history or "copy link address" gives away nothing that works for somebody
+ * else.
  *
  * WHEN IT DOES NOTHING, which is most of the time and is the point:
  *
@@ -77,16 +80,19 @@
       var mine = data.materials[code];
       if (!mine) return;
 
+      /* Each slot is now { open, native, name } rather than a bare URL —
+         'open' is what card()/the video branch below actually link to;
+         'native' and 'name' only matter for the video slot. */
       var docs = [];
       if (mine.guide) {
         docs.push(card('Learner Guide',
           'The full notes for ' + code + ' — every topic written out, with the examples ' +
-          'and diagrams.', mine.guide));
+          'and diagrams.', mine.guide.open));
       }
       if (mine.workbook) {
         docs.push(card('Learner Workbook',
           'The activities, exercises and self-assessments for this module. Completed and ' +
-          'handed to your facilitator.', mine.workbook));
+          'handed to your facilitator.', mine.workbook.open));
       }
       /* Only replace what we actually have. A module with a workbook and no
          guide keeps the "ask HR" card for the guide, which is still true. */
@@ -101,16 +107,26 @@
         }
       }
 
-      /* The recording is a link out, not an embedded player. An iframe would
-         need the file to be publicly embeddable, which is a weaker sharing
-         setting than "anyone with the link", and it would bypass the redirect
-         that does the logging. */
       var vid = document.getElementById('m-video');
       if (vid && mine.video) {
-        vid.innerHTML = '<a class="dcard" href="' + esc(mine.video) + '" target="_blank" ' +
-          'rel="noopener noreferrer"><div class="dmeta"><h4>Facilitator session</h4>' +
-          '<p>The recorded session for this module. It opens in a new tab.</p>' +
-          '<span class="dl">' + DOC_ICON + ' Watch the recording ↗</span></div></a>';
+        if (mine.video.native) {
+          /* A file the academy holds — an actual <video> element, since
+             there is nothing else that could play a raw byte stream, and
+             materials.php's Range support (see lib/material_files.php) is
+             what makes the scrub bar actually work. */
+          vid.innerHTML = '<div class="videobox" style="aspect-ratio:16/9;border-radius:14px;' +
+            'overflow:hidden;background:#000"><video controls preload="metadata" ' +
+            'style="width:100%;height:100%" src="' + esc(mine.video.open) + '"></video></div>';
+        } else {
+          /* A link out — a YouTube/Drive URL needs the destination site to
+             render it, and an iframe would need a weaker sharing setting
+             than "anyone with the link" plus bypass the redirect that logs
+             the open, so this stays a card rather than an embed. */
+          vid.innerHTML = '<a class="dcard" href="' + esc(mine.video.open) + '" target="_blank" ' +
+            'rel="noopener noreferrer"><div class="dmeta"><h4>Facilitator session</h4>' +
+            '<p>The recorded session for this module. It opens in a new tab.</p>' +
+            '<span class="dl">' + DOC_ICON + ' Watch the recording ↗</span></div></a>';
+        }
       }
     })
     .catch(function () {

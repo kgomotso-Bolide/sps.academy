@@ -21,7 +21,9 @@ require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password()
-require __DIR__ . '/lib/learner.php';
+require __DIR__ . '/lib/learner.php';
+require __DIR__ . '/lib/mail.php';
+require __DIR__ . '/lib/invite.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
@@ -47,8 +49,9 @@ if (is_post()) {
         $action = (string) ($_POST['a'] ?? 'status');
 
         if ($action === 'enrol' && $id > 0) {
-            $result = learner_enrol_registration($id, (string) ($_POST['course'] ?? ''));
-            $notice = $result['message'];
+            $delivery = ($_POST['delivery'] ?? 'show') === 'invite' ? 'invite' : 'show';
+            $result   = learner_enrol_registration($id, (string) ($_POST['course'] ?? ''), $delivery);
+            $notice   = $result['message'];
             if ($result['ok'] && $result['password'] !== null) {
                 $fresh = [
                     'name'     => trim($result['user']['first_name'] . ' ' . $result['user']['last_name']),
@@ -375,10 +378,34 @@ function when(string $utc): string
                       </option>
                     <?php endforeach; ?>
                   </select>
+                  <?php if (!$mine): ?>
+                    <?php /* Only meaningful when a NEW account is about to be made —
+                             enrolling someone already signed up never touches their
+                             password, so there is nothing here to choose between. */ ?>
+                    <fieldset class="adm-delivery">
+                      <legend>How should they get their sign-in?</legend>
+                      <label>
+                        <input type="radio" name="delivery" value="show" checked>
+                        Show the password here — hand it over in person or by phone
+                      </label>
+                      <label>
+                        <input type="radio" name="delivery" value="invite">
+                        Email them a link to set their own password
+                      </label>
+                      <p class="adm-sub">The email route depends on mail the domain's SPF
+                        record does not yet authorise this server to send — it may be filed
+                        as spam, or not arrive. If sending fails outright, the notice above
+                        the table will say so; the account still exists, so set a password
+                        for them from the <a href="admin-users">Accounts page</a> rather than
+                        pressing Enrol again.</p>
+                    </fieldset>
+                  <?php endif; ?>
                   <button type="submit" class="btn btn-primary">
                     <?= $mine ? 'Enrol' : 'Create account and enrol' ?></button>
-                  <span class="adm-sub">Creates a sign-in for
-                    <?= e((string) $r['email']) ?> and shows the password once.</span>
+                  <?php if ($mine): ?>
+                    <span class="adm-sub">Adds this course to their existing account. Their
+                      password is not affected.</span>
+                  <?php endif; ?>
                 </form>
               </details>
               <?php endif; ?>

@@ -37,6 +37,13 @@ DirectoryIndex index.html index.php
   # kind of thing to get wrong.
   RewriteRule ^(lib|schema|tools|_drafts|private)(/|$) - [R=404,L]
 
+  # .user.ini tunes PHP-FPM upload limits for the material-upload feature —
+  # nothing secret in it, but no reason to make PHP-FPM tuning fetchable
+  # either. The rule above matches directory names, not filenames, so it does
+  # not already cover this; same [R=404,L] style rather than a 403, so a
+  # denied file reads the same as one that never existed.
+  RewriteRule ^\.user\.ini$ - [R=404,L]
+
   # Force HTTPS. Registration posts personal information; it does not travel in
   # the clear. X-Forwarded-Proto is checked too because shared hosting often
   # terminates TLS at a proxy, where %{HTTPS} reads "off" on an https request.

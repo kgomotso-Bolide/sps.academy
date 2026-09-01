@@ -132,6 +132,38 @@ notice gained a section on learner accounts and progress; a consent row records 
 that was on screen, so leaving it at `2026-08-17` records agreement to wording that no longer
 matches the page. Consents already stored keep their old version, which is the point.
 
+**The invite route — one new table, `account_invites`.** Same shape as the release above:
+deploy the code, set a fresh `setup_token`, open `/setup`, run it, empty the token again. Until
+that is done, "Enrol" still works either way, but choosing "Email them a link" creates the
+account and then reports the invite email could not be sent — nothing 500s, see `db_optional()`
+in `lib/db.php` — so use "Show the password here" until the table exists. No `policy_version`
+bump needed this time: nothing new is collected, only how an existing credential is delivered.
+
+**File-backed materials and self-check quizzes, 1 Sep 2026 — six new tables.**
+`material_files`, `quizzes`, `quiz_questions`, `quiz_choices`, `quiz_attempts`,
+`quiz_attempt_answers`. Same three-step shape as above. Until they exist:
+`admin-materials.php` still works for links (the existing behaviour, untouched) but an
+uploaded file cannot be saved; `admin-quizzes.php`, `quiz.php` and the "Check yourself"
+card on `module.html` all degrade to "nothing here yet" rather than a 500 — see
+`db_optional()` in `lib/db.php`, and specifically the note on
+`materials_slots_for_course()` in `lib/materials.php` about why the link half and the
+file half of a material slot are wrapped in **separate** `db_optional()` calls: a missing
+`material_files` table must not take the already-working `materials` link path down with it.
+
+Two things this release also needs, beyond the usual three steps:
+
+- **`.user.ini`** ships with the code and needs no separate action — but its effect is
+  not instant (PHP-FPM's `user_ini.cache_ttl`, roughly five minutes) and Xneelo's package
+  may cap it regardless of what the file asks for. Check the *live* number on
+  `admin-materials.php` (it reads `ini_get('upload_max_filesize')` fresh on every load) a
+  few minutes after deploying — that is the real ceiling, not the figures in `.user.ini`.
+  Do one real upload test on the live account before deciding whether any given video goes
+  file-backed, rather than assuming the request in `.user.ini` was honoured.
+- **Bump `policy_version`** in `~/private/sps-config.php`. Quiz attempts are new personal
+  data, kept without a `purge_after` on the same basis as `learner_progress` (part of the
+  learner record) — the same reason the 18 Aug release needed the bump, and `privacy.php`
+  has been updated to say so.
+
 ## Check before telling anyone
 
 - [ ] `https://centenarynetworks.com/` — the **Centenary homepage**, unchanged.
@@ -174,6 +206,37 @@ matches the page. Consents already stored keep their old version, which is the p
       confirm the password appears once, and sign in with it.
 - [ ] Switch a test account off, confirm it cannot sign in, and switch it back on.
 - [ ] Confirm the **Switch this account off** link is absent on your own row.
+- [ ] On `/admin`, enrol a **new** registration with **"Email them a link"** selected. The
+      notice says an email is on its way rather than showing a password. Check whether it
+      actually arrives, **including junk** — same honest limitation as the reset link above.
+- [ ] Open that link at `/invite?t=…`, set a password, and confirm you land signed in on `/my`.
+      Then open the same link again — it must say the link no longer works, same as `/reset`.
+- [ ] Let an invite link sit unused: after seven days it should read the same "no longer
+      works" message (not worth waiting for on a live check — read the code instead: it is
+      `INVITE_TTL_SECONDS` in `lib/invite.php`, deliberately longer than the reset link's one
+      hour because a new starter does not necessarily open the email the same day).
+
+### Course material and self-check quizzes
+
+- [ ] `/admin-materials` shows the **live** upload cap ("Files can be up to…") — confirm it
+      is a real number, not "any size (no server limit set)", which would mean neither
+      `.user.ini` nor the host's own default is taking effect as expected.
+- [ ] Upload a small PDF to a real module's guide slot, save, reload the page and confirm it
+      shows as saved. Open the module on the public site while signed in and enrolled — the
+      PDF should open. Sign out and confirm it does not.
+- [ ] Paste a Drive link into a **different** slot on the same module, save, and confirm both
+      the file and the link work side by side.
+- [ ] Upload a file to the SAME slot as an existing link (or the reverse) and confirm the new
+      one wins and the old one is actually gone — check `/admin-materials` shows only one.
+- [ ] On `/admin-quizzes`, write a two-question quiz for one module, publish it, and confirm
+      the **Publish** option is unavailable on a module with no questions yet.
+- [ ] As a signed-in, enrolled learner, open that module and confirm a **Check yourself** card
+      appears with a working link to the quiz. View the page source on the quiz page itself —
+      confirm nothing marks which choice is correct before you submit.
+- [ ] Take the quiz twice with different answers, and confirm `/my` shows the **better** of
+      the two scores, not the more recent one.
+- [ ] On `/admin-quizzes` → **View results**, confirm that attempt shows up, and that the CSV
+      export downloads and matches.
 
 > **Until SPF is fixed, tell Kgomotso to use `/admin-users`.** The self-service reset is built
 > and correct, but it depends on mail that this server cannot yet get delivered. The Accounts

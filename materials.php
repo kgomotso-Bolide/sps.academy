@@ -1,14 +1,22 @@
 <?php
 declare(strict_types=1);
 
-/* Course material: handing a learner a link, and remembering that we did.
+/* Course material: handing a learner a link or a file, and remembering that
+ * we did.
  *
  * Two jobs:
  *
- *   GET ?course=<slug>  — the links for a course this learner is enrolled on,
- *                         as JSON. Every value is a URL back to THIS file, not
- *                         the Google Drive address.
- *   GET ?open=<id>      — log it, then redirect to the real address.
+ *   GET ?course=<slug>  — every slot for a course this learner is enrolled
+ *                         on, as JSON. Every value is a URL back to THIS
+ *                         file, never the real Drive address or a path to
+ *                         where an uploaded file lives on disk.
+ *   GET ?open=l<id>     — log it, then redirect to the real address (a link).
+ *   GET ?open=f<id>     — log it, then stream the bytes (an uploaded file).
+ *
+ * The l/f prefix exists because materials.id and material_files.id are two
+ * independent auto-increment sequences that can collide numerically — see
+ * materials_slots_for_course() in lib/materials.php, which is what actually
+ * builds these tokens.
  *
  * WHY THE PAGE NEVER CONTAINS THE DRIVE LINK
  *
@@ -47,6 +55,7 @@ require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/materials.php';
+require __DIR__ . '/lib/material_files.php';
 
 app_session_start();
 
@@ -69,9 +78,9 @@ $me = current_user();
    ?open=<id> — the logged redirect
    --------------------------------------------------------------------------- */
 
-$open = (int) ($_GET['open'] ?? 0);
+$openRaw = (string) ($_GET['open'] ?? '');
 
-if ($open > 0) {
+if ($openRaw !== '') {
     /* Deliberately a plain page rather than JSON: this is a link a person
        clicked, so a failure has to be readable by a person. */
     $refuse = static function (string $why): void {
@@ -83,25 +92,48 @@ if ($open > 0) {
         exit;
     };
 
+    /* A bare integer is a bookmark or browser-history entry from before this
+       file understood file-backed material — not malicious, just stale. It
+       gets the same honest answer as any other id that no longer resolves,
+       rather than silently falling through to the JSON handler below and
+       confusing whatever opened it. */
+    if (!preg_match('/^([lf])(\d+)$/', $openRaw, $m)) {
+        if ($me === null) redirect('login');
+        $refuse('That material is no longer available. If you had a link to it, ask the academy.');
+    }
+    [, $source, $idStr] = $m;
+    $id = (int) $idStr;
+
     if ($me === null) {
         redirect('login');
     }
 
-    $row = db_optional(fn() => materials_get($open));
+    $row = $source === 'l'
+        ? db_optional(fn() => materials_get($id))
+        : db_optional(fn() => material_file_get($id));
     if ($row === null) {
         $refuse('That material is no longer available. If you had a link to it, ask the academy.');
     }
 
     /* Enrolment, checked at the moment of opening rather than only when the
        page was built. A learner taken off a course keeps whatever HTML their
-       browser already has; this is what actually ends their access. */
+       browser already has; this is what actually ends their access. Runs on
+       EVERY request including a video's Range continuations — see the note
+       in material_file_stream() on why only the logging, not this check, is
+       coalesced to the first one. */
     $ok = db_optional(fn() => learner_is_enrolled((int) $me['id'], (string) $row['course_slug']), false);
     if (!$ok) {
-        audit('material.denied', 'materials', $open, (string) $row['course_slug']);
+        audit('material.denied', $source === 'l' ? 'materials' : 'material_files', $id,
+              (string) $row['course_slug']);
         $refuse('You are not on the course this belongs to. If that is wrong, ask the academy.');
     }
 
-    audit('material.opened', 'materials', $open,
+    if ($source === 'f') {
+        material_file_stream($row);
+        exit;
+    }
+
+    audit('material.opened', 'materials', $id,
           $row['module_code'] . ' ' . $row['kind']);
 
     /* 302 and not 301. A permanent redirect would be cached by the browser, and
@@ -133,15 +165,13 @@ if (!db_optional(fn() => learner_is_enrolled((int) $me['id'], $course), false)) 
     mout(['in' => true, 'enrolled' => false, 'materials' => (object) []], 403);
 }
 
-$found = db_optional(fn() => materials_for_course($course), []);
+$found = materials_slots_for_course($course);   // wraps its own two sources — see the note above it
 
 $out = [];
 foreach ($found as $module => $kinds) {
     $slots = [];
     foreach (MATERIAL_KINDS as $kind) {
-        $slots[$kind] = isset($kinds[$kind])
-            ? 'materials.php?open=' . (int) $kinds[$kind]['id']
-            : null;
+        $slots[$kind] = $kinds[$kind] ?? null;
     }
     $out[$module] = $slots;
 }

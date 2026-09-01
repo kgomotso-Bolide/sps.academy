@@ -172,6 +172,54 @@ CREATE TABLE IF NOT EXISTS password_resets (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+-- First-time set-password links, for an account an administrator just created.
+--
+-- Deliberately its own table rather than a row in password_resets, even though
+-- the mechanics are identical (a hashed single-use token, an expiry, sign in on
+-- success). The two answer different questions: a reset assumes a working
+-- password already existed and the person asking IS the visitor who forgot it;
+-- an invite exists because the account never had a password anyone knows, the
+-- request is not self-service at all — it is an administrator pressing "Enrol"
+-- — and the visitor who eventually opens the link is proving they are the
+-- person named on a brand-new account, not recovering an old one. Folding that
+-- into password_resets would mean either a misleading "someone asked to reset
+-- your password" email for a password that never existed, or a branching flag
+-- threaded through a file (lib/reset.php) that earns its safety from being
+-- small and read as a whole. Two tables, two short files, one job each.
+--
+-- Same token handling as password_resets and for the same reasons: the token
+-- itself is NEVER stored, only its SHA-256 hash, so a stolen read of this table
+-- is a table of useless strings rather than working sign-ins; rows are kept
+-- after use because "who invited this account, and when" is a question that
+-- gets asked later, not deleted once answered.
+--
+-- Seven days, not the reset link's one hour (see lib/invite.php) — a reset is
+-- something you act on right away because you are locked out this minute; an
+-- invite waits in an inbox until a new starter gets to onboarding admin, which
+-- is not necessarily today.
+--
+-- invited_by names the administrator who pressed the button, same reasoning as
+-- enrolments.enrolled_by: "why does this account exist" should have a name and
+-- a date behind it, not an inference from created_at.
+CREATE TABLE IF NOT EXISTS account_invites (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id  INT UNSIGNED NOT NULL,
+  user_id    INT UNSIGNED NOT NULL,
+  token_hash CHAR(64)     NOT NULL,
+  expires_at DATETIME     NOT NULL,
+  used_at    DATETIME         NULL,
+  invited_by INT UNSIGNED     NULL,
+  created_at DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_invite_token (token_hash),
+  KEY ix_invite_user (tenant_id, user_id),
+  KEY ix_invite_expires (expires_at),
+  CONSTRAINT fk_invite_tenant  FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_invite_user    FOREIGN KEY (user_id)    REFERENCES users (id),
+  CONSTRAINT fk_invite_by      FOREIGN KEY (invited_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- Who is on which course.
 --
 -- A registration is an expression of interest; an enrolment is a decision. They
@@ -327,4 +375,193 @@ CREATE TABLE IF NOT EXISTS materials (
   KEY ix_material_course (tenant_id, course_slug),
   CONSTRAINT fk_material_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_material_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- The file-backed twin of `materials`, for when there is no Drive/SharePoint
+-- link to point at — an actual PDF, workbook or video the academy holds.
+--
+-- Kept as its OWN table rather than columns added to `materials`, and that is
+-- worth explaining rather than assuming. The comment above `materials` says
+-- "we hold a LINK, never a file" and gives real reasons: storage, virus
+-- scanning, document viewing, video streaming and mobile apps are solved
+-- problems. That reasoning is still correct for the link path, and nothing
+-- here contradicts it — `materials` keeps meaning exactly what it always
+-- meant. File storage is a deliberate, explained departure for the specific
+-- material that has no Drive link to hold instead, so it gets its own table
+-- rather than a nullable branch bolted onto an existing one. Same reasoning
+-- that kept `account_invites` apart from `password_resets`.
+--
+-- One file per (course, module, kind), same rule as `materials`, and the two
+-- are mutually exclusive per slot — enforced in PHP (lib/material_files.php),
+-- not here, because "at most one of these two rows may exist" is not
+-- something two independent UNIQUE constraints can express.
+--
+-- disk_name is a random token with NO extension, and the bytes themselves live
+-- outside the web root entirely (app_private_dir() in lib/bootstrap.php) —
+-- belt and braces against the file ever being requested directly, let alone
+-- executed as anything. mime_type is the CANONICAL value the upload was
+-- validated against, not whatever the browser claimed or a later re-sniff;
+-- lib/material_files.php never trusts either of those to set a header.
+CREATE TABLE IF NOT EXISTS material_files (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id     INT UNSIGNED NOT NULL,
+  course_slug   VARCHAR(60)  NOT NULL,
+  module_code   VARCHAR(20)  NOT NULL,
+  kind          VARCHAR(20)  NOT NULL,
+  disk_name     VARCHAR(64)  NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  mime_type     VARCHAR(127) NOT NULL,
+  size_bytes    BIGINT UNSIGNED NOT NULL,
+  updated_at    DATETIME     NOT NULL,
+  updated_by    INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_matfile_slot (tenant_id, course_slug, module_code, kind),
+  KEY ix_matfile_course (tenant_id, course_slug),
+  CONSTRAINT fk_matfile_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_matfile_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- A self-check quiz for one module. ONE per (course, module) — narrower than
+-- "many quizzes per module", matching what was actually asked for; loosening
+-- it later (a title/slug column, drop the unique) is a small, contained
+-- change if it's ever needed.
+--
+-- pass_pct is nullable on purpose: a quiz can just show a score with no
+-- pass/fail line, which is the honest default until the academy decides a
+-- module actually needs a pass mark.
+--
+-- THIS IS NOT THE QCTO ASSESSMENT, and nothing that reads from this table may
+-- imply otherwise — see the disclaimer text repeated verbatim on quiz.php,
+-- admin-quizzes.php and my.php. Competence is Centenary's decision after the
+-- real assessment; the qualification is the QCTO's after the EISA. A quiz
+-- here is the academy's own self-check, built to help someone study.
+CREATE TABLE IF NOT EXISTS quizzes (
+  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id    INT UNSIGNED NOT NULL,
+  course_slug  VARCHAR(60)  NOT NULL,
+  module_code  VARCHAR(20)  NOT NULL,
+  pass_pct     TINYINT UNSIGNED NULL,
+  published    TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at   DATETIME     NOT NULL,
+  updated_at   DATETIME     NOT NULL,
+  updated_by   INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_quiz_slot (tenant_id, course_slug, module_code),
+  CONSTRAINT fk_quiz_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_quiz_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- One multiple-choice question. sort_order is a plain integer an admin can
+-- reorder in the authoring UI — not inferred from insertion order, which
+-- would make "move this question up" impossible to express cleanly.
+--
+-- active, not deleted, when an admin removes a question from the form. Same
+-- reasoning admin-users.php already uses for a learner who has left: progress
+-- and enrolments hang off a user, so the account is switched off rather than
+-- deleted. Here it is quiz_attempt_answers that hangs off a question — a
+-- learner's already-graded attempt keeps pointing at the exact question and
+-- choice they were graded against, and a hard DELETE would either break that
+-- foreign key outright (which is what happens the moment anyone has attempted
+-- the quiz) or silently rewrite history. quiz_questions_with_choices() and
+-- quiz_question_count() only ever see active = 1; a removed question simply
+-- stops appearing anywhere live while every past attempt still reads true.
+CREATE TABLE IF NOT EXISTS quiz_questions (
+  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id    INT UNSIGNED NOT NULL,
+  quiz_id      INT UNSIGNED NOT NULL,
+  prompt       TEXT         NOT NULL,
+  sort_order   INT UNSIGNED NOT NULL DEFAULT 0,
+  active       TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at   DATETIME     NOT NULL,
+  updated_at   DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_quizq_quiz (tenant_id, quiz_id, sort_order),
+  CONSTRAINT fk_quizq_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_quizq_quiz   FOREIGN KEY (quiz_id)   REFERENCES quizzes (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- One answer option. is_correct is validated in PHP to have exactly one true
+-- value per question before a quiz can be published — the column itself
+-- allows any number, same trade the rest of this codebase makes throughout
+-- (e.g. `kind` on `materials` is a plain VARCHAR, not an ENUM) in favour of a
+-- change that needs no migration nobody can run on hosting with no shell.
+--
+-- active carries the same reasoning as quiz_questions.active, for the same
+-- reason: quiz_attempt_answers.choice_id points at a specific row here, and a
+-- removed choice is switched off rather than deleted so a past attempt that
+-- picked it keeps a valid, readable answer.
+CREATE TABLE IF NOT EXISTS quiz_choices (
+  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id    INT UNSIGNED NOT NULL,
+  question_id  INT UNSIGNED NOT NULL,
+  choice_text  VARCHAR(500) NOT NULL,
+  is_correct   TINYINT(1)   NOT NULL DEFAULT 0,
+  sort_order   INT UNSIGNED NOT NULL DEFAULT 0,
+  active       TINYINT(1)   NOT NULL DEFAULT 1,
+  PRIMARY KEY (id),
+  KEY ix_quizc_question (tenant_id, question_id, sort_order),
+  CONSTRAINT fk_quizc_tenant   FOREIGN KEY (tenant_id)   REFERENCES tenants (id),
+  CONSTRAINT fk_quizc_question FOREIGN KEY (question_id) REFERENCES quiz_questions (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- One attempt at a quiz. Unlimited attempts are allowed and the best is kept,
+-- so there is deliberately no UNIQUE on (quiz_id, user_id) here.
+--
+-- question_count is a SNAPSHOT of how many questions the quiz had at the
+-- moment of this attempt, not a live count. That is what keeps an old
+-- attempt's score honest after an admin later adds or removes a question —
+-- without it, "8 out of 8" from before an edit would silently start reading
+-- against a quiz that now has ten.
+--
+-- NO score_pct COLUMN, and that is deliberate, not an oversight: the
+-- percentage is score_count/question_count, computed in PHP at read time —
+-- see the "DELIBERATELY NO PERCENTAGE" reasoning already established for
+-- learner_progress in lib/learner.php, carried through to its logical
+-- conclusion here. Computing "best score" therefore compares PERCENTAGES in
+-- PHP, never MAX(score_count) in SQL — two attempts can legitimately have
+-- different question_count values, and comparing raw counts across those
+-- would be wrong.
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+  id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id      INT UNSIGNED NOT NULL,
+  quiz_id        INT UNSIGNED NOT NULL,
+  user_id        INT UNSIGNED NOT NULL,
+  started_at     DATETIME     NOT NULL,
+  submitted_at   DATETIME     NOT NULL,
+  score_count    INT UNSIGNED NOT NULL,
+  question_count INT UNSIGNED NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_qatt_quiz_user (tenant_id, quiz_id, user_id),
+  KEY ix_qatt_user (tenant_id, user_id),
+  CONSTRAINT fk_qatt_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_qatt_quiz   FOREIGN KEY (quiz_id)   REFERENCES quizzes (id),
+  CONSTRAINT fk_qatt_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- One question's worth of one attempt. choice_id NULL means the learner left
+-- it unanswered — that is scored as wrong (is_correct = 0) and still counts
+-- toward question_count; it does not shrink the denominator the way simply
+-- omitting a row would. is_correct is a SNAPSHOT graded against the answer
+-- key at the moment of the attempt, for the same reason question_count is: it
+-- must keep reading true even if an admin later changes which choice is
+-- correct.
+CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
+  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id    INT UNSIGNED NOT NULL,
+  attempt_id   INT UNSIGNED NOT NULL,
+  question_id  INT UNSIGNED NOT NULL,
+  choice_id    INT UNSIGNED     NULL,
+  is_correct   TINYINT(1)   NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_qans_attempt_question (tenant_id, attempt_id, question_id),
+  CONSTRAINT fk_qans_tenant   FOREIGN KEY (tenant_id)   REFERENCES tenants (id),
+  CONSTRAINT fk_qans_attempt  FOREIGN KEY (attempt_id)  REFERENCES quiz_attempts (id),
+  CONSTRAINT fk_qans_question FOREIGN KEY (question_id) REFERENCES quiz_questions (id),
+  CONSTRAINT fk_qans_choice   FOREIGN KEY (choice_id)   REFERENCES quiz_choices (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

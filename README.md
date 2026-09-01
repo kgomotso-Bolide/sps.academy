@@ -163,17 +163,29 @@ sps/
 ├── forgot.php              # Ask for a reset link. Says the SAME thing whether or not the
 │                           #   address has an account — read the note in lib/reset.php
 ├── reset.php               # Set a new password from the link. Single use, one hour
+├── invite.php              # Set your FIRST password, from a link "Enrol" emailed. Single
+│                           #   use, seven days. reset.php's twin, not a fork of it — see
+│                           #   the note at the top of lib/invite.php for why they are two
+│                           #   files that happen to look alike
 ├── admin-users.php         # ACCOUNTS: set a password by hand, switch an account off.
 │                           #   The route that works while the domain's SPF record is missing
 ├── my.php                  # THE LEARNER DASHBOARD — courses, progress, change password
 ├── account.php             # JSON: the session probe every page makes, and progress writes
 ├── admin.php               # Registrations list + the Enrol button that creates learner accounts
 ├── admin-progress.php      # Submitted progress reports
+├── admin-materials.php     # Where a link OR an uploaded file gets attached to a module slot
+├── materials.php           # Hands a signed-in, enrolled learner a material — 302 for a link,
+│                           #   streams the bytes (with Range support) for an uploaded file.
+│                           #   Never the real Drive address or an on-disk path, either way
+├── admin-quizzes.php       # Write a module's self-check quiz, publish it, see who's attempted it
+├── quiz.php                # Take a self-check quiz — server-scored, is_correct never reaches
+│                           #   the browser before you submit
 ├── privacy.php             # Privacy notice — VERSIONED; bump policy_version when you edit it
 ├── setup.php               # Browser installer (404 unless setup_token is set in the config)
 ├── phpcheck.php            # Dependency-free preflight (same gate as setup.php)
 ├── lib/                    # bootstrap · db · auth · learner · registration · progress ·
-│                           #   csrf · audit · mail · install. Denied to the web.
+│                           #   csrf · audit · mail · install · reset · invite · materials ·
+│                           #   material_files · quiz. Denied to the web.
 ├── schema/                 # schema.mysql.sql is canonical; schema.sqlite.sql mirrors it so
 │                           #   the whole site runs on a laptop. tools/migrate.php --check
 │                           #   refuses to run if the two have drifted.
@@ -192,6 +204,10 @@ sps/
 ├── profile-page.js         # Profile page: hydrate form, saved courses
 ├── assistant.js            # SHARED: client-side "Ask the Academy" AI assistant
 ├── neural.js               # Home hero neural-network canvas (motion PAUSED — see file)
+├── materials.js            # module.html: asks materials.php what this learner may open,
+│                           #   swaps in real links/files. Silent when there's nothing to show
+├── quiz-widget.js          # module.html: the "Check yourself" card — same silent-by-default
+│                           #   shape as materials.js, kept as its own file on purpose
 │
 ├── images/gm-photo.svg     # PLACEHOLDER — General Manager portrait, awaiting the real photo
 ├── images/poster-1.svg     # PLACEHOLDER — academy photograph 1
@@ -528,9 +544,10 @@ accredited qualification.
   knows who you are.
   - **Getting an account**: an administrator presses **Enrol** on a registration in `/admin`.
     It creates the sign-in, records the enrolment, links the registration to the person, and
-    shows the password **once**. Deliberately **no self-signup** — the site is on a public URL
-    and mail from this server still fails the domain's SPF, so an address cannot be verified.
-    When SPF is fixed the honest upgrade is an invite link and only the delivery step changes.
+    either shows the password **once** or — as of **1 Sep 2026**, see below — emails a
+    one-time set-password link. Deliberately **no self-signup either way**: the site is on a
+    public URL, so an address is only trusted because an administrator is looking straight at
+    the registration it came from, never because someone typed it into a public form.
   - **Why it matters more than it sounds**: browser storage was tied to one device, was deleted
     by clearing history, and on a shared site machine showed the previous learner's record to
     the next one. That last is a disclosure, not an inconvenience.
@@ -541,6 +558,85 @@ accredited qualification.
     editing seventeen navs. That is a stopgap the shared page header will absorb.
   - New tables `enrolments` and `learner_progress`. **Deploying the code is not enough** —
     see "Updating a site that is already live" in `DEPLOY-XNEELO.md`.
+- [x] **Invite links for new accounts (1 Sep 2026)** — the honest upgrade this section
+  promised back in August, arrived once Kgomotso asked for "onboarding capability": "Enrol"
+  now offers a **choice** of how a brand-new account's credential reaches the learner —
+  shown once on screen (unchanged, and still the default), or a one-time set-password link
+  emailed to them via `invite.php` / `lib/invite.php`. Both are still entirely
+  administrator-initiated; there is still no public sign-up form and no way into
+  `account_invites` except through the Enrol button on a specific registration.
+  - **Kept apart from `lib/reset.php` on purpose**, despite matching mechanics (hashed
+    single-use token, an expiry, sign in on success). A reset link claims someone forgot a
+    password that existed; an invite account never had one. Read the note at the top of
+    `lib/invite.php` for the full reasoning — it is also why `reset.php` was left untouched
+    rather than given a mode flag.
+  - **Seven days, not the reset link's one hour** (`INVITE_TTL_SECONDS`). A reset is acted on
+    within minutes because someone is locked out right now; an invite waits until whoever
+    handles onboarding gets to it.
+  - **Still gated by the same SPF problem** as `/forgot` — see `lib/mail.php`. The Enrol form
+    offers both routes rather than switching over, and says so next to the "Email them a
+    link" option; if the send fails outright the account still exists (with an unusable
+    random password nobody is ever told), and the fallback is `/admin-users`, not pressing
+    Enrol again — re-enrolling an existing account never touches its password.
+  - New table `account_invites`. **Deploying the code is not enough** — see "Updating a site
+    that is already live" in `DEPLOY-XNEELO.md`.
+- [x] **File-backed course material, and self-check quizzes (1 Sep 2026)** — Kgomotso wants the
+  platform to grow into "a true learning platform": material enrolled learners can actually
+  open, and a scored, recorded way to check understanding. Two features, six new tables, built
+  together because they share the same access pattern.
+  - **Materials can now be a link OR a file, admin's choice per slot.** The existing
+    Drive/SharePoint link path (`materials` table, `lib/materials.php`) is untouched — its own
+    header comment still says "we hold a LINK, never a file", and that stays true for that
+    path. Where the academy holds an actual PDF, workbook or video instead, `admin-materials.php`
+    can upload it; it lives in a new table, `material_files`, kept apart from `materials` for
+    the same reason `account_invites` was kept apart from `password_resets` — read the header
+    comment in `lib/material_files.php`. A slot is one or the other, never both: choosing a
+    file for a slot clears any link there, and saving a link clears any file.
+  - **Uploaded files live outside the web root and the git tree entirely**
+    (`app_private_dir('material-files')`), named with a random token and no extension — belt
+    and braces on top of not being reachable over HTTP at all. `materials.php?open=` now
+    carries an `l`/`f` prefix (`l123` for a link, `f45` for a file) because `materials.id` and
+    `material_files.id` are separate sequences that can collide numerically; a bare legacy
+    integer gets an honest "no longer available" rather than silently doing the wrong thing.
+  - **Video gets a real `<video>` element, not the "opens in a new tab" card**, when it's
+    file-backed — `materials.php` marks a file-backed video slot `native`, and `materials.js`
+    branches on that. A YouTube/Drive link still gets the external card; embedding a raw file
+    stream in an iframe would be the wrong tool.
+  - **Range/206 support**, because a `<video>` scrub bar is unusable without it —
+    `material_file_stream()` parses `Range`, serves `206`/`416` correctly, and re-checks
+    enrolment on every request (a learner taken off a course loses access mid-video) while only
+    *auditing* the first request of a view, not every small Range fetch scrubbing generates.
+  - **`.user.ini`** (new, repo root) raises PHP-FPM's upload limits — `.htaccess` genuinely
+    cannot do this under FastCGI, see its own long-standing comment on `php_flag`/`php_value`.
+    Not a promise: Xneelo's package may cap it regardless, so `admin-materials.php` reads and
+    shows the *live* `ini_get('upload_max_filesize')` rather than the number requested.
+  - **Quizzes: multiple choice, auto-graded, unlimited attempts, best score kept.** One quiz
+    per module (`quizzes`, `quiz_questions`, `quiz_choices`), matching the one-slot-per-kind
+    pattern `materials` already uses. Grading (`quiz_grade_and_record()` in `lib/quiz.php`)
+    re-reads the current answer key server-side; `is_correct` never reaches a learner's browser
+    before they submit — checked by inspecting the actual page source, not just by writing the
+    code that way.
+  - **"Best score" compares percentages, never raw counts.** `quiz_attempts.question_count` is
+    a snapshot taken at attempt time, not a live count — an admin can edit a published quiz's
+    questions later without retroactively changing what an old attempt was "out of". That means
+    two attempts can have different denominators, and the read side is built around that on
+    purpose: read the header comment on `quiz_attempts` in `schema.mysql.sql` before touching
+    the scoring logic.
+  - **Removed questions and choices are switched off, never deleted** (an `active` column on
+    both tables) — the first real bug this session hit, caught by the local smoke test before
+    it shipped: a hard `DELETE` on a question a learner had already answered violates the
+    foreign key from `quiz_attempt_answers`, or would have silently rewritten history if the
+    constraint weren't there. Same reasoning `admin-users.php` already uses for a learner who
+    has left: something hangs off the row, so it's switched off, not deleted.
+  - **Not the QCTO assessment, and the site keeps saying so** — the same disclaimer sentence
+    appears on `quiz.php`, `admin-quizzes.php` and `my.php`, not four different rewordings of
+    it. A quiz score is the academy's own self-check; competence is still Centenary's decision
+    after the real assessment, and the qualification is still the QCTO's after the EISA.
+  - New tables `material_files`, `quizzes`, `quiz_questions`, `quiz_choices`, `quiz_attempts`,
+    `quiz_attempt_answers`. **Deploying the code is not enough** — see "Updating a site that is
+    already live" in `DEPLOY-XNEELO.md`. `policy_version` bumped this time (unlike the invite
+    release above): quiz attempts are new personal data, retained on the same basis as
+    `learner_progress`.
 - [x] **Password reset, and the Accounts page (18 Aug 2026)** — two halves of one problem.
   - **Self-service** at `/forgot` → emailed link → `/reset`. The token is stored only as a
     SHA-256 hash, lasts an hour, works once, and issuing a new one retires the old. Requests

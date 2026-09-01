@@ -85,19 +85,29 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <p>Once you are signed in, the topics you tick off as you study are saved <strong>to your account</strong> rather than to the computer you are using, together with the date you ticked each one. That is what lets your progress follow you to another device, and what stops the next person on a shared machine seeing your record. Before you sign in — and if you never do — those ticks stay in your browser and reach us only if you send a progress report.</p>
     <p>What you tick is <strong>your own account of what you have studied</strong>. It is not a mark, and it is not an assessment result: being found competent is Centenary's decision after assessment, and the qualification is awarded by the QCTO after the external assessment.</p>
     <p>The academy can see your ticks and their dates, and uses them to know who needs help and to report on how an intake is going. Your line manager sees them only in a progress report that you send.</p>
+    <p>Some modules also carry a short <strong>self-check quiz</strong> — multiple choice,
+      marked automatically, that you can take as many times as you like. We keep your best
+      score and how many times you attempted it, in the same way and for the same reason as
+      your topic ticks: it is your own study record, <strong>not a mark and not an assessment
+      result</strong>. Being found competent is still Centenary's decision after the real
+      assessment, and the qualification is still the QCTO's after the EISA — a quiz score here
+      does not change that.</p>
     <h3>Course material, and the record of opening it</h3>
-    <p>The guides, workbooks and recordings are not stored on this website. They are held in
-      <strong>Centenary Networks' Google Workspace</strong>, and this site holds only a link to
-      each one. When you open a piece of material you are taken to Google, and Google's own
-      terms and privacy notice apply to what happens there.</p>
+    <p>Most guides, workbooks and recordings are held in <strong>Centenary Networks' Google
+      Workspace</strong>, and this site holds only a link to each one — when you open one of
+      those you are taken to Google, and Google's own terms and privacy notice apply to what
+      happens there. Where the academy holds a file directly instead, this server stores and
+      sends it to you itself, with the same access rule either way: only to a learner who is
+      signed in and enrolled on that course.</p>
     <p>We record <strong>which material you opened and when</strong>. We use it for two things:
       to notice a learner who has not been able to get started so somebody can help, and to
       evidence to the QCTO that material was made available to you. It is not a mark and it is
       not an assessment.</p>
-    <p>The links we give you are for you. They are shown only to learners who are signed in and
-      enrolled on that course, and the page you see does not contain the underlying Google
-      address. Please do not forward them: anyone who has the link can open the file, so passing
-      one on shares Centenary's material with somebody who has not been enrolled.</p>
+    <p>The links we give you are for you, whether they point at Google or at a file this server
+      holds — the page you see does not contain the underlying Google address, or a direct path
+      to a stored file. Please do not forward them: anyone who has a Google link can open that
+      file, so passing one on shares Centenary's material with somebody who has not been
+      enrolled.</p>
 
     <p>If you ask for a password reset, we email a one-time link to the address on your account and keep a record that a reset was asked for and when. We do not keep the link itself, only a scrambled version of it, so nobody — including us — can read it back out of our records. The link stops working after an hour or after you use it, whichever comes first.</p>
 
@@ -118,7 +128,7 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 
     <h3>How long we keep it</h3>
     <p>If you register your interest and do not go on to enrol, we delete your registration <strong>twelve months</strong> after you sent it. That is long enough to cover the next intake and the one after it.</p>
-    <p>If you do enrol in an accredited qualification, your learner record — your account, your enrolment, and the progress recorded against it — has to be kept for as long as the QCTO requires. A qualification that cannot be evidenced is a qualification you cannot prove you hold. That period is longer, and it is not something we can shorten at your request.</p>
+    <p>If you do enrol in an accredited qualification, your learner record — your account, your enrolment, the progress recorded against it, and any self-check quiz attempts — has to be kept for as long as the QCTO requires. A qualification that cannot be evidenced is a qualification you cannot prove you hold. That period is longer, and it is not something we can shorten at your request.</p>
     <p>You can clear your own recorded progress at any time from the progress report page. Doing so deletes those ticks and does not keep a copy.</p>
     <p class="legal-tbc"><strong>To confirm:</strong> the exact retention period required by the QCTO for learner and assessment records.</p>
 

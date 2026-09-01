@@ -105,6 +105,25 @@ CREATE INDEX IF NOT EXISTS ix_reset_user ON password_resets (tenant_id, user_id)
 CREATE INDEX IF NOT EXISTS ix_reset_expires ON password_resets (expires_at);
 
 
+-- See the long note on this table in schema.mysql.sql: a first-time
+-- set-password link for an account an administrator just created, kept apart
+-- from password_resets because a reset and an invite answer different
+-- questions even though the token mechanics match.
+CREATE TABLE IF NOT EXISTS account_invites (
+  id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  user_id    INTEGER NOT NULL REFERENCES users (id),
+  token_hash TEXT    NOT NULL,
+  expires_at TEXT    NOT NULL,
+  used_at    TEXT        NULL,
+  invited_by INTEGER     NULL REFERENCES users (id),
+  created_at TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_invite_token ON account_invites (token_hash);
+CREATE INDEX IF NOT EXISTS ix_invite_user ON account_invites (tenant_id, user_id);
+CREATE INDEX IF NOT EXISTS ix_invite_expires ON account_invites (expires_at);
+
+
 CREATE TABLE IF NOT EXISTS enrolments (
   id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   tenant_id       INTEGER NOT NULL REFERENCES tenants (id),
@@ -170,3 +189,89 @@ CREATE TABLE IF NOT EXISTS materials (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_material_slot ON materials (tenant_id, course_slug, module_code, kind);
 CREATE INDEX IF NOT EXISTS ix_material_course ON materials (tenant_id, course_slug);
+
+-- See the long note on this table in schema.mysql.sql: the file-backed twin
+-- of `materials`, its own table rather than columns bolted on, mutually
+-- exclusive with a `materials` row for the same slot (enforced in PHP).
+CREATE TABLE IF NOT EXISTS material_files (
+  id            INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug   TEXT    NOT NULL,
+  module_code   TEXT    NOT NULL,
+  kind          TEXT    NOT NULL,
+  disk_name     TEXT    NOT NULL,
+  original_name TEXT    NOT NULL,
+  mime_type     TEXT    NOT NULL,
+  size_bytes    INTEGER NOT NULL,
+  updated_at    TEXT    NOT NULL,
+  updated_by    INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_matfile_slot ON material_files (tenant_id, course_slug, module_code, kind);
+CREATE INDEX IF NOT EXISTS ix_matfile_course ON material_files (tenant_id, course_slug);
+
+-- See the long note on this table in schema.mysql.sql: a self-check quiz for
+-- one module, NOT the QCTO assessment. One quiz per (course, module).
+CREATE TABLE IF NOT EXISTS quizzes (
+  id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug  TEXT    NOT NULL,
+  module_code  TEXT    NOT NULL,
+  pass_pct     INTEGER     NULL,
+  published    INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT    NOT NULL,
+  updated_at   TEXT    NOT NULL,
+  updated_by   INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_quiz_slot ON quizzes (tenant_id, course_slug, module_code);
+
+-- active, not deleted, on removal — see the long note in schema.mysql.sql:
+-- quiz_attempt_answers hangs off a question the same way enrolments hang off
+-- a user, so it is switched off rather than deleted.
+CREATE TABLE IF NOT EXISTS quiz_questions (
+  id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants (id),
+  quiz_id      INTEGER NOT NULL REFERENCES quizzes (id),
+  prompt       TEXT    NOT NULL,
+  sort_order   INTEGER NOT NULL DEFAULT 0,
+  active       INTEGER NOT NULL DEFAULT 1,
+  created_at   TEXT    NOT NULL,
+  updated_at   TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_quizq_quiz ON quiz_questions (tenant_id, quiz_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS quiz_choices (
+  id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants (id),
+  question_id  INTEGER NOT NULL REFERENCES quiz_questions (id),
+  choice_text  TEXT    NOT NULL,
+  is_correct   INTEGER NOT NULL DEFAULT 0,
+  sort_order   INTEGER NOT NULL DEFAULT 0,
+  active       INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS ix_quizc_question ON quiz_choices (tenant_id, question_id, sort_order);
+
+-- See the long note on this table in schema.mysql.sql: NO score_pct column —
+-- computed in PHP from score_count/question_count at read time. Unlimited
+-- attempts, best kept, so there is no UNIQUE on (quiz_id, user_id).
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+  id             INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id      INTEGER NOT NULL REFERENCES tenants (id),
+  quiz_id        INTEGER NOT NULL REFERENCES quizzes (id),
+  user_id        INTEGER NOT NULL REFERENCES users (id),
+  started_at     TEXT    NOT NULL,
+  submitted_at   TEXT    NOT NULL,
+  score_count    INTEGER NOT NULL,
+  question_count INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_qatt_quiz_user ON quiz_attempts (tenant_id, quiz_id, user_id);
+CREATE INDEX IF NOT EXISTS ix_qatt_user ON quiz_attempts (tenant_id, user_id);
+
+CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
+  id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id    INTEGER NOT NULL REFERENCES tenants (id),
+  attempt_id   INTEGER NOT NULL REFERENCES quiz_attempts (id),
+  question_id  INTEGER NOT NULL REFERENCES quiz_questions (id),
+  choice_id    INTEGER     NULL REFERENCES quiz_choices (id),
+  is_correct   INTEGER NOT NULL DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_qans_attempt_question ON quiz_attempt_answers (tenant_id, attempt_id, question_id);

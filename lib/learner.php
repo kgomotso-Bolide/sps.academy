@@ -23,15 +23,22 @@ declare(strict_types=1);
  * HOW SOMEBODY GETS AN ACCOUNT
  *
  * An administrator presses "Enrol" on a registration. There is no self-signup,
- * and that is a decision rather than an omission: the site is on a public URL
- * and the domain's SPF record still authorises Google rather than Xneelo, so
- * mail sent from this server cannot be relied on to arrive. Self-signup without
- * a verified address means anybody who can type an email address can create an
- * account, and there would be nothing behind the door but our own material.
+ * and that is a decision rather than an omission: the site is on a public URL,
+ * so self-signup without a verified address would mean anybody who can type an
+ * email address gets an account, with nothing behind the door but our own
+ * material.
  *
- * When SPF is fixed the honest upgrade is an invite link — "Enrol" emails a
- * one-time set-password URL — and only the delivery step changes. Everything
- * below stays as it is.
+ * The credential can reach the learner two ways — see $delivery on
+ * learner_enrol_registration() below and lib/invite.php. Both are still
+ * entirely admin-initiated; only the last step differs:
+ *
+ *   - shown once on screen, for the administrator to hand over in person; or
+ *   - a one-time set-password link, emailed by lib/invite.php.
+ *
+ * The email route depends on mail this server cannot yet be relied on to
+ * deliver — the domain's SPF record still authorises Google rather than
+ * Xneelo, see lib/mail.php — so admin.php offers both and defaults to the one
+ * that always works.
  *
  * WHAT IS DELIBERATELY NOT HERE
  *
@@ -152,16 +159,34 @@ function learner_split_name(string $full): array
  * reset — resetting it would lock out somebody who is already working, to fix
  * nothing. An existing enrolment is left alone.
  *
+ * $delivery chooses how a NEW account's credential reaches the learner:
+ *
+ *   'show'   (default) — a generated password is returned once, for the
+ *            administrator to read off the screen and hand over in person or
+ *            by phone. Always works, whatever state the domain's DNS is in.
+ *   'invite' — no password is generated or ever known to us. Instead the new
+ *            row gets an unusable random hash and an email carrying a
+ *            one-time set-password link — see lib/invite.php. Depends on mail
+ *            actually arriving, which mail from this server cannot yet be
+ *            relied on to do; the caller must check 'invite_sent' and fall
+ *            back to telling the administrator to use 'show' for this person
+ *            if it came back false.
+ *
+ * Meaningless, and ignored, when the person already has an account: an
+ * existing password is never touched by enrolling them on a second course.
+ *
  * @return array{
  *   ok: bool, message: string, user: ?array, password: ?string,
- *   user_created: bool, enrolment_created: bool
+ *   user_created: bool, enrolment_created: bool,
+ *   invited: bool, invite_sent: ?bool
  * }
  */
-function learner_enrol_registration(int $regId, string $courseSlug): array
+function learner_enrol_registration(int $regId, string $courseSlug, string $delivery = 'show'): array
 {
     $fail = static fn(string $m): array => [
         'ok' => false, 'message' => $m, 'user' => null, 'password' => null,
         'user_created' => false, 'enrolment_created' => false,
+        'invited' => false, 'invite_sent' => null,
     ];
 
     if (!learner_course_valid($courseSlug)) {
@@ -178,8 +203,9 @@ function learner_enrol_registration(int $regId, string $courseSlug): array
                    . 'nothing to sign in with. Correct it with the learner first.');
     }
 
-    $title = learner_course_title($courseSlug, $reg['course_title'] ?? null);
-    $admin = current_user();
+    $title      = learner_course_title($courseSlug, $reg['course_title'] ?? null);
+    $admin      = current_user();
+    $viaInvite  = $delivery === 'invite';
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -192,12 +218,20 @@ function learner_enrol_registration(int $regId, string $courseSlug): array
 
         if ($user === null) {
             [$first, $last] = learner_split_name((string) $reg['full_name']);
-            $password = install_readable_password();
+
+            /* Two very different secrets, depending on how it will reach the
+               learner. 'show' generates something a person can read off the
+               screen and type. 'invite' generates 32 random bytes nobody will
+               ever read or type — the account has to have SOME password hash,
+               and this one exists purely to be overwritten the moment the
+               invite link is used. */
+            $password = $viaInvite ? null : install_readable_password();
+            $hash     = $viaInvite ? auth_hash(bin2hex(random_bytes(32))) : auth_hash($password);
 
             $uid = db_insert('users', [
                 'tenant_id'     => tenant_id(),
                 'email'         => $email,
-                'password_hash' => auth_hash($password),
+                'password_hash' => $hash,
                 'first_name'    => $first,
                 'last_name'     => $last,
                 'employee_no'   => ($reg['employee_no'] ?? '') !== '' ? $reg['employee_no'] : null,
@@ -260,15 +294,35 @@ function learner_enrol_registration(int $regId, string $courseSlug): array
               'user ' . (int) $user['id'] . ' · ' . $courseSlug . ' — ' . $title);
     }
 
-    $message = $userCreated
-        ? 'Account created and enrolled on ' . $title . '.'
-        : ($enrolCreated
-            ? 'That person already had an account — they are now also enrolled on ' . $title . '.'
-            : 'They were already enrolled on ' . $title . '. Nothing was changed.');
+    /* The invite email, if that is the route asked for. Deliberately AFTER the
+       audit calls above, so "an account was created" and "it was enrolled" are
+       recorded even if mail fails outright — a failed send must never look
+       like a failed enrolment. */
+    $invited    = $userCreated && $viaInvite;
+    $inviteSent = null;
+    if ($invited) {
+        $inviteSent = invite_create_and_send($user, (int) ($admin['id'] ?? 0), $title);
+    }
+
+    if ($invited) {
+        $message = $inviteSent
+            ? 'Account created and enrolled on ' . $title . '. An email with a link to set '
+                . 'a password is on its way to ' . $user['email'] . '.'
+            : 'Account created and enrolled on ' . $title . ', but the invite email could not '
+                . 'be sent. The account already exists, so re-enrolling will not generate a '
+                . 'password — set one for them from the Accounts page instead.';
+    } else {
+        $message = $userCreated
+            ? 'Account created and enrolled on ' . $title . '.'
+            : ($enrolCreated
+                ? 'That person already had an account — they are now also enrolled on ' . $title . '.'
+                : 'They were already enrolled on ' . $title . '. Nothing was changed.');
+    }
 
     return [
         'ok' => true, 'message' => $message, 'user' => $user, 'password' => $password,
         'user_created' => $userCreated, 'enrolment_created' => $enrolCreated,
+        'invited' => $invited, 'invite_sent' => $inviteSent,
     ];
 }
 
