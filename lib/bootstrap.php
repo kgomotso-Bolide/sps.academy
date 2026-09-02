@@ -291,6 +291,16 @@ function app_config_safe(string $key)
  * wrong on a registration page quotes the request, and the request contains
  * somebody's name and email address. Serving that at /private/logs/app.log
  * would be a worse leak than the bug being logged.
+ *
+ * MUST use the same HOME-directory-first search as app_config(), and for the
+ * identical reason documented there: on this host public_html is a symlink to
+ * /usr/www/users/<account>/spsacademy, so walking up from APP_ROOT with
+ * dirname() never reaches /usr/home/<account>/ — it stays inside the
+ * symlinked tree, where no private/ directory exists. An earlier version of
+ * this function only walked up and never found it, so every caller — this
+ * one included — got null and failed as "storage is not available," even
+ * though ~/private/ was sitting right there the whole time. app_log() calls
+ * this too, so that bug was silently swallowing every log line as well.
  */
 function app_private_dir(string $sub = ''): ?string
 {
@@ -299,11 +309,24 @@ function app_private_dir(string $sub = ''): ?string
     if ($base === null) {
         $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
         $base    = false;
-        $dir     = APP_ROOT;
+
+        $candidates = [];
+
+        $home = (string) (getenv('HOME') ?: '');
+        if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
+            $pw = @posix_getpwuid(posix_getuid());
+            $home = (string) ($pw['dir'] ?? '');
+        }
+        if ($home !== '') $candidates[] = rtrim($home, '/') . '/private';
+
+        $dir = APP_ROOT;
         for ($i = 0; $i < 4; $i++) {
             $dir = dirname($dir);
             if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-            $candidate = $dir . '/private';
+            $candidates[] = $dir . '/private';
+        }
+
+        foreach ($candidates as $candidate) {
             if (!is_dir($candidate)) continue;
             if ($docroot !== '' && path_inside($candidate, $docroot)) continue;
             $base = $candidate;
