@@ -29,7 +29,8 @@ function install_tables(): array
     return ['tenants', 'users', 'registrations', 'consents', 'audit_log',
             'password_resets', 'account_invites', 'enrolments', 'learner_progress',
             'progress_reports', 'material_files', 'quizzes', 'quiz_questions',
-            'quiz_choices', 'quiz_attempts', 'quiz_attempt_answers'];
+            'quiz_choices', 'quiz_attempts', 'quiz_attempt_answers',
+            'topic_sections'];
 }
 
 /** Which of the expected tables are not there yet. */

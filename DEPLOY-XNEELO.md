@@ -164,6 +164,24 @@ Two things this release also needs, beyond the usual three steps:
   learner record) — the same reason the 18 Aug release needed the bump, and `privacy.php`
   has been updated to say so.
 
+**Reading a module on the page, 2 Sep 2026 — one new table.** `topic_sections`, holding the
+written content for one area of one topic, so a learner can work through a module a section at
+a time instead of opening the whole guide. Same three-step shape as every release above: deploy,
+set a fresh `setup_token`, open `/setup`, run it, empty the token again.
+
+Until the table exists, `admin-lessons.php` and `lessons.php` degrade to "nothing written yet"
+rather than a 500 — `db_optional()` again — and the module page renders exactly as it did
+before, because `lessons.js` does nothing at all when the server has nothing to give it. That
+is also what a module with no content written looks like, which is the normal state for ten of
+the eleven modules, so it is worth checking the table really was created rather than assuming
+an empty page means an empty table.
+
+**No `policy_version` bump for this one.** Nothing new is collected about a learner: the reading
+is content going out, not data coming in. The one record it creates is a `section.read` audit
+line per module opened, which is the same kind of "which material did this learner open, and
+when" entry `material.opened` has made since 1 Sep and which the privacy notice already
+describes.
+
 ## Check before telling anyone
 
 - [ ] `https://centenarynetworks.com/` — the **Centenary homepage**, unchanged.
@@ -237,6 +255,18 @@ Two things this release also needs, beyond the usual three steps:
       the two scores, not the more recent one.
 - [ ] On `/admin-quizzes` → **View results**, confirm that attempt shows up, and that the CSV
       export downloads and matches.
+
+### Reading a module on the page
+
+- [ ] On `/admin-lessons`, choose **KM-01**. The five areas of KT01 should already have text in
+      them, each with **Learners can read this** ticked.
+- [ ] Signed in and enrolled, open `/module?m=KM-01`. The five areas under the first topic
+      should now be clickable, with a caret, and expand to show the reading. Every other
+      topic's areas stay plain text — that is correct, nothing is written for them yet.
+- [ ] Sign out and open the same page. The areas must go back to being plain headings, with no
+      reading behind them and no caret.
+- [ ] Type a line containing `<b>test</b>` into any area, save, and confirm the learner sees
+      those characters as text rather than bold. Content written here is never markup.
 
 > **Until SPF is fixed, tell Kgomotso to use `/admin-users`.** The self-service reset is built
 > and correct, but it depends on mail that this server cannot yet get delivered. The Accounts

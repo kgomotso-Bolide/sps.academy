@@ -565,3 +565,45 @@ CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
   CONSTRAINT fk_qans_question FOREIGN KEY (question_id) REFERENCES quiz_questions (id),
   CONSTRAINT fk_qans_choice   FOREIGN KEY (choice_id)   REFERENCES quiz_choices (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Written teaching content for ONE AREA of one topic — the "read it here"
+-- half of a module, as opposed to `materials`/`material_files`, which hand
+-- over a whole document.
+--
+-- WHY THIS IS NOT IN pm-modules.js
+--
+-- That file already carries the study structure (modules, topics, and the
+-- `covers` list this table attaches to) and its header says plainly what it
+-- deliberately leaves out: "the full teaching prose... the learner guides are
+-- Centenary's material and the downloads are access-controlled". pm-modules.js
+-- is served to anybody who opens the site. Teaching content put there would be
+-- published to the world the moment it was saved, which is the exact mistake
+-- the DOCS map made before links moved into the database. So the prose lives
+-- here and reaches a learner only through lessons.php, behind the same
+-- signed-in-and-enrolled check materials.php applies.
+--
+-- KEYED BY BOTH INDEX AND TITLE, on purpose. area_index is the position in
+-- that topic's `covers` array, which is what the page renders against.
+-- area_title is a SNAPSHOT of the heading as it read when the content was
+-- written — it is not used for lookup, it is there so that if the registered
+-- curriculum is ever revised, a mismatch between the two is visible rather
+-- than silently attaching last year's prose to a different heading.
+CREATE TABLE IF NOT EXISTS topic_sections (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  module_code VARCHAR(20)  NOT NULL,
+  topic_code  VARCHAR(30)  NOT NULL,
+  area_index  TINYINT UNSIGNED NOT NULL,
+  area_title  VARCHAR(255) NOT NULL,
+  body        MEDIUMTEXT   NOT NULL,
+  published   TINYINT(1)   NOT NULL DEFAULT 0,
+  updated_at  DATETIME     NOT NULL,
+  updated_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_section_area (tenant_id, course_slug, module_code, topic_code, area_index),
+  KEY ix_section_module (tenant_id, course_slug, module_code),
+  CONSTRAINT fk_section_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_section_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -275,3 +275,23 @@ CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
   is_correct   INTEGER NOT NULL DEFAULT 0
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_qans_attempt_question ON quiz_attempt_answers (tenant_id, attempt_id, question_id);
+
+
+-- Written teaching content for one area of one topic. See the fuller note in
+-- schema.mysql.sql: it is here rather than in pm-modules.js because that file
+-- is public and this is Centenary's material.
+CREATE TABLE IF NOT EXISTS topic_sections (
+  id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT    NOT NULL,
+  module_code TEXT    NOT NULL,
+  topic_code  TEXT    NOT NULL,
+  area_index  INTEGER NOT NULL,
+  area_title  TEXT    NOT NULL,
+  body        TEXT    NOT NULL,
+  published   INTEGER NOT NULL DEFAULT 0,
+  updated_at  TEXT    NOT NULL,
+  updated_by  INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_section_area ON topic_sections (tenant_id, course_slug, module_code, topic_code, area_index);
+CREATE INDEX IF NOT EXISTS ix_section_module ON topic_sections (tenant_id, course_slug, module_code);

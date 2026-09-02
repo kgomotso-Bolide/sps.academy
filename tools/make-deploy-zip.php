@@ -100,6 +100,11 @@ $requiredAlso = [
     // under Xneelo's FastCGI/PHP-FPM, see the file itself.
     'lib/material_files.php', 'lib/quiz.php', 'quiz.php', 'admin-quizzes.php',
     'quiz-widget.js', '.user.ini',
+    // Reading a module on the page, area by area. Same pairing rule as above:
+    // lessons.php without lib/sections.php is a page that cannot answer, and
+    // lessons.js without lessons.php quietly renders nothing at all — which
+    // looks exactly like "no content written yet" and would not be noticed.
+    'lib/sections.php', 'lessons.php', 'admin-lessons.php', 'lessons.js',
     'schema/schema.mysql.sql',
 ];
 
