@@ -284,6 +284,97 @@ function app_config_safe(string $key)
     try { return app_config($key); } catch (Throwable $e) { return null; }
 }
 
+/** The account's home directory, however this host is willing to reveal it. */
+function app_home_dir(): string
+{
+    $home = (string) (getenv('HOME') ?: '');
+    if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
+        $pw = @posix_getpwuid(posix_getuid());
+        $home = (string) ($pw['dir'] ?? '');
+    }
+    /* Last resort: the directory the configuration file was found in. That
+       file is placed by hand, outside the web root, by whoever installed the
+       site — so wherever it lives is by definition a directory this account
+       owns and the web server cannot serve. On a host that hides HOME from
+       PHP-FPM this is the only honest clue we have. */
+    if ($home === '') {
+        $cfg = app_config_safe('_path');
+        if (is_string($cfg) && $cfg !== '') {
+            $dir = dirname($cfg);
+            if (basename($dir) === 'private') $dir = dirname($dir);
+            $home = $dir;
+        }
+    }
+    return $home === '' ? '' : rtrim(str_replace('\\', '/', $home), '/');
+}
+
+/**
+ * Every place a private directory could reasonably live, best first, each
+ * with what is actually true of it right now.
+ *
+ * Split out from app_private_dir() so that a page reporting "storage is not
+ * available" can say WHERE it looked and WHY each place was no good. The
+ * first version of this feature failed on the live server with nothing but
+ * that sentence, and no shell to go and look with — which turned a
+ * five-minute fix into three deploys of guessing. A resolver that cannot
+ * explain itself is a resolver you debug blind.
+ *
+ * @return array<int, array{path:string, source:string, status:string, usable:bool}>
+ */
+function app_private_candidates(): array
+{
+    $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+    $paths   = [];
+
+    $home = app_home_dir();
+    if ($home !== '') $paths[] = [$home . '/private', 'the account home directory'];
+
+    /* Walking up from the application. On this host public_html is a symlink
+       to /usr/www/users/<account>/spsacademy, so this walk does NOT pass
+       through /usr/home/<account> — which is exactly why the home directory
+       is checked first above, and the same reason app_config() checks it
+       first. Kept as a fallback because it is right for the subdomain
+       layout, where the web root IS the application. */
+    $dir = APP_ROOT;
+    for ($i = 0; $i < 4; $i++) {
+        $dir = dirname($dir);
+        if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
+        $paths[] = [str_replace('\\', '/', $dir) . '/private', 'above the application'];
+    }
+
+    /* Last, and only last: the home directory itself. It is outside the web
+       root and writable, so it works — but it scatters material-files/ and
+       logs/ across the account's top level, which is untidy enough that it
+       must never win while a private/ directory exists or could be made.
+       Hence its position at the bottom of this list rather than beside the
+       first entry, where it would quietly pre-empt creating ~/private. */
+    if ($home !== '') $paths[] = [$home, 'the account home directory itself (last resort)', true];
+
+    $out = [];
+    foreach ($paths as $p) {
+        [$path, $source] = $p;
+        $fallback = $p[2] ?? false;
+
+        $status = 'usable';
+        $usable = true;
+
+        if ($docroot !== '' && path_inside($path, $docroot)) {
+            $status = 'REFUSED — it is inside the web root, so anyone could fetch what we put there';
+            $usable = false;
+        } elseif (!is_dir($path)) {
+            $status = is_dir(dirname($path)) ? 'does not exist yet (could be created)' : 'parent directory does not exist';
+            $usable = false;
+        } elseif (!is_writable($path)) {
+            $status = 'exists but is not writable by the web server';
+            $usable = false;
+        }
+
+        $out[] = ['path' => $path, 'source' => $source, 'status' => $status,
+                  'usable' => $usable, 'fallback' => (bool) $fallback];
+    }
+    return $out;
+}
+
 /**
  * A writable directory that is NOT reachable over HTTP.
  *
@@ -292,45 +383,62 @@ function app_config_safe(string $key)
  * somebody's name and email address. Serving that at /private/logs/app.log
  * would be a worse leak than the bug being logged.
  *
- * MUST use the same HOME-directory-first search as app_config(), and for the
- * identical reason documented there: on this host public_html is a symlink to
- * /usr/www/users/<account>/spsacademy, so walking up from APP_ROOT with
- * dirname() never reaches /usr/home/<account>/ — it stays inside the
- * symlinked tree, where no private/ directory exists. An earlier version of
- * this function only walked up and never found it, so every caller — this
- * one included — got null and failed as "storage is not available," even
- * though ~/private/ was sitting right there the whole time. app_log() calls
- * this too, so that bug was silently swallowing every log line as well.
+ * IT CREATES ~/private IF IT HAS TO. The deploy note has always said to make
+ * that directory by hand, and on this installation it plainly never happened —
+ * the configuration file sits directly in the home directory instead, which
+ * app_config() accepts and says so. Requiring a directory nobody was told
+ * twice to create, on a host with no shell to create it from, is a
+ * requirement that fails quietly and blames the code. Creating it is safe:
+ * the only candidate we will create is one already proven to be outside the
+ * document root, and it is made 0700.
  */
 function app_private_dir(string $sub = ''): ?string
 {
     static $base = null;
 
     if ($base === null) {
-        $docroot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
-        $base    = false;
+        $base       = false;
+        $candidates = app_private_candidates();
 
-        $candidates = [];
+        /* Three passes, and the order between them is the whole point. A
+           real private/ directory beats making one; making one beats
+           scattering our directories across the top of somebody's home
+           folder. The last-resort candidate IS "usable" — it exists and it
+           is writable — so a single first-usable-wins loop would take it and
+           never create ~/private at all. */
 
-        $home = (string) (getenv('HOME') ?: '');
-        if ($home === '' && function_exists('posix_getpwuid') && function_exists('posix_getuid')) {
-            $pw = @posix_getpwuid(posix_getuid());
-            $home = (string) ($pw['dir'] ?? '');
-        }
-        if ($home !== '') $candidates[] = rtrim($home, '/') . '/private';
-
-        $dir = APP_ROOT;
-        for ($i = 0; $i < 4; $i++) {
-            $dir = dirname($dir);
-            if ($dir === '' || $dir === '.' || $dir === dirname($dir)) break;
-            $candidates[] = $dir . '/private';
+        // 1. An existing, writable, out-of-reach private/ directory.
+        foreach ($candidates as $c) {
+            if ($c['usable'] && !$c['fallback']) { $base = $c['path']; break; }
         }
 
-        foreach ($candidates as $candidate) {
-            if (!is_dir($candidate)) continue;
-            if ($docroot !== '' && path_inside($candidate, $docroot)) continue;
-            $base = $candidate;
-            break;
+        // 2. Create the best one that is merely absent.
+        if ($base === false) {
+            foreach ($candidates as $c) {
+                if ($c['fallback']) continue;
+                if ($c['status'] !== 'does not exist yet (could be created)') continue;
+                if (@mkdir($c['path'], 0700, true) && is_dir($c['path'])) {
+                    /* Assign BEFORE logging: app_log() calls straight back
+                       into this function for its own directory, and would
+                       otherwise see $base still false and write the "we made
+                       it" line into the system temp directory instead of the
+                       directory it is announcing. */
+                    $base = $c['path'];
+                    app_log('CREATED private directory at ' . $c['path']);
+                    break;
+                }
+            }
+        }
+
+        // 3. Only now, the home directory itself.
+        if ($base === false) {
+            foreach ($candidates as $c) {
+                if ($c['usable'] && $c['fallback']) {
+                    $base = $c['path'];
+                    app_log('FALLING BACK to ' . $c['path'] . ' — could not create a private directory');
+                    break;
+                }
+            }
         }
     }
 

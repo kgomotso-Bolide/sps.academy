@@ -250,6 +250,27 @@ $uploadCapBytes = material_file_effective_upload_cap();
               ? 'any size (no server limit set)'
               : material_file_format_bytes($uploadCapBytes) ?></strong> — set by the server,
         read fresh on this page load, not promised in advance.</p>
+
+      <?php if (app_private_dir('material-files') === null): ?>
+        <?php /* Uploads cannot work at all. Say where we looked, because the
+                 alternative — the bare sentence "Storage is not available
+                 right now" — is what this page said on the live server while
+                 nobody could tell whether the directory was missing, unwritable
+                 or refused for being web-reachable. Administrator-only page,
+                 and server paths are what the person fixing it needs. */ ?>
+        <div class="form-err" role="alert">
+          <p><strong>File uploads are not working: this installation has nowhere private to
+            put them.</strong> Links still work. Every place that was tried, in order:</p>
+          <ul>
+            <?php foreach (app_private_candidates() as $c): ?>
+              <li><code><?= e($c['path']) ?></code> — <?= e($c['status']) ?>
+                <span class="adm-sub">(<?= e($c['source']) ?>)</span></li>
+            <?php endforeach; ?>
+          </ul>
+          <p>Create the first of those over SFTP and give it permissions <code>700</code>, then
+            reload this page. Nothing else needs changing.</p>
+        </div>
+      <?php endif; ?>
     </div>
 
     <?php if (count($courses) > 1): ?>
