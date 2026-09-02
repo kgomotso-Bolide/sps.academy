@@ -284,7 +284,11 @@ $uploadCapBytes = material_file_effective_upload_cap();
 <script>
 (function () {
   var MODS  = window.PM_MODULES || [];
-  var HAVE  = <?= json_encode($forJs, JSON_UNESCAPED_SLASHES) ?>;
+  /* JSON_HEX_TAG and friends: a file whose name contains a closing script tag
+     would otherwise end this block early and leave the page blank with no
+     explanation — see the fuller note on the same line in admin-quizzes.php,
+     including why that tag is not written out literally even in a comment. */
+  var HAVE  = <?= json_encode($forJs, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var KINDS = [
     ['guide',    'Learner guide', 'The notes this module is assessed on'],
     ['workbook', 'Workbook',      'Activities and self-assessments'],

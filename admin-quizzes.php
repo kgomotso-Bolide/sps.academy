@@ -122,12 +122,25 @@ if (is_post()) {
                 }
             }
 
+            /* Anything that could not be saved is said out loud, before the
+               reassuring part. A question the admin wrote and lost is the one
+               outcome this page must never report as success — see the note
+               on 'skipped' in quiz_save_questions(). */
+            foreach ($counts['skipped'] as $s) {
+                $errors[] = 'Question ' . $s['n'] . ' was NOT saved — ' . $s['why'] . '.'
+                          . ($s['was'] !== '' ? ' (It began "' . $s['was'] . '".)' : '')
+                          . ' Fix it and save again; everything else on this module was saved.';
+            }
+
             $bits = [];
             if ($counts['added'])    $bits[] = $counts['added'] . ' question' . ($counts['added'] === 1 ? '' : 's') . ' added';
             if ($counts['updated'])  $bits[] = $counts['updated'] . ' updated';
             if ($counts['removed'])  $bits[] = $counts['removed'] . ' removed';
-            $notice = $bits ? ('Saved for ' . $module . ' — ' . implode(', ', $bits) . '.')
-                            : ('Saved for ' . $module . '. Nothing had changed.');
+            if ($bits) {
+                $notice = 'Saved for ' . $module . ' — ' . implode(', ', $bits) . '.';
+            } elseif (!$counts['skipped']) {
+                $notice = 'Saved for ' . $module . '. Nothing had changed.';
+            }
         }
         csrf_rotate();
     }
@@ -326,9 +339,19 @@ function qs(array $over = []): string
 <script>
 (function () {
   var MODS = window.PM_MODULES || [];
-  var HAVE = <?= json_encode($forJs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-  var CSRF = <?= json_encode(csrf_token()) ?>;
-  var COURSE = <?= json_encode($course) ?>;
+  /* JSON_HEX_TAG is not decoration. Without it, a question containing a
+     closing script tag — a perfectly reasonable thing to write in a course
+     about anything technical — ends this block early. The browser then hits a
+     syntax error, the module list never renders, and the page comes up blank
+     with nothing on it to explain why. It is also the difference between
+     stored text and stored script. Note that this comment deliberately does
+     not spell that tag out either: the parser does not care that it is inside
+     a comment, and writing it here would break the page just as surely.
+     Everything below that interpolates PHP into JavaScript uses the same
+     flags, for the same reason. */
+  var HAVE = <?= json_encode($forJs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  var CSRF = <?= json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  var COURSE = <?= json_encode($course, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var rows = document.getElementById('quiz-rows');
   if (!rows || !MODS.length) return;
 
@@ -453,6 +476,31 @@ function qs(array $over = []): string
       qContainer.insertAdjacentHTML('beforeend', questionBlock(idx, null));
       wireQuestion(qContainer.lastElementChild, qContainer);
       renumber(qContainer);
+    });
+
+    /* Say what is wrong HERE, before a round trip loses the typing. The server
+       checks the same things again and reports anything that still gets
+       through — this is the courtesy, not the guard, exactly as the URL check
+       on admin-materials.php is. */
+    form.addEventListener('submit', function (e) {
+      var problems = [];
+      qContainer.querySelectorAll('.qz-question').forEach(function (qEl, i) {
+        var prompt  = (qEl.querySelector('textarea').value || '').trim();
+        var texts   = [].map.call(qEl.querySelectorAll('input[type=text]'), function (t) { return (t.value || '').trim(); })
+                          .filter(function (t) { return t !== ''; });
+        var ticked  = !!qEl.querySelector('input[type=radio]:checked');
+
+        if (prompt === '' && texts.length === 0) return;   // the blank row at the bottom
+        if (prompt === '')          problems.push('Question ' + (i + 1) + ' has answer options but no question written.');
+        else if (texts.length < MIN_CHOICES) problems.push('Question ' + (i + 1) + ' needs at least ' + MIN_CHOICES + ' answer options.');
+        else if (!ticked)           problems.push('Question ' + (i + 1) + ' has no option marked as the correct one.');
+      });
+
+      if (problems.length) {
+        e.preventDefault();
+        alert('Nothing has been saved yet:\n\n' + problems.join('\n') +
+              '\n\nFix these and press Save again.');
+      }
     });
   });
 })();

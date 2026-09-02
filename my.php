@@ -304,7 +304,7 @@ function when_local(?string $utc): string
         '<p class="prog-note">' + o.modulesComplete + ' of ' + o.modulesTotal +
           ' modules marked complete · ' + o.creditsClaimed + ' of ' + o.creditsTotal +
           ' knowledge credits covered by your own record. The practical and workplace ' +
-          'credits are assessed separately, against your work at ' + <?= json_encode(brand("company_short")) ?> + '.</p></div>' +
+          'credits are assessed separately, against your work at ' + <?= json_encode(brand("company_short"), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?> + '.</p></div>' +
         (next
           ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + '">' +
               '<span class="my-next-lbl">Carry on with</span>' +

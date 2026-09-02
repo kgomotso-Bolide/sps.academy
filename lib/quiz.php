@@ -181,11 +181,18 @@ function quiz_upsert(string $courseSlug, string $moduleCode, array $fields, int 
  * A null 'id' means a new question/choice. Anything stored but absent from
  * $posted is deleted.
  *
- * @return array{added:int, updated:int, removed:int}
+ * A question that cannot be saved is REPORTED, not silently dropped. An
+ * earlier version simply `continue`d past anything incomplete, so an admin
+ * who wrote a question and forgot to tick which answer was correct — much the
+ * easiest mistake to make on this form — got "Saved. Nothing had changed."
+ * and lost the lot. Losing somebody's writing is bad; telling them it went
+ * fine while doing it is worse. The caller renders 'skipped' as an error.
+ *
+ * @return array{added:int, updated:int, removed:int, skipped: array<int, array{n:int, why:string}>}
  */
 function quiz_save_questions(int $quizId, array $posted, int $by): array
 {
-    $counts = ['added' => 0, 'updated' => 0, 'removed' => 0];
+    $counts = ['added' => 0, 'updated' => 0, 'removed' => 0, 'skipped' => []];
 
     $existingQ = db_all('SELECT id FROM quiz_questions WHERE tenant_id = ? AND quiz_id = ? AND active = 1',
                         [tenant_id(), $quizId]);
@@ -196,14 +203,42 @@ function quiz_save_questions(int $quizId, array $posted, int $by): array
     try {
         foreach ($posted as $order => $q) {
             $prompt = trim((string) ($q['prompt'] ?? ''));
-            if ($prompt === '') continue;   // an empty prompt is a blank row left on the form, not a question
 
             $choicesIn = array_values(array_filter(
                 (array) ($q['choices'] ?? []),
                 fn($c) => trim((string) ($c['text'] ?? '')) !== ''
             ));
-            if (count($choicesIn) < QUIZ_MIN_CHOICES || count($choicesIn) > QUIZ_MAX_CHOICES) continue;
-            if (!array_filter($choicesIn, fn($c) => !empty($c['correct']))) continue;   // needs exactly-one-or-more correct
+
+            /* An entirely empty block is the blank row the form always leaves
+               at the bottom — not something anybody wrote, so it is ignored
+               without comment. Anything half-filled IS somebody's writing. */
+            if ($prompt === '' && !$choicesIn) continue;
+
+            $why = '';
+            if ($prompt === '') {
+                $why = 'it has answer options but no question written above them';
+            } elseif (count($choicesIn) < QUIZ_MIN_CHOICES) {
+                $why = 'it needs at least ' . QUIZ_MIN_CHOICES . ' answer options filled in';
+            } elseif (count($choicesIn) > QUIZ_MAX_CHOICES) {
+                $why = 'it has more than ' . QUIZ_MAX_CHOICES . ' answer options';
+            } elseif (!array_filter($choicesIn, fn($c) => !empty($c['correct']))) {
+                $why = 'no option is marked as the correct one';
+            }
+            if ($why !== '') {
+                $counts['skipped'][] = [
+                    'n'   => (int) $order + 1,
+                    'why' => $why,
+                    'was' => mb_substr($prompt !== '' ? $prompt : trim((string) $choicesIn[0]['text']), 0, 60),
+                ];
+                /* If this question is ALREADY stored, keep it. Everything not
+                   in $keepQIds is deactivated at the end of the loop, so
+                   without this line a broken edit to a saved question would
+                   delete the good version that was already there — turning a
+                   refused edit into data loss. */
+                $skippedId = (int) ($q['id'] ?? 0);
+                if ($skippedId > 0) $keepQIds[] = $skippedId;
+                continue;
+            }
 
             $qid = (int) ($q['id'] ?? 0);
             if ($qid > 0 && db_value(
