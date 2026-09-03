@@ -1590,6 +1590,38 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 @media(max-width:620px){
   .sc-overall,.sc-big,.sc-gap,.sc-note{padding:20px 18px}
 }
+/* ---- Written section content on a module page (lessons.js) ----------------
+   Attaches to the existing .lesson rows rather than introducing a new
+   component: an area that has something to read becomes an expander, and one
+   that does not is left exactly as the curriculum rendered it. That
+   difference has to be visible at a glance, which is what the caret is for. */
+.lesson-has-content{position:relative;padding-right:44px}
+.lesson-has-content .lname{font-weight:600}
+.lesson-has-content:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+.sec-caret{position:absolute;right:20px;top:50%;width:8px;height:8px;margin-top:-5px;
+  border-right:2px solid var(--orange-deep);border-bottom:2px solid var(--orange-deep);
+  transform:rotate(45deg);transition:transform .15s ease}
+.lesson-has-content.open .sec-caret{transform:rotate(-135deg);margin-top:-2px}
+.sec-badge{display:inline-block;font-weight:600;color:var(--orange-deep)}
+
+.sec-body{padding:4px 22px 20px;border-bottom:1px solid var(--line);background:var(--bg-soft)}
+.sec-body p{margin:0 0 12px;line-height:1.7;max-width:68ch}
+.sec-body p:last-child{margin-bottom:0}
+.sec-body ul{margin:0 0 12px;padding-left:22px;max-width:68ch}
+.sec-body li{margin-bottom:6px;line-height:1.65}
+
+/* ---- Writing that content (admin-lessons.php) ---------------------------- */
+.sec-area{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#fff}
+.sec-area h5{margin:0 0 4px;font-size:15px}
+.sec-area .sec-idx{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;
+  border-radius:6px;background:var(--orange-tint);color:var(--orange-deep);font-weight:700;
+  font-size:12px;margin-right:8px}
+.sec-area textarea{width:100%;min-height:150px;font:14px/1.6 inherit;padding:10px 12px;
+  border:1px solid var(--line);border-radius:8px;resize:vertical}
+.sec-area .sec-hint{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
+.sec-topic{margin:22px 0 10px;font-size:14px;font-weight:700}
+.sec-topic .sec-topic-code{color:var(--ink-soft);font-weight:500;margin-left:8px}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------
@@ -1698,35 +1730,3 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
   .pg-lead{font-size:16px}
   .pg-back{width:100%;justify-content:center}
 }
-
-/* ---- Written section content on a module page (lessons.js) ----------------
-   Attaches to the existing .lesson rows rather than introducing a new
-   component: an area that has something to read becomes an expander, and one
-   that does not is left exactly as the curriculum rendered it. That
-   difference has to be visible at a glance, which is what the caret is for. */
-.lesson-has-content{position:relative;padding-right:44px}
-.lesson-has-content .lname{font-weight:600}
-.lesson-has-content:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
-.sec-caret{position:absolute;right:20px;top:50%;width:8px;height:8px;margin-top:-5px;
-  border-right:2px solid var(--orange-deep);border-bottom:2px solid var(--orange-deep);
-  transform:rotate(45deg);transition:transform .15s ease}
-.lesson-has-content.open .sec-caret{transform:rotate(-135deg);margin-top:-2px}
-.sec-badge{display:inline-block;font-weight:600;color:var(--orange-deep)}
-
-.sec-body{padding:4px 22px 20px;border-bottom:1px solid var(--line);background:var(--bg-soft)}
-.sec-body p{margin:0 0 12px;line-height:1.7;max-width:68ch}
-.sec-body p:last-child{margin-bottom:0}
-.sec-body ul{margin:0 0 12px;padding-left:22px;max-width:68ch}
-.sec-body li{margin-bottom:6px;line-height:1.65}
-
-/* ---- Writing that content (admin-lessons.php) ---------------------------- */
-.sec-area{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#fff}
-.sec-area h5{margin:0 0 4px;font-size:15px}
-.sec-area .sec-idx{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;
-  border-radius:6px;background:var(--orange-tint);color:var(--orange-deep);font-weight:700;
-  font-size:12px;margin-right:8px}
-.sec-area textarea{width:100%;min-height:150px;font:14px/1.6 inherit;padding:10px 12px;
-  border:1px solid var(--line);border-radius:8px;resize:vertical}
-.sec-area .sec-hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
-.sec-topic{margin:22px 0 10px;font-size:14px;font-weight:700}
-.sec-topic .sec-topic-code{color:var(--muted);font-weight:500;margin-left:8px}
