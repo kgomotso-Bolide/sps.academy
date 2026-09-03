@@ -64,6 +64,16 @@ $shared = [
     'lib/learner.php', 'lib/mail.php', 'lib/progress.php', 'lib/registration.php',
     'lib/reset.php', 'lib/materials.php', 'lib/.htaccess',
 
+    // These four were missing from this list until 3 Sep 2026, and the omission
+    // was not harmless: admin.php, materials.php, admin-materials.php and my.php
+    // are all on it and every one of them does a HARD require of one of these.
+    // Syncing the pages without the libraries wrote a fatal error into three
+    // live client sites — a white screen, not a degraded page — and it was
+    // caught by walking every require in the target repos rather than by
+    // anything this tool checked. If you add a page below that requires a new
+    // library, the library belongs here in the same edit.
+    'lib/invite.php', 'lib/material_files.php', 'lib/quiz.php', 'lib/sections.php',
+
     // The database.
     'schema/schema.mysql.sql', 'schema/schema.sqlite.sql',
 
@@ -73,6 +83,19 @@ $shared = [
     'phpcheck.php', 'pm-progress.php', 'privacy.php', 'reset.php', 'setup.php',
     'admin-materials.php', 'materials.php',
 
+    // Added 3 Sep 2026, same omission as the libraries above. lib/chrome.php is
+    // synced and its admin nav renders links to admin-lessons and admin-quizzes,
+    // so without these two the nav on the other academies points at 404s. invite
+    // is the pair to lib/invite.php: shipping one without the other leaves a
+    // link in somebody's inbox that fails when they open it.
+    'invite.php', 'quiz.php', 'admin-quizzes.php',
+    'lessons.php', 'admin-lessons.php',
+
+    // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
+    // in it is the client, and admin-materials.php reports the effective cap it
+    // produces, so a site without it silently offers a much smaller one.
+    '.user.ini',
+
     // profile-page.js joined this list on 19 Aug 2026, after the four copies had
     // been allowed to diverge and three of them broke: profile.js is shared and
     // names its API window.SPSProfile, while their profile-page.js still looked
@@ -81,7 +104,12 @@ $shared = [
     // Client-side code that talks to the back end. profile.js and pm-progress.js
     // know the shape of account.php's JSON, so they are part of the application
     // and not part of the site — a stale copy of either is a broken sign-in.
+    // quiz-widget.js and lessons.js joined on 3 Sep 2026. Both know the JSON
+    // shape of a page above — quiz.php and lessons.php — so they are the
+    // application, not the site, and module.html loads them by name on every
+    // academy.
     'profile.js', 'profile-page.js', 'pm-progress.js', 'materials.js',
+    'quiz-widget.js', 'lessons.js',
 
     // The graduate list. Centenary's people, not the client's, so it is the same
     // list on all four sites and there is no reason for four copies of it to
