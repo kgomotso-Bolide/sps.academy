@@ -36,3 +36,28 @@ card crops to a tall rectangle, so a wide group photo will lose most of the
 person. Ask whether they are happy for that specific photograph to be published,
 not just for "a photo" — it is their face on five public websites.
 
+
+## A photograph for somebody who has not agreed yet
+
+It does not go in this folder. Put it in `private/trainers/` and leave `photo`
+empty, so the card falls back to their initials.
+
+Everything in `images/` is uploaded by the deploy, whether or not a page links
+it — unlinked is not unpublished. The alternative is a `RewriteRule` in
+`.htaccess` denying that one file, which is what Taryn McCormick's photograph
+had until she cleared it, but that rule has to name the file, which puts their
+name in a `.htaccess` sitting on four public servers, and it is a rule somebody
+has to remember to delete later. `private/` is excluded from the deploy mirror
+outright, so there is nothing to remember and nothing to leak.
+
+Move the file in here in the same edit that sets `consent: true`. That is the
+route `irisha-luhanga.jpg` took on 3 Sep 2026; nothing is waiting there now.
+
+## Ask about the photograph you were actually sent
+
+A file arriving is not clearance, and the file you have may not be the one they
+would choose. Check the photograph against any they have published themselves:
+if their own bio or profile deck carries a different picture, you have one they
+did not send you, and Fiston's case is the reason that matters — he was asked
+for his LinkedIn photograph and replied, to everyone, asking to send a different
+one instead.

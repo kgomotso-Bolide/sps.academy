@@ -62,6 +62,16 @@ if (preg_match('#^/(lib|schema|tools|_drafts|private)(/|$)#', $path)) {
     return true;
 }
 
+/* The one .htaccess rule that matches a FILENAME rather than a directory name.
+   The rule above only covers directory names, so this is not already handled,
+   and a local check that reports .user.ini as readable when the live server
+   404s it is worse than no check at all. */
+if ($path === '/.user.ini') {
+    http_response_code(404);
+    echo 'Not found.';
+    return true;
+}
+
 if ($path === '/' || substr($path, -1) === '/') {
     $path .= 'index.html';
 }
