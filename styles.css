@@ -1622,6 +1622,31 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .sec-topic{margin:22px 0 10px;font-size:14px;font-weight:700}
 .sec-topic .sec-topic-code{color:var(--ink-soft);font-weight:500;margin-left:8px}
 
+/* ---- No motion, anywhere ---------------------------------------------------
+   Kgomotso, 3 Sep 2026: no animation on the sites. This follows the hero dots
+   coming out on 2 Sep for the same reason — she finds the movement
+   uncomfortable, and a learner reading a module for forty notional hours should
+   not have anything moving at the edge of their vision.
+
+   Written as one override at the end of the shared block rather than by hunting
+   the twenty-odd transition declarations above. Two reasons: a declaration
+   removed by hand comes back the next time somebody copies a rule from another
+   component, and !important here beats every later rule in the per-site half of
+   this file without needing to be last in the file.
+
+   TRANSFORMS ARE NOT TOUCHED, deliberately. transform is load-bearing here —
+   it rotates the section caret and the link arrows and centres a few things.
+   Killing transform would break layout; killing the TRANSITION of transform
+   just means the caret flips instantly, which is the point.
+
+   The reduced-motion block further up is now redundant for this file and kept
+   anyway: it costs nothing and it is what a browser looks for. */
+*,*::before,*::after{
+  transition:none!important;
+  animation:none!important;
+}
+html{scroll-behavior:auto!important}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------

@@ -23,10 +23,15 @@
   ".aiw-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #dfe7ea;background:#fff;flex:0 0 auto}"+
   ".aiw-foot input{flex:1;border:1px solid #dfe7ea;border-radius:9px;padding:10px 12px;font:14px Inter,sans-serif;color:#2b2b2b}.aiw-foot input:focus{outline:2px solid #f37424}"+
   ".aiw-foot button{background:#f37424;border:0;color:#fff;border-radius:9px;padding:0 14px;cursor:pointer;line-height:0}.aiw-foot button:hover{background:#e35e16}.aiw-foot button svg{width:18px;height:18px}"+
-  ".aiw-typing span{display:inline-block;width:6px;height:6px;margin:0 1px;border-radius:50%;background:#b7b2ac;animation:aiwb 1s infinite}.aiw-typing span:nth-child(2){animation-delay:.15s}.aiw-typing span:nth-child(3){animation-delay:.3s}"+
-  "@keyframes aiwb{0%,60%,100%{opacity:.3}30%{opacity:1}}"+
-  "@media(max-width:480px){.aiw-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}.aiw-btn{right:14px;bottom:14px}}"+
-  "@media(prefers-reduced-motion:reduce){.aiw-typing span{animation:none}}";
+  /* The "thinking" indicator. It used to be three dots pulsing on a 1s loop.
+     Kgomotso asked for no animation on the sites (3 Sep 2026), the same reason
+     the hero dots came out the day before, so the dots are now still. Three
+     static dots still read as "…", which is what they were saying anyway.
+     The keyframes are gone rather than merely overridden: styles.css turns all
+     animation off globally, and a rule that only works because something else
+     cancels it is a rule waiting to come back. */
+  ".aiw-typing span{display:inline-block;width:6px;height:6px;margin:0 1px;border-radius:50%;background:#b7b2ac;opacity:.75}"+
+  "@media(max-width:480px){.aiw-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}.aiw-btn{right:14px;bottom:14px}}";
   var st=document.createElement('style'); st.appendChild(document.createTextNode(css)); document.head.appendChild(st);
 
   var COURSES=[
