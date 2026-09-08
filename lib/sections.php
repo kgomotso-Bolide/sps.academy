@@ -124,22 +124,33 @@ function section_set(string $courseSlug, string $moduleCode, string $topicCode, 
  */
 function section_body_html(string $body): string
 {
-    $body  = str_replace("\r\n", "\n", $body);
-    $out   = '';
-    $list  = false;
+    $body = str_replace("\r\n", "\n", $body);
+    $out  = '';
+    $list = false;                 // is a <ul> currently open?
 
     foreach (preg_split('/\n{2,}/', trim($body)) as $block) {
         $lines   = explode("\n", trim($block));
         $bullets = array_filter($lines, fn($l) => str_starts_with(trim($l), '- '));
+        $isList  = $lines && count($bullets) === count($lines);
 
-        if (count($bullets) === count($lines) && $lines) {
-            $out .= '<ul>';
+        if ($isList) {
+            /* Only open a list if one is not already open. Blocks are split on
+               blank lines, and a writer separating each bullet with one — which
+               is what happens when material is converted out of a Word document,
+               and is a perfectly natural way to type — used to produce a run of
+               single-item lists instead of one list. That reads as extra spacing
+               to a sighted reader and as several one-item lists to a screen
+               reader, which is the part that actually matters. */
+            if (!$list) { $out .= '<ul>'; $list = true; }
             foreach ($lines as $l) $out .= '<li>' . e(trim(substr(trim($l), 2))) . '</li>';
-            $out .= '</ul>';
             continue;
         }
+
+        if ($list) { $out .= '</ul>'; $list = false; }
         $out .= '<p>' . nl2br(e(implode("\n", $lines))) . '</p>';
     }
+    if ($list) $out .= '</ul>';
+
     return $out;
 }
 

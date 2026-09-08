@@ -223,7 +223,27 @@
     const key=t.key
       ? '<div class="topic-key"><span class="lbl">The idea in one paragraph</span>'+ESC(t.key)+'</div>'
       : '';
-    return '<div class="module open">'+
+    /* Where "next" goes when this topic is finished. Within a module the
+       topics are all on this one page, so it scrolls; at the end of the last
+       one it carries on to the next module, which is the only place the reader
+       would otherwise have to work out for themselves. Rendered here rather
+       than in lessons.js because it is navigation and belongs with the card,
+       not with the material — it has to work for a signed-out visitor too. */
+    /* MODS[idx+1], not the `next` further down this file: that one is declared
+       with const at the bottom, so reading it from here is a temporal dead zone
+       error — and that takes the whole page down, not just this one link. */
+    const nextM  = MODS[idx+1];
+    const isLast = i === m.topics.length - 1;
+    const nextT  = isLast ? null : m.topics[i+1];
+    const nextHref  = nextT ? '#'+ESC(nextT.code) : (nextM ? 'module?m='+ESC(nextM.id) : '');
+    const nextLabel = nextT ? nextT.n : (nextM ? nextM.id+' · '+nextM.title : '');
+    const nav = nextHref
+      ? '<div class="topic-next"><a href="'+nextHref+'">'+
+          '<span>'+(nextT?'Next topic':'Next module')+' →</span>'+
+          '<strong>'+ESC(nextLabel)+'</strong></a></div>'
+      : '';
+
+    return '<div class="module open" id="'+ESC(t.code)+'">'+
       '<div class="module-head" style="cursor:default">'+
         '<span class="module-num">'+(i+1)+'</span>'+
         '<div class="mt"><h4>'+ESC(t.n)+'</h4>'+
@@ -231,7 +251,7 @@
             (t.covers.length?' · '+t.covers.length+' areas':'')+'</div></div>'+
         '<span class="topic-w" aria-hidden="true">'+t.w+'%</span>'+
       '</div>'+
-      key+covers+tick+
+      key+covers+tick+nav+
     '</div>';
   }).join('');
 

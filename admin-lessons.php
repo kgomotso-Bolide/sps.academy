@@ -238,25 +238,44 @@ $counts = db_optional(fn() => sections_count_for_course($course), []);
   var mod = MODS.filter(function (m) { return m.id === MODULE; })[0];
   if (!mod) { rows.innerHTML = '<p class="adm-empty">That module is not in the curriculum file.</p>'; return; }
 
+  /* ONE BOX PER TOPIC, not one per area (changed 8 Sep 2026).
+     -------------------------------------------------------
+     This used to render a textarea for every area the curriculum lists under a
+     topic, each with the area's name pushed into a hidden title field. That was
+     wrong twice over once the Learner Guides were actually read: the guides are
+     written topic by topic, so material loaded from them has no area to belong
+     to — and it would have been shown here under whichever area happened to be
+     first, then had that area's name saved onto it as a title.
+
+     So the areas are now shown for what they are: the syllabus this topic has
+     to cover, listed above the box as a reminder while writing. The material
+     itself is one piece, stored at index 0 with no title, exactly as the
+     loader writes it.
+
+     Nothing prunes: the save only touches what it is sent, so anything already
+     stored at a higher index stays where it is. */
   rows.innerHTML = mod.topics.map(function (t) {
     var have = HAVE[t.code] || {};
-    var areas = (t.covers || []).map(function (areaTitle, i) {
-      var v = have[String(i)] || { title: areaTitle, body: '', published: false };
-      var nm = 'sec[' + esc(t.code) + '][' + i + ']';
-      return '<div class="sec-area">' +
-        '<h5><span class="sec-idx">' + (i + 1) + '</span>' + esc(areaTitle) + '</h5>' +
-        '<input type="hidden" name="' + nm + '[title]" value="' + esc(areaTitle) + '">' +
-        '<textarea name="' + nm + '[body]" placeholder="What a learner should read for this area. ' +
+    var v = have['0'] || { title: '', body: '', published: false };
+    var nm = 'sec[' + esc(t.code) + '][0]';
+
+    var syllabus = (t.covers || []).length
+      ? '<ul class="sec-covers">' + t.covers.map(function (c) {
+          return '<li>' + esc(c) + '</li>';
+        }).join('') + '</ul>'
+      : '';
+
+    return '<div class="sec-topic">' + esc(t.n) +
+        '<span class="sec-topic-code">' + esc(t.code) + ' · ' + t.w + '% of the module</span></div>' +
+      '<div class="sec-area">' +
+        (syllabus ? '<p class="sec-hint">This topic has to cover:</p>' + syllabus : '') +
+        '<input type="hidden" name="' + nm + '[title]" value="' + esc(v.title || '') + '">' +
+        '<textarea name="' + nm + '[body]" placeholder="What a learner reads for this topic. ' +
           'Blank line for a new paragraph, &quot;- &quot; for a bullet. Leave empty to show nothing.">' +
           esc(v.body) + '</textarea>' +
         '<label class="mat-remove"><input type="checkbox" name="' + nm + '[published]" value="1"' +
           (v.published ? ' checked' : '') + '> Learners can read this</label>' +
-        '</div>';
-    }).join('');
-
-    if (!areas) return '';
-    return '<div class="sec-topic">' + esc(t.n) +
-      '<span class="sec-topic-code">' + esc(t.code) + ' · ' + t.w + '% of the module</span></div>' + areas;
+      '</div>';
   }).join('');
 })();
 </script>

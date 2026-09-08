@@ -60,6 +60,10 @@ foreach ($found as $topicCode => $areas) {
     foreach ($areas as $i => $row) {
         $out[$topicCode][(string) $i] = [
             'title' => (string) $row['area_title'],
+            /* Counted from the stored plain text, not from the rendered HTML —
+               tag names would otherwise be counted as words. The page shows a
+               reading time built from this, so it has to be the real figure. */
+            'words' => str_word_count((string) $row['body']),
             'html'  => section_body_html((string) $row['body']),
         ];
     }

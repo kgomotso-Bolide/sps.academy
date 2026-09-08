@@ -436,18 +436,51 @@ function qs(array $over = []): string
     });
   }
 
-  rows.innerHTML = MODS.map(function (m) {
-    var have = HAVE[m.id] || { published: false, passPct: null, questions: [] };
+  /* ONE QUIZ PER TOPIC, NOT PER MODULE (changed 8 Sep 2026)
+     -------------------------------------------------------
+     A learner reads a topic and then answers questions on it, so the questions
+     belong to the topic. Centenary's own question bank is written that way too
+     — ten questions per topic.
+
+     This needed NO schema change, which is the reason it is done like this.
+     quizzes.module_code is VARCHAR(20) and its UNIQUE key is
+     (tenant_id, course_slug, module_code); a topic code such as KM-01-KT01 is
+     ten characters and passes learner_valid_code() unchanged, so storing one
+     there gives exactly one quiz per topic for free. The column now holds a
+     curriculum code — module or topic — rather than only a module code. Adding
+     a column instead would have meant ALTER TABLE, which this codebase does not
+     do: install_apply_schema() re-runs every CREATE statement on each deploy
+     and has to stay idempotent.
+
+     Any quiz saved against a bare module code before today still loads and is
+     still gradeable; it simply appears under no topic here. */
+  var UNITS = [];
+  MODS.forEach(function (m) {
+    (m.topics || []).forEach(function (t) {
+      UNITS.push({ id: t.code, title: t.n, module: m.id, moduleTitle: m.title, weight: t.w });
+    });
+  });
+  if (!UNITS.length) return;
+
+  var lastModule = null;
+  rows.innerHTML = UNITS.map(function (u) {
+    var have = HAVE[u.id] || { published: false, passPct: null, questions: [] };
     var n = have.questions.length;
     var status = !n ? 'no quiz yet' : (n + ' question' + (n === 1 ? '' : 's') + (have.published ? ' · published' : ' · draft'));
 
-    return '<details class="mat-mod">' +
-      '<summary><span class="mat-code">' + esc(m.id) + '</span> ' + esc(m.title) +
+    var head = '';
+    if (u.module !== lastModule) {
+      lastModule = u.module;
+      head = '<h3 class="qz-modhead">' + esc(u.module) + ' · ' + esc(u.moduleTitle) + '</h3>';
+    }
+
+    return head + '<details class="mat-mod">' +
+      '<summary><span class="mat-code">' + esc(u.id) + '</span> ' + esc(u.title) +
         '<span class="mat-have' + (n ? ' on' : '') + '">' + esc(status) + '</span></summary>' +
-      '<form method="POST" class="qz-form" data-module="' + esc(m.id) + '">' +
+      '<form method="POST" class="qz-form" data-module="' + esc(u.id) + '">' +
         '<input type="hidden" name="_token" value="' + esc(CSRF) + '">' +
         '<input type="hidden" name="course" value="' + esc(COURSE) + '">' +
-        '<input type="hidden" name="module" value="' + esc(m.id) + '">' +
+        '<input type="hidden" name="module" value="' + esc(u.id) + '">' +
         '<div class="qz-meta">' +
           '<div class="field"><label>Pass mark (%, optional)</label>' +
             '<input type="number" name="pass_pct" min="0" max="100" value="' +
@@ -455,21 +488,112 @@ function qs(array $over = []): string
           '<label class="mat-remove"><input type="checkbox" name="published" value="1"' +
             (have.published ? ' checked' : '') + '> Published — learners can take this</label>' +
         '</div>' +
+        '<details class="qz-paste"><summary>Paste a set of questions</summary>' +
+          '<p class="field-hint">Numbered questions with lettered options, the way a question ' +
+            'bank is usually written. Mark the right answer with a tick or an asterisk at the ' +
+            'end of its line. Pasting REPLACES what is in this form; nothing is saved until you ' +
+            'press save, so you can read it over first.</p>' +
+          '<textarea class="qz-paste-in" rows="7" placeholder="1. Which of these best defines a project?&#10;A. Routine day-to-day work&#10;B. A temporary effort with a start and an end  *&#10;C. A department&#10;D. A budget"></textarea>' +
+          '<div class="mat-save"><button type="button" class="btn btn-ghost qz-paste-go">Load these into the form</button>' +
+            '<span class="qz-paste-msg"></span></div>' +
+        '</details>' +
         '<div class="qz-questions">' +
           (have.questions.length ? have.questions.map(function (q, i) { return questionBlock(i, q); }).join('')
                                   : questionBlock(0, null)) +
         '</div>' +
         '<div class="mat-save">' +
           '<button type="button" class="btn btn-ghost qz-addq">Add a question</button>' +
-          '<button type="submit" class="btn btn-primary">Save this module’s quiz</button>' +
+          '<button type="submit" class="btn btn-primary">Save this topic’s quiz</button>' +
         '</div>' +
       '</form>' +
     '</details>';
   }).join('');
 
+  /* Read a pasted question bank.
+   *
+   * Deliberately fills in THIS FORM rather than posting anywhere of its own.
+   * Everything then goes through the same submit, the same CSRF check and the
+   * same quiz_save_questions() as a hand-typed question — including its rules
+   * about needing two options and exactly one right answer, and its habit of
+   * naming what it skipped instead of dropping it silently. A separate import
+   * endpoint would have been a second way into the same table, with its own
+   * copy of those rules to keep in step. */
+  function parseBank(text) {
+    var lines = String(text).replace(/\r/g, '').split('\n');
+    var out = [], cur = null;
+
+    function closeCur() {
+      if (cur && cur.prompt && cur.choices.length) out.push(cur);
+      cur = null;
+    }
+    lines.forEach(function (raw) {
+      var line = raw.trim();
+      if (!line) return;
+
+      var q = line.match(/^(\d{1,3})[.)]\s+(.*)$/);
+      if (q) { closeCur(); cur = { prompt: q[2].trim(), choices: [] }; return; }
+
+      var c = line.match(/^([A-Ha-h])[.)]\s+(.*)$/);
+      if (c && cur) {
+        var t = c[2];
+        /* The right answer is marked at the end of its own line. Accept the
+           three things people actually type, and the wording Centenary's own
+           bank uses. */
+        var correct = /(?:✓|✔|\*|\(correct\)|correct answer)\s*$/i.test(t);
+        t = t.replace(/\s*(?:✓|✔|\*|\(correct\)|(?:✓\s*)?correct answer)\s*$/i, '').trim();
+        if (t) cur.choices.push({ text: t, correct: correct });
+        return;
+      }
+      /* A wrapped question line: fold it back onto the prompt, but only before
+         any options have been read, or a wrapped OPTION would land on it. */
+      if (cur && !cur.choices.length) cur.prompt += ' ' + line;
+      else if (cur && cur.choices.length) {
+        cur.choices[cur.choices.length - 1].text += ' ' + line;
+      }
+    });
+    closeCur();
+    return out;
+  }
+
+  function wirePaste(form, qContainer) {
+    var box = form.querySelector('.qz-paste-in');
+    var go  = form.querySelector('.qz-paste-go');
+    var msg = form.querySelector('.qz-paste-msg');
+    if (!box || !go) return;
+
+    go.addEventListener('click', function () {
+      var parsed = parseBank(box.value);
+      if (!parsed.length) {
+        msg.textContent = 'Nothing recognised — questions need to be numbered, with lettered options under them.';
+        return;
+      }
+      var noAnswer = parsed.filter(function (q) {
+        return !q.choices.some(function (c) { return c.correct; });
+      });
+      var tooFew = parsed.filter(function (q) { return q.choices.length < MIN_CHOICES; });
+
+      qContainer.innerHTML = parsed.map(function (q, i) {
+        return questionBlock(i, {
+          id: '', prompt: q.prompt,
+          choices: q.choices.slice(0, MAX_CHOICES).map(function (c) {
+            return { id: '', text: c.text, correct: c.correct };
+          })
+        });
+      }).join('');
+      qContainer.querySelectorAll('.qz-question').forEach(function (qEl) { wireQuestion(qEl, qContainer); });
+      renumber(qContainer);
+
+      var bits = [parsed.length + ' question' + (parsed.length === 1 ? '' : 's') + ' loaded'];
+      if (noAnswer.length) bits.push(noAnswer.length + ' with no right answer marked — tick one before saving');
+      if (tooFew.length)   bits.push(tooFew.length + ' with fewer than two options');
+      msg.textContent = bits.join('. ') + '. Nothing is saved yet.';
+    });
+  }
+
   rows.querySelectorAll('.qz-form').forEach(function (form) {
     var qContainer = form.querySelector('.qz-questions');
     qContainer.querySelectorAll('.qz-question').forEach(function (qEl) { wireQuestion(qEl, qContainer); });
+    wirePaste(form, qContainer);
 
     form.querySelector('.qz-addq').addEventListener('click', function () {
       var idx = qContainer.children.length;
