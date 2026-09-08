@@ -295,10 +295,62 @@ function bundle_validate(array $bundle, string $course, array $topicCodes): arra
                     ? 'no option is marked as the correct one.'
                     : count($correct) . ' options are marked correct, and only one may be.');
             }
+
+            /* THE ANSWER KEY MUST NOT BE VISIBLE IN THE OPTION TEXT.
+               Question banks arrive with the right answer ticked in the
+               document — "Ten   [tick] Correct answer" — and whatever converts
+               that into a bundle has to take the marking off. On 8 Sep 2026 a
+               converter took off the trailing words and left the tick, so all
+               forty questions of KM-01 shipped to a live site showing learners
+               which answer was right.
+
+               Nothing checked. The conversion was correct about WHICH option
+               was right, so every count and every test agreed with it; the only
+               thing wrong was a character a learner could see. So the check
+               belongs here, on the file, where it applies to every bundle
+               anybody ever makes rather than to the one converter that got it
+               wrong. */
+            foreach ($filled as $ci => $c) {
+                if (($why = bundle_answer_marker((string) $c['text'])) !== '') {
+                    $problems[] = $n . ' option ' . ($ci + 1) . ': ' . $why
+                                . ' Take the marking off — a learner sees this text.';
+                }
+            }
         }
     }
 
     return $problems;
+}
+
+/**
+ * Does this answer option still carry the marking from the question bank?
+ *
+ * Returns '' if it is clean, or a sentence naming what was found.
+ *
+ * TICKS AND CROSSES ARE FLAGGED WHEREVER THEY APPEAR. There is no legitimate
+ * reason for one in a multiple-choice option, so position does not matter.
+ *
+ * WORDS ARE FLAGGED ONLY AT THE END, and the bare word "correct" is not
+ * flagged at all: KM-01-KT03 has the perfectly good option "To identify and
+ * correct performance deviations", and a checker that fails on that is a
+ * checker somebody switches off.
+ */
+function bundle_answer_marker(string $text): string
+{
+    $t = trim($text);
+
+    /* U+2713 check, U+2714 heavy check, U+2705 white heavy check, U+2717/U+2718
+       ballot X, U+274C cross mark, U+2611 ballot box with check. */
+    if (preg_match('/[\x{2713}\x{2714}\x{2705}\x{2717}\x{2718}\x{274C}\x{2611}]/u', $t)) {
+        return 'it still has a tick or cross in it.';
+    }
+    if (preg_match('/(?:correct(?:\s+answer)?|answer\s*key|\(correct\)|\[correct\])\s*[.)\]]?$/iu', $t)) {
+        return 'it ends with the words that marked it as the answer.';
+    }
+    if (preg_match('/[*]\s*$/u', $t)) {
+        return 'it ends with an asterisk, which is how the bank marks the answer.';
+    }
+    return '';
 }
 
 /**
