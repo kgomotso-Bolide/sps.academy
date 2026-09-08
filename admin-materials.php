@@ -81,7 +81,23 @@ function admin_materials_reshape_files(?array $raw): array
 }
 
 if (is_post()) {
-    if (!csrf_valid()) {
+    /* AN UPLOAD OVER post_max_size NEVER REACHES THIS FILE INTACT.
+       PHP discards the whole request body first, so $_POST and $_FILES both
+       arrive empty and the CSRF token goes with them. Without this the page
+       reports that the form had expired — which is a lie, and sends somebody
+       round the same loop uploading the same too-big file and being told each
+       time that they took too long over it.
+
+       This is the ceiling for the WHOLE request, so several large files in one
+       save can trip it even when each of them is individually under the limit;
+       the message says so. The per-file caps are reported separately by
+       material_file_problem(), which is only reached by a request that made it
+       this far. */
+    if (!$_POST && !$_FILES && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+        $errors[] = 'That upload was larger than this server accepts in one request ('
+                  . (string) ini_get('post_max_size') . ' for everything sent together) and was'
+                  . ' discarded before this page saw it. Nothing was saved. Try one file at a time.';
+    } elseif (!csrf_valid()) {
         $errors[] = 'That form had expired — nothing was saved. Please try again.';
     } else {
         $posted = post_str('course', 60);
