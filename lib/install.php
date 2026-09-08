@@ -24,13 +24,26 @@ function install_table_exists(string $table): bool
     }
 }
 
+/**
+ * Every table the schema defines, so that install_missing_tables() and
+ * phpcheck.php can both say honestly whether an installation is complete.
+ *
+ * KEEP THIS IN STEP WITH schema/schema.*.sql. A table left off does not fail
+ * loudly: install_apply_schema() creates it anyway, because it just executes the
+ * schema file — but nothing then REPORTS it as missing, so a site without it
+ * looks healthy while the feature that needs it is quietly broken. `materials`
+ * was off this list until 8 Sep 2026 for exactly that reason; it exists on the
+ * installations that have it only because they were built before it was
+ * dropped. tools/migrate.php --check compares the two schema files with each
+ * other; nothing was comparing either of them with this list.
+ */
 function install_tables(): array
 {
     return ['tenants', 'users', 'registrations', 'consents', 'audit_log',
             'password_resets', 'account_invites', 'enrolments', 'learner_progress',
-            'progress_reports', 'material_files', 'quizzes', 'quiz_questions',
-            'quiz_choices', 'quiz_attempts', 'quiz_attempt_answers',
-            'topic_sections'];
+            'progress_reports', 'materials', 'material_files', 'quizzes',
+            'quiz_questions', 'quiz_choices', 'quiz_attempts',
+            'quiz_attempt_answers', 'topic_sections'];
 }
 
 /** Which of the expected tables are not there yet. */
