@@ -105,6 +105,11 @@ $requiredAlso = [
     // lessons.js without lessons.php quietly renders nothing at all — which
     // looks exactly like "no content written yet" and would not be noticed.
     'lib/sections.php', 'lessons.php', 'admin-lessons.php', 'lessons.js',
+    // The bundle loader is how a course's reading and questions reach a site at
+    // all, since the content itself is never in this repository — see the header
+    // of lib/bundle.php. admin-lessons.php hard-requires it, so shipping the
+    // page without it is a white screen on the content page.
+    'lib/bundle.php',
     'schema/schema.mysql.sql',
 ];
 

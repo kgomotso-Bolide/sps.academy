@@ -1663,6 +1663,18 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .sec-covers li{margin-bottom:3px}
 .sec-area .sec-hint:first-child{margin-top:0}
 
+/* Loading a prepared course bundle. Folded away by default: it is the thing
+   done once when a course arrives, not the thing done while editing, and an
+   open file-picker sitting above the editor invites a mis-click that would
+   reload a whole course over somebody's edits. */
+.sec-bundle{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.sec-bundle>summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:14px}
+.sec-bundle-body{padding:0 16px 16px;max-width:70ch}
+.sec-bundle-body p{font-size:13.5px;line-height:1.65;margin:0 0 10px}
+.sec-bundle-form{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--line)}
+.sec-bundle-form input[type=file]{font:13px/1.5 inherit;max-width:100%}
+
 /* ---- No motion, anywhere ---------------------------------------------------
    Kgomotso, 3 Sep 2026: no animation on the sites. This follows the hero dots
    coming out on 2 Sep for the same reason — she finds the movement

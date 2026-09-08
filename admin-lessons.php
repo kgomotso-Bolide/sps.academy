@@ -34,6 +34,8 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/sections.php';
+require __DIR__ . '/lib/quiz.php';
+require __DIR__ . '/lib/bundle.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
@@ -51,8 +53,61 @@ $notice = '';
 $errors = [];
 
 if (is_post()) {
-    if (!csrf_valid()) {
+    /* An upload bigger than post_max_size arrives as an EMPTY $_POST and an
+       empty $_FILES — PHP discards the body before this file runs. The CSRF
+       token goes with it, so without this the page would report that the form
+       had expired, which is a lie and sends somebody round the same loop
+       trying again with the same too-big file. */
+    if (!$_POST && !$_FILES && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+        $errors[] = 'That upload was larger than this server accepts in one request ('
+                  . (string) ini_get('post_max_size') . ') and was discarded before the page saw it.';
+    } elseif (!csrf_valid()) {
         $errors[] = 'That form had expired — nothing was saved. Please try again.';
+    } elseif (post_str('action', 20) === 'bundle') {
+        /* Loading a prepared bundle, rather than saving one module's boxes.
+           Checked first because it is the one POST here that carries no module
+           code — it is a whole-course load. See lib/bundle.php for why the
+           content arrives as an upload instead of in the repository. */
+        $postedCourse = post_str('course', 60);
+        if (!isset($courses[$postedCourse])) {
+            $errors[] = 'That is not a course this page can manage.';
+        } else {
+            $course = $postedCourse;
+            $result = bundle_import(
+                (array) ($_FILES['bundle'] ?? []),
+                $course,
+                !empty($_POST['bundle_publish']),
+                (int) $me['id']
+            );
+
+            if ($result['problems']) {
+                /* All of them, not the first. Somebody fixing a bundle wants
+                   the list, and nothing was written, so there is no risk in
+                   saying everything that is wrong with it. Capped only because
+                   a badly wrong file can produce one line per topic. */
+                $errors[] = 'Nothing was loaded — that bundle has '
+                          . count($result['problems']) . ' problem'
+                          . (count($result['problems']) === 1 ? '' : 's') . ':';
+                foreach (array_slice($result['problems'], 0, 40) as $p) $errors[] = '· ' . $p;
+                if (count($result['problems']) > 40) {
+                    $errors[] = '· … and ' . (count($result['problems']) - 40) . ' more.';
+                }
+            } else {
+                $r    = $result['report'];
+                $bits = [];
+                if ($r['reading']['added'])     $bits[] = $r['reading']['added'] . ' topics written';
+                if ($r['reading']['updated'])   $bits[] = $r['reading']['updated'] . ' topics updated';
+                if ($r['reading']['unchanged']) $bits[] = $r['reading']['unchanged'] . ' already the same';
+                if ($r['words'])                $bits[] = number_format($r['words']) . ' words';
+                if ($r['quizzes']['topics'])    $bits[] = $r['quizzes']['added'] . ' questions across '
+                                                        . $r['quizzes']['topics'] . ' quizzes';
+                $notice = 'Bundle loaded — ' . implode(', ', $bits) . '.'
+                        . (empty($_POST['bundle_publish'])
+                            ? ' It is NOT visible to learners yet: nothing was published.'
+                            : ' Learners can read it now.');
+            }
+        }
+        csrf_rotate();
     } else {
         $postedCourse = post_str('course', 60);
         $postedModule = post_str('module', 20);
@@ -166,6 +221,38 @@ $counts = db_optional(fn() => sections_count_for_course($course), []);
         there is — what you type is stored and shown as text, never as markup, which is what stops
         anything typed here becoming code on a learner's page.</p>
     </div>
+
+    <details class="sec-bundle"<?= $notice !== '' || $errors ? ' open' : '' ?>>
+      <summary>Load a prepared bundle</summary>
+      <div class="sec-bundle-body">
+        <p>A bundle is one <code>.json</code> file holding the reading for many topics at once, and
+          the quiz questions that go with them. It is how a whole course is put on the platform —
+          fifty-one topics typed into fifty-one boxes by hand is not editing, it is a data load, and
+          it is how a topic ends up filed under the wrong code.</p>
+
+        <p class="mat-warn"><strong>The file is checked against the registered curriculum before
+          anything is written.</strong> Every topic code in it has to be a topic that exists, filed
+          under the module it actually belongs to. If any part of the bundle is wrong,
+          <strong>none</strong> of it is loaded and this page lists what is wrong — a half-loaded
+          course looks finished from the module list, and the gap is only found by a learner.</p>
+
+        <p class="mat-warn"><strong>Course material is never kept in the site's code.</strong> That
+          is why this is an upload: the repository this site deploys from is public, so anything put
+          there to be deployed is published to anybody who looks. The guides belong to enrolled
+          learners who are signed in. Keep the bundle file on your own machine — do not put it in a
+          shared folder, and do not email it.</p>
+
+        <form method="POST" enctype="multipart/form-data" class="sec-bundle-form">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="bundle">
+          <input type="hidden" name="course" value="<?= e($course) ?>">
+          <input type="file" name="bundle" accept=".json,application/json" required>
+          <label class="mat-remove"><input type="checkbox" name="bundle_publish" value="1" checked>
+            Publish it as it loads, so learners can read it straight away</label>
+          <button type="submit" class="btn btn-primary">Load this bundle</button>
+        </form>
+      </div>
+    </details>
 
     <form class="adm-search" method="GET">
       <?php if (count($courses) > 1): ?>
