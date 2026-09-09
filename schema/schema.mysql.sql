@@ -607,3 +607,32 @@ CREATE TABLE IF NOT EXISTS topic_sections (
   CONSTRAINT fk_section_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_section_user   FOREIGN KEY (updated_by) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/* Which letters have already gone to which learner.
+ *
+ * The point of this table is that a learner is never sent the same letter
+ * twice. Quizzes carry unlimited attempts, so "email the module result" has to
+ * mean "email it once" — without a record of the send, every later retake in a
+ * finished module would post another copy of the same report.
+ *
+ * It is the record of an EVENT, not a queue: a row exists because a send was
+ * attempted, and `delivered` says how that went. A failed send is still
+ * recorded, with delivered = 0, so an admin can see that a learner was owed a
+ * letter that never left. It is deliberately not retried automatically —
+ * mail() failing usually means the server or DNS is wrong, and a retry loop
+ * against a broken SPF record just multiplies the spam-folder copies.
+ */
+CREATE TABLE IF NOT EXISTS letters_sent (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id  INT UNSIGNED NOT NULL,
+  user_id    INT UNSIGNED NOT NULL,
+  kind       VARCHAR(30)  NOT NULL,   -- 'welcome' | 'module_results'
+  ref        VARCHAR(90)  NOT NULL,   -- course slug, or 'course-slug/KM-04'
+  delivered  TINYINT(1)   NOT NULL DEFAULT 0,
+  sent_at    DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_letter_once (tenant_id, user_id, kind, ref),
+  KEY ix_letter_user (tenant_id, user_id),
+  CONSTRAINT fk_letter_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_letter_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

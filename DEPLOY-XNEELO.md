@@ -182,6 +182,71 @@ line per module opened, which is the same kind of "which material did this learn
 when" entry `material.opened` has made since 1 Sep and which the privacy notice already
 describes.
 
+**Letters to learners, 9 Sep 2026 — one new table.** `letters_sent`, recording which
+letter has already gone to which learner. Same three-step shape: deploy, set a fresh
+`setup_token`, open `/setup`, run it, empty the token again. `/spsacademy/phpcheck.php`
+will then say `tables  19 of 19 present`.
+
+Two letters now go out automatically:
+
+- **A welcome letter when a learner is enrolled**, confirming what they have been
+  registered for — the course, the eleven modules, the credit total. When the account is
+  new and you choose "Email them a link", this *is* the invite: one email carrying both
+  the confirmation and the set-a-password link, rather than two arriving together. When
+  you choose "Show the password here", the same letter goes out without any link, and
+  **never with the password** — that one is read off the screen and handed over, and it
+  is not something this site will put in an email.
+- **A module report when a learner finishes a module's self-checks**, listing each topic,
+  their best score, and the module percentage. It is sent **once per module** — the first
+  time every published quiz in that module has an attempt. Retaking anything afterwards
+  never sends a second copy. Eleven letters over the whole qualification, not one per
+  quiz, and not one per attempt.
+
+Until the table exists **nothing is sent at all** — `letter_send_once()` will not send a
+letter it cannot record, because a letter sent without a record is one the learner gets
+again on the next page load. Enrolment and quizzes carry on working untouched; the letters
+simply do not go. `db_optional()` in `lib/db.php`, as everywhere else.
+
+**No `policy_version` bump.** Nothing new is collected. What changes is that results the
+learner can already see on `/my` are now also sent to the learner's own address, which is
+the address they gave and the purpose they were registered for. Results are never sent to
+anybody else.
+
+### These letters will land in spam until DNS is fixed
+
+This is the same SPF problem described at the top of `lib/mail.php`, and it now matters
+much more, because these letters go to **learners** rather than to an internal address
+somebody knows to check.
+
+`centenarynetworks.com` receives mail through Google Workspace, so its SPF record
+authorises Google's servers to send as that domain. Xneelo's server is not in that record.
+Mail sent from the academy therefore fails SPF and is likely to be filed as spam or
+rejected outright.
+
+**At GoDaddy, add a TXT record for the host the academy actually sends from.** Ask Xneelo
+support to confirm their outbound mail host first — do not guess it, and do not copy the
+line below without checking, because an SPF record naming the wrong server is worse than
+none:
+
+```
+Type: TXT
+Name: spsacademy            (or whichever host the site is served from)
+Value: v=spf1 include:<the include Xneelo gives you> -all
+TTL: 1 hour
+```
+
+Then, before anyone is told this feature exists:
+
+1. Enrol one test learner and confirm the welcome letter arrives in a **real inbox**, not
+   the spam folder.
+2. Have them finish one module's quizzes and confirm the report arrives.
+3. Only then mention it to learners. A welcome letter that silently goes to spam is worse
+   than no welcome letter, because everyone assumes it was sent and nobody checks.
+
+Until that is done, treat both letters as best-effort. Every one of them is recorded in
+`letters_sent` with a `delivered` flag, so what was attempted is always answerable, and
+the learner's results are on `/my` regardless.
+
 ## Check before telling anyone
 
 - [ ] `https://centenarynetworks.com/` — the **Centenary homepage**, unchanged.

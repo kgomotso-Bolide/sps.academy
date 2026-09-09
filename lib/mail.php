@@ -52,7 +52,8 @@ function notify(string $subject, string $body, ?string $replyTo = null): bool
  * /admin-users. Until the SPF record described above exists at GoDaddy, that
  * page is the reliable route and this one is the convenient one.
  */
-function mail_send(string $to, string $subject, string $body, ?string $replyTo = null): bool
+function mail_send(string $to, string $subject, string $body, ?string $replyTo = null,
+                   string $contentType = 'text/plain; charset=UTF-8'): bool
 {
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
         app_log('MAIL SKIPPED — not a valid address');
@@ -71,7 +72,11 @@ function mail_send(string $to, string $subject, string $body, ?string $replyTo =
 
     $headers = [
         'From: ' . tenant_name() . ' <' . $from . '>',
-        'Content-Type: text/plain; charset=UTF-8',
+        /* text/plain for everything that calls this directly; a multipart type
+           when mail_send_html() has already built the parts. Passed in rather
+           than sniffed from the body, because guessing at the body is how a
+           message ends up declaring a boundary it does not have. */
+        'Content-Type: ' . $contentType,
         'MIME-Version: 1.0',
         'X-Mailer: sps-academy',
         // Stops holiday auto-replies and out-of-office loops bouncing back.
@@ -123,6 +128,47 @@ function mail_send(string $to, string $subject, string $body, ?string $replyTo =
     // a slow leak of the learner list into a file with a different lifetime.
     if (!$ok) app_log('MAIL FAILED — ' . $subject);
     return $ok;
+}
+
+/**
+ * Send a letter that has both an HTML and a plain-text form.
+ *
+ * WHY BOTH, ALWAYS. The text part is not a courtesy for old software. It is
+ * what a learner reads when their client blocks HTML, when the mail is opened
+ * on a watch or read aloud, and — the case that actually decides it — it is
+ * what several spam filters score the message on. An HTML-only mail from a
+ * domain that already fails SPF (see this file's header) is close to the
+ * worst-scoring shape a legitimate message can have. So $text is a required
+ * argument, not an optional one: there is no call site that can forget it.
+ *
+ * multipart/alternative, and the parts are ordered worst-to-best because that
+ * is what the format means — a client shows the LAST part it understands.
+ *
+ * Everything mail_send() does about header injection, the envelope sender and
+ * the development file sink applies here too, so this builds the body and the
+ * content headers and then hands over to it rather than repeating any of that.
+ */
+function mail_send_html(string $to, string $subject, string $html, string $text, ?string $replyTo = null): bool
+{
+    /* A boundary that cannot occur in either part. Random, because a fixed one
+       appearing inside a learner's own name or a course title would split the
+       message in the wrong place — unlikely, and silent when it happens. */
+    $b = '=_' . bin2hex(random_bytes(16));
+
+    $body = "This is a message in MIME format. If you can read this, your mail\r\n"
+          . "program does not support multipart messages.\r\n"
+          . "\r\n--" . $b . "\r\n"
+          . "Content-Type: text/plain; charset=UTF-8\r\n"
+          . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+          . str_replace("\r\n", "\n", $text) . "\r\n"
+          . "\r\n--" . $b . "\r\n"
+          . "Content-Type: text/html; charset=UTF-8\r\n"
+          . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+          . str_replace("\r\n", "\n", $html) . "\r\n"
+          . "\r\n--" . $b . "--\r\n";
+
+    return mail_send($to, $subject, $body, $replyTo,
+                     'multipart/alternative; boundary="' . $b . '"');
 }
 
 function tenant_name(): string

@@ -23,8 +23,10 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password()
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/mail.php';
+require __DIR__ . '/lib/chrome.php';     // brand(), which the letters read
+require __DIR__ . '/lib/curriculum.php';
+require __DIR__ . '/lib/letters.php';
 require __DIR__ . '/lib/invite.php';
-require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
 

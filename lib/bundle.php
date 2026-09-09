@@ -47,6 +47,23 @@ declare(strict_types=1);
 
 defined('APP_BOOTED') or exit('lib/bundle.php is not a page.');
 
+/* THE ONE PLACE A LIBRARY HERE REQUIRES ANOTHER, and it is deliberate.
+ *
+ * Everywhere else in this codebase a page lists the libraries it needs and the
+ * libraries themselves require nothing. That works because a forgotten require
+ * is a fatal error on the first call — loud, immediate, and fixed in a minute.
+ *
+ * This one is different. bundle_curriculum_topics() reads the curriculum, and
+ * if it comes back empty every topic in an uploaded bundle is reported as "not
+ * a topic in the curriculum" and the whole course load is refused. That is not
+ * a crash; it is a page confidently telling an administrator their file is
+ * wrong when the file is fine. Somebody would spend an afternoon on it.
+ *
+ * So this file makes sure of its own dependency rather than trusting fifty-one
+ * topic codes to a line somebody has to remember to add. require_once, so a
+ * page that also lists it explicitly is unaffected. */
+require_once __DIR__ . '/curriculum.php';
+
 /* The format string a bundle must carry. It is versioned so that a file
    prepared for a later shape is refused with an explanation rather than
    half-understood by an older site — the four academies do not all update on
@@ -74,15 +91,10 @@ const BUNDLE_MAX_QUESTIONS = 100;       // per topic quiz
  * introducing the second copy that would drift the day the curriculum is
  * revised.
  *
- * It is deliberately a scan and not a JavaScript parse. The file is JS with
- * unquoted keys, so it is not JSON; but the only thing wanted from it is which
- * codes exist, and that is a fact about the text.
- *
- *   id: "KM-01", code: "121905000-KM-01"   <- module: id, then registered code
- *     { code: "KM-01-KT01", n: "…"         <- topic
- *
- * A topic is told from the module's registered code by the prefix: a topic of
- * KM-01 starts "KM-01-", and "121905000-KM-01" does not.
+ * The reading itself now lives in lib/curriculum.php, because the letters sent
+ * to learners need the module and topic TITLES from the same file and two
+ * parsers of one curriculum is the drift this comment was written to prevent.
+ * This stays as the name the bundle code and its tests already use.
  *
  * Returns an empty array if the file cannot be read, which makes every bundle
  * fail validation — the safe direction, and bundle_import() says so plainly
@@ -90,18 +102,7 @@ const BUNDLE_MAX_QUESTIONS = 100;       // per topic quiz
  */
 function bundle_curriculum_topics(): array
 {
-    $js = @file_get_contents(APP_ROOT . '/pm-modules.js');
-    if ($js === false || $js === '') return [];
-
-    if (!preg_match_all('/\b(id|code)\s*:\s*"([^"]+)"/', $js, $m, PREG_SET_ORDER)) return [];
-
-    $out = [];
-    $cur = '';
-    foreach ($m as [, $key, $val]) {
-        if ($key === 'id') { $cur = $val; continue; }
-        if ($cur !== '' && str_starts_with($val, $cur . '-')) $out[$val] = $cur;
-    }
-    return $out;
+    return curriculum_topics();
 }
 
 /**

@@ -110,6 +110,15 @@ $requiredAlso = [
     // of lib/bundle.php. admin-lessons.php hard-requires it, so shipping the
     // page without it is a white screen on the content page.
     'lib/bundle.php',
+    // The curriculum reader, which lib/bundle.php require_once's and the letters
+    // read module and topic titles from. Missing, every bundle upload is refused
+    // with "not a topic in the curriculum" — the file is fine, the site is not.
+    'lib/curriculum.php',
+    // The learner's welcome letter and module report. lib/invite.php calls into
+    // this for the enrolment email; without it a new learner still gets the old
+    // plain-text note, so the failure is quiet rather than broken — which is
+    // exactly why it is listed here rather than left to chance.
+    'lib/letters.php',
     'schema/schema.mysql.sql',
 ];
 

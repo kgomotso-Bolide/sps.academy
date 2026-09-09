@@ -62,7 +62,8 @@ const INVITE_TTL_SECONDS = 604800;
  *              this person, right now, rather than trust an email that may
  *              never arrive.
  */
-function invite_create_and_send(array $user, int $adminId, string $courseTitle): bool
+function invite_create_and_send(array $user, int $adminId, string $courseTitle,
+                                string $courseSlug = ''): bool
 {
     $token = bin2hex(random_bytes(32));
 
@@ -92,7 +93,7 @@ function invite_create_and_send(array $user, int $adminId, string $courseTitle):
         return false;
     }
 
-    $sent = invite_send($user, $token, $courseTitle);
+    $sent = invite_send($user, $token, $courseTitle, $courseSlug);
     audit($sent ? 'learner.invited' : 'learner.invite_send_failed',
           'users', (int) $user['id'], $courseTitle, $adminId);
     return $sent;
@@ -107,22 +108,44 @@ function invite_link_url(string $token): string
     return $scheme . '://' . $host . app_base_path() . 'invite?t=' . $token;
 }
 
-function invite_send(array $user, string $token, string $courseTitle): bool
+/**
+ * The invite IS the welcome letter.
+ *
+ * It used to be a short plain-text note carrying only the link, and the welcome
+ * letter did not exist. Now that it does, a newly invited learner must not get
+ * both: two emails arriving together, one confirming the enrolment and one
+ * offering a password, reads like a system talking to itself, and the learner
+ * has to work out which is the real one. So there is a single letter — it
+ * confirms what they have been registered for AND carries the link — and
+ * lib/letters.php builds it.
+ *
+ * @param string $courseSlug needed because letters_sent records the welcome
+ *                           against the course, so re-enrolling on the same one
+ *                           does not post a second copy.
+ */
+function invite_send(array $user, string $token, string $courseTitle, string $courseSlug = ''): bool
 {
-    $url  = invite_link_url($token);
-    $name = trim((string) $user['first_name']) ?: 'there';
+    $url = invite_link_url($token);
 
-    $body = "Hello " . $name . ",\n\n"
-          . "An account has been created for you on the " . tenant_name() . ", "
-          . "enrolling you on " . $courseTitle . ".\n\n"
-          . "Choose your own password here, within the next seven days:\n\n"
-          . $url . "\n\n"
-          . "It only works once. If it has expired by the time you open it, ask "
-          . "the academy for a new one.\n\n"
-          . "— " . tenant_name() . "\n";
+    /* Pages require the libraries they use; if this one did not load letters,
+       fall back to the note this function used to send rather than fatal. The
+       learner still gets in, which is the part that matters. */
+    if (!function_exists('letter_send_welcome')) {
+        app_log('INVITE — lib/letters.php was not loaded, sent the plain note instead');
+        $name = trim((string) $user['first_name']) ?: 'there';
+        $body = "Hello " . $name . ",\n\n"
+              . "An account has been created for you on the " . tenant_name() . ", "
+              . "enrolling you on " . $courseTitle . ".\n\n"
+              . "Choose your own password here, within the next seven days:\n\n"
+              . $url . "\n\n"
+              . "It only works once. If it has expired by the time you open it, ask "
+              . "the academy for a new one.\n\n"
+              . "— " . tenant_name() . "\n";
+        return mail_send((string) $user['email'],
+            'Your ' . tenant_name() . ' account is ready', $body);
+    }
 
-    return mail_send((string) $user['email'],
-        'Your ' . tenant_name() . ' account is ready', $body);
+    return letter_send_welcome($user, $courseSlug, $courseTitle, $url);
 }
 
 /**

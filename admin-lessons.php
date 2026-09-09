@@ -35,6 +35,7 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/sections.php';
 require __DIR__ . '/lib/quiz.php';
+require __DIR__ . '/lib/curriculum.php';
 require __DIR__ . '/lib/bundle.php';
 require __DIR__ . '/lib/chrome.php';
 

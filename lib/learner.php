@@ -301,7 +301,24 @@ function learner_enrol_registration(int $regId, string $courseSlug, string $deli
     $invited    = $userCreated && $viaInvite;
     $inviteSent = null;
     if ($invited) {
-        $inviteSent = invite_create_and_send($user, (int) ($admin['id'] ?? 0), $title);
+        /* One letter, not two: the invite and the welcome are the same message,
+           because the learner should receive a single email that both confirms
+           what they are registered for and offers the password link. See
+           invite_send() and lib/letters.php. */
+        $inviteSent = invite_create_and_send($user, (int) ($admin['id'] ?? 0), $title, $courseSlug);
+    } elseif ($enrolCreated && function_exists('letter_send_welcome')) {
+        /* The other route: the account already existed, or the administrator
+           chose to read the password off the screen and hand it over. Either
+           way the learner is newly enrolled on something and is owed the
+           confirmation — WITHOUT a link and without a password, because in this
+           branch there is no token to send and the password is not ours to
+           email. Wrapped so that no email problem can fail an enrolment that
+           has already been committed above. */
+        try {
+            letter_send_welcome($user, $courseSlug, $title, null);
+        } catch (Throwable $e) {
+            app_log('WELCOME LETTER FAILED (user ' . (int) $user['id'] . '): ' . $e->getMessage());
+        }
     }
 
     if ($invited) {

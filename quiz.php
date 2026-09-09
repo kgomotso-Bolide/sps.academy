@@ -34,6 +34,9 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
 require __DIR__ . '/lib/chrome.php';
+require __DIR__ . '/lib/mail.php';
+require __DIR__ . '/lib/curriculum.php';
+require __DIR__ . '/lib/letters.php';
 
 app_session_start();
 
@@ -120,6 +123,14 @@ if (is_post()) {
         }
         $result = quiz_grade_and_record((int) $quiz['id'], (int) $me['id'], $answers);
         csrf_rotate();
+
+        /* If that was the last topic quiz outstanding in this module, post the
+           learner their module report — once, however many times they retake
+           anything in it afterwards. letter_module_completed() decides; it
+           swallows its own failures, because the learner is waiting for a score
+           and an email problem must never become an error page. */
+        letter_module_completed($me, $course, $module,
+                                learner_course_title($course));
     }
 }
 

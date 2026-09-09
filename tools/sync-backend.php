@@ -73,7 +73,7 @@ $shared = [
     // anything this tool checked. If you add a page below that requires a new
     // library, the library belongs here in the same edit.
     'lib/invite.php', 'lib/material_files.php', 'lib/quiz.php', 'lib/sections.php',
-    'lib/bundle.php',
+    'lib/bundle.php', 'lib/curriculum.php', 'lib/letters.php',
 
     // The database.
     'schema/schema.mysql.sql', 'schema/schema.sqlite.sql',

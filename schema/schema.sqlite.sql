@@ -295,3 +295,17 @@ CREATE TABLE IF NOT EXISTS topic_sections (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_section_area ON topic_sections (tenant_id, course_slug, module_code, topic_code, area_index);
 CREATE INDEX IF NOT EXISTS ix_section_module ON topic_sections (tenant_id, course_slug, module_code);
+
+/* Which letters have already gone to which learner — see the MySQL schema for
+   why this exists and why a failed send is still recorded. */
+CREATE TABLE IF NOT EXISTS letters_sent (
+  id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  user_id    INTEGER NOT NULL REFERENCES users (id),
+  kind       TEXT    NOT NULL,
+  ref        TEXT    NOT NULL,
+  delivered  INTEGER NOT NULL DEFAULT 0,
+  sent_at    TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_letter_once ON letters_sent (tenant_id, user_id, kind, ref);
+CREATE INDEX IF NOT EXISTS ix_letter_user ON letters_sent (tenant_id, user_id);

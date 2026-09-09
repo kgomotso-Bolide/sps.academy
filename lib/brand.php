@@ -60,6 +60,22 @@ return [
   'accred_no'     => '07-QCTO/SDP180526182035',
   'accred_valid'  => '15 May 2026 – 14 May 2031',
 
+  /* The two brand colours, as plain hex, for EMAIL only.
+
+     Every other surface takes its colours from the --accent and --ink custom
+     properties in styles.css. Email cannot: a mail client strips <style> and
+     has never heard of var(), so the colour has to be written into each tag as
+     it is emitted, and PHP has to know what it is. These must be kept the same
+     as --accent and --ink in this site's block of styles.css — they are the
+     one deliberate duplication in the palette, and this note is why.
+
+     Fungi, Equinix and Maziv each need their own two values here when their
+     letters are switched on; lib/letters.php falls back to a neutral grey
+     rather than to SPS orange if a site has not set them, so a missing key
+     looks unfinished instead of looking like another company's mail. */
+  'email_accent'  => '#f37424',
+  'email_ink'     => '#2b2b2b',
+
   /* Bumped on any release that changes styles.css or a .js file.
      See asset() in lib/chrome.php for why this is not optional. */
   'asset_version' => '20260819',
