@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SPS Academy — AI Skills, Built In-House</title>
 <meta name="description" content="SPS Academy is our in-house training academy — accredited qualifications and short courses open to every SPS employee, fully funded, online or in person.">
-<link rel="stylesheet" href="styles.css?v=20260820">
+<link rel="stylesheet" href="styles.css?v=20260909">
 </head>
 <body>
 <nav id="nav">
@@ -24,38 +24,39 @@
     <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   </div>
 </nav>
-<!-- The hero used to carry a drifting "neural network" canvas of dots and
-     connecting lines behind the headline. Its motion was paused on 4 Aug 2026
-     because Kgomotso found it uncomfortable, and it was removed altogether on
-     2 Sep 2026 at her request — the still dots still read as smudges on the
-     screen rather than as texture. The hero keeps its two radial gradients, so
-     it is not flat; see .hero in styles.css. -->
+<!-- Hero. This is the 3 Jul layout (commit a4939c3) brought back on 9 Sep 2026:
+     Kgomotso sent the old screenshot and asked for it on every academy —
+     "simple and to the point". A photograph, one line, one search field, two
+     pills, nothing else.
+
+     Two things left behind on purpose. The drifting "neural network" canvas is
+     gone for good (removed 2 Sep 2026, she found it uncomfortable), and so is
+     the accreditation card that used to sit beside the headline — the
+     QCTO → SAQA → Provider chain it explained is on /courses, which is where
+     its "see which courses carry it" link already pointed.
+
+     TO RESKIN THIS: change the photograph on .hero-photo and the two lines of
+     copy. Nothing else in the hero belongs to one academy. The photograph is
+     the same stock image on every site for now — swap in a real one from this
+     academy the moment there is one. -->
 <header class="hero" id="home">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="badge-live"><span class="dot"></span> AI · Live &amp; Hands-On</span>
-      <span class="eyebrow">Our In-House Academy · Online &amp; In Person · For SPS Employees</span>
-      <h1>AI Skills, Built <span class="o">In-House</span></h1>
-      <p class="lead">Our own academy. Fully funded by SPS, and run <strong>online or in person</strong> — whichever fits your shift.</p>
-      <div class="btn-row">
-        <a href="courses" class="btn btn-primary">Explore Courses</a>
-        <a href="contact" class="btn btn-ghost">Upskill Yourself</a>
-      </div>
-    </div>
-    <div class="hero-card reveal">
-      <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg> Accreditation · How it works</span>
-      <h3>Who stands behind your certificate</h3>
-      <p class="qual"><strong>SAQA</strong> runs South Africa's National Qualifications Framework. <strong>QCTO</strong> designs and quality-assures occupational qualifications, and accredits the providers allowed to deliver them.</p>
-      <div class="nqf-flow">
-        <div class="nqf-step"><b>QCTO</b><span>Designs and quality-assures the qualification</span></div>
-        <div class="nqf-arrow" aria-hidden="true">→</div>
-        <div class="nqf-step"><b>SAQA</b><span>Registers it on the NQF, with its own ID</span></div>
-        <div class="nqf-arrow" aria-hidden="true">→</div>
-        <div class="nqf-step"><b>Provider</b><span>Accredited to deliver it to you</span></div>
-      </div>
-      <p class="qual" style="margin:14px 0 0;font-size:13px">That chain is why an accredited certificate counts outside SPS too — with another employer, or towards further study. <a href="courses" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">See which courses carry it</a></p>
+  <div class="hero-photo" style="background-image:url(https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&amp;fit=crop&amp;w=1800&amp;q=80)"></div>
+  <div class="hero-inner">
+    <h1>Welcome to SPS Academy</h1>
+    <p class="lead">Credit-bearing AI &amp; technical skills for the people who power SPS.</p>
+    <!-- A plain GET to /courses, so it still works with JavaScript off. The
+         catalogue reads ?q= on load and opens filtered across every school —
+         see the seed at the bottom of courses-index.js. -->
+    <form class="hero-search" action="courses" method="get" role="search">
+      <input type="search" name="q" placeholder="What do you want to learn?" aria-label="Search courses">
+      <button class="go" type="submit" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+    </form>
+    <div class="hero-cta">
+      <a href="courses" class="btn btn-soft">Explore our courses</a>
+      <a href="contact" class="btn btn-white">Talk to our team</a>
     </div>
   </div>
+  <div class="hero-curve" aria-hidden="true"><svg viewBox="0 0 1440 70" preserveAspectRatio="none"><path d="M0,70 L0,34 C280,72 620,72 720,50 C860,20 1180,6 1440,44 L1440,70 Z" fill="#ffffff"/></svg></div>
 </header>
 <!-- Intake band. Centenary Networks confirmed the start date on 12 Aug 2026; it
      is the provider's date, not our arithmetic, and it is the one thing on this
@@ -99,14 +100,17 @@
              under it belongs to a real person who has not seen it. Replace this block
              with their words when they are approved, and put the eyebrow back to
              "A message from Paul". -->
+        <!-- Cut from four paragraphs to two on 9 Sep 2026, with the rest of the
+             landing-page trim. Nothing was lost that the page does not say
+             elsewhere: "fully funded, online or in person" is on the intake band
+             and on every course card, and the closing invitation is the CTA band
+             at the foot of the page. -->
         <blockquote>
           <p class="big">Our People, Our Greatest Asset.</p>
           <p>SPS Academy exists because the people doing the work are what the
-            company is built on — whatever the role, whatever the starting point.</p>
-          <p>Every course is fully funded, and runs online or in person. What you come
-            away with is yours to keep: an accredited qualification counts with another
-            employer, not only here.</p>
-          <p>Have a look through the courses and register your interest.</p>
+            company is built on — whatever the role, whatever the starting point.
+            What you come away with is yours to keep: an accredited qualification
+            counts with another employer, not only here.</p>
         </blockquote>
         <div class="sig">
           <strong>Paul Mansour</strong>
@@ -117,22 +121,7 @@
   </div>
 </section>
 
-<section class="section-soft">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">Why we built this</span>
-      <h2>Nobody gets left behind</h2>
-      <p>Practical training, built around the work we actually do. No technical background needed.</p>
-    </div>
-    <div class="features">
-      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg></div><h3>Fully Funded</h3><p>SPS pays. You register your interest, square the timing with your manager, and start.</p></div>
-      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></div><h3>Built Around Your Job</h3><p>Grounded in the work we actually do, so what you learn this week you can use next week.</p></div>
-      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div><h3>Online or In Person</h3><p>Study from home, from any SPS site, or in a classroom with a facilitator. Tell HR which suits you.</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="courses">
+<section id="courses" class="section-soft">
   <div class="wrap">
     <div class="sec-head center reveal"><span class="eyebrow">Our Courses</span><h2>What's in the catalogue</h2><p>Three lines: the accredited <strong>Project Manager</strong> qualification, <strong>AI short courses</strong>, and <strong>AI &amp; Software Development</strong>. Ask HR for anything not here.</p></div>
     <div class="course-grid">
@@ -256,28 +245,6 @@
     </div>
 
     <div style="text-align:center;margin-top:38px"><a href="courses" class="btn btn-primary">Browse all courses</a></div>
-  </div>
-</section>
-
-<section class="section-soft">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <span class="eyebrow">SPS Academy so far</span>
-      <h2>Our people, in pictures</h2>
-      <p>Two photographs from the academy belong here — an intake, a team, a site visit. Send them through and they go straight in.</p>
-    </div>
-    <!-- PLACEHOLDER: swap images/poster-1.svg and images/poster-2.svg for the real
-         photographs, then rewrite the two captions to match. -->
-    <div class="posters reveal">
-      <figure class="poster">
-        <img loading="lazy" src="images/poster-1.svg" alt="Placeholder for the first academy photograph">
-        <figcaption><strong>Caption to follow</strong>Replace this image and caption once the first photograph is supplied.</figcaption>
-      </figure>
-      <figure class="poster">
-        <img loading="lazy" src="images/poster-2.svg" alt="Placeholder for the second academy photograph">
-        <figcaption><strong>Caption to follow</strong>Replace this image and caption once the second photograph is supplied.</figcaption>
-      </figure>
-    </div>
   </div>
 </section>
 

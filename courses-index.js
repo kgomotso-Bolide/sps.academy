@@ -199,6 +199,13 @@
     state.acc=b.dataset.acc; setActive(accRow,'acc',state.acc); apply();
   });
 
+  /* A search typed into the landing-page hero arrives here as ?q=…, so the
+     catalogue opens already filtered across every school instead of on the
+     chooser. The hash still wins: a link to a school is a link to that school,
+     and sync() clears the query when one is open. */
+  var seed=(new URLSearchParams(location.search).get("q")||"").trim();
+  if(seed){ q.value=seed; state.q=seed.toLowerCase(); }
+
   sync(false);
 })();
 
