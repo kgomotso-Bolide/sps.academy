@@ -99,8 +99,15 @@ if (is_post()) {
                 if ($r['reading']['updated'])   $bits[] = $r['reading']['updated'] . ' topics updated';
                 if ($r['reading']['unchanged']) $bits[] = $r['reading']['unchanged'] . ' already the same';
                 if ($r['words'])                $bits[] = number_format($r['words']) . ' words';
-                if ($r['quizzes']['topics'])    $bits[] = $r['quizzes']['added'] . ' questions across '
-                                                        . $r['quizzes']['topics'] . ' quizzes';
+                /* added PLUS updated, not added alone. Reloading a corrected
+                   bundle matches every question that is already stored, so
+                   'added' is zero and the line read "0 questions across 10
+                   quizzes" — which is true, and reads exactly like a failure to
+                   somebody who has just reloaded a file to fix a mistake. */
+                if ($r['quizzes']['topics']) {
+                    $bits[] = ($r['quizzes']['added'] + $r['quizzes']['updated'])
+                            . ' questions across ' . $r['quizzes']['topics'] . ' quizzes';
+                }
                 $notice = 'Bundle loaded — ' . implode(', ', $bits) . '.'
                         . (empty($_POST['bundle_publish'])
                             ? ' It is NOT visible to learners yet: nothing was published.'
