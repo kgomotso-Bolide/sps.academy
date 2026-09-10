@@ -258,9 +258,19 @@
        regardless, because a card that says who cleared it is the point.
 
        WHAT IS HIS AND WHAT IS NOT. The role, the titles and the qualification
-       below are his own words. He did not name an employer, so the org line
-       carries the three titles and no company — add one when he says which,
-       rather than assuming Centenary because the signature file says so.
+       below are his own words, and so is the employer: he confirmed Centenary
+       Networks on 10 Sep 2026, which is why the org line names it now and did
+       not before.
+
+       HE DOES NOT OWN ANY OF IT, and the bio said otherwise for half a day. It
+       read that the catalogue, the learner accounts, the course material and the
+       quizzes "are all his", which is true of the software and false of
+       everything else in that list. He is employed by Centenary Networks; the
+       material belongs to whoever wrote it, and the learner accounts belong to
+       the academy and the people in them. He asked for it to say he built the
+       platform, and nothing more. Keep it that way: on a page whose whole job
+       is who may be named and on what basis, a sentence handing one person the
+       client's course material and their learners is the wrong kind of wrong.
 
        THE PHOTOGRAPH is his own studio portrait, cropped to head-and-shoulders
        to match the other three and the 180px card column: the original is
@@ -270,7 +280,7 @@
     {
       name: 'Sibusiso Seopela',
       role: 'Artificial intelligence, and software development',
-      org: 'Software Engineer · AI Engineer · Academies Developer',
+      org: 'Software Developer, IT Lead and Academies Developer · Centenary Networks',
       creds: 'Diploma in Information Technology (NQF 6) · Four years in software development',
       teaches: [
         ['ai-fundamentals', 'AI Fundamentals for the Workplace'],
@@ -279,9 +289,9 @@
         ['ai-leaders', 'AI for Leaders & Managers'],
         ['ai-software-development', 'AI & Software Development']
       ],
-      bio: 'A software engineer working in AI, and the developer of the academy platform ' +
-           'itself — the catalogue, the learner accounts, the course material and the ' +
-           'self-check quizzes are all his. He holds a Diploma in Information Technology ' +
+      bio: 'A software engineer working in AI, and the developer of the academy ' +
+           'platform: he builds and maintains the sites the academies run on. He ' +
+           'holds a Diploma in Information Technology ' +
            'at NQF 6 and four years in software development, and he teaches the AI line ' +
            'across the academies: what the tools actually do, how to use them in the ' +
            'working day, and how to build with them.',
