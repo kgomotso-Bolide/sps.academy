@@ -39,7 +39,7 @@ require __DIR__ . '/lib/materials.php';
 require __DIR__ . '/lib/material_files.php';
 require __DIR__ . '/lib/chrome.php';
 
-$me = require_admin();
+$me = require_staff();   // trainers may read this page — see require_write() below
 
 /* Only courses whose curriculum this platform actually carries. The others are
    real courses, but nothing here knows what their modules are. */
@@ -81,6 +81,11 @@ function admin_materials_reshape_files(?array $raw): array
 }
 
 if (is_post()) {
+    /* A trainer reaches this page but may not change it. The check is here, on
+       the writing side, and not on whether the form was rendered: a hidden
+       button is not a permission. */
+    require_write();
+
     /* AN UPLOAD OVER post_max_size NEVER REACHES THIS FILE INTACT.
        PHP discards the whole request body first, so $_POST and $_FILES both
        arrive empty and the CSRF token goes with them. Without this the page

@@ -92,6 +92,12 @@ $shared = [
     'invite.php', 'quiz.php', 'admin-quizzes.php',
     'lessons.php', 'admin-lessons.php',
 
+    // The trainer role, 10 Sep 2026. trainer.php is brand-neutral like every
+    // other page on this list — it draws its chrome from lib/brand.php — and it
+    // is the only page a trainer account has of its own, so a site without it
+    // gives them a nav link to a 404.
+    'trainer.php',
+
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
     // produces, so a site without it silently offers a much smaller one.

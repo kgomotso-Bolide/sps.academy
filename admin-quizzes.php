@@ -41,7 +41,7 @@ require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
 require __DIR__ . '/lib/chrome.php';
 
-$me = require_admin();
+$me = require_staff();   // trainers may read this page — see require_write() below
 
 /* Only courses whose curriculum this platform actually carries — same
    restriction admin-materials.php applies, for the same reason: nothing here
@@ -93,6 +93,11 @@ function admin_quizzes_reshape(array $raw): array
 }
 
 if (is_post()) {
+    /* A trainer reaches this page but may not change it. The check is here, on
+       the writing side, and not on whether the form was rendered: a hidden
+       button is not a permission. */
+    require_write();
+
     if (!csrf_valid()) {
         $errors[] = 'That form had expired — nothing was saved. Please try again.';
     } else {

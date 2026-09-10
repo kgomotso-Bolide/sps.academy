@@ -76,7 +76,8 @@ if (is_post()) {
             $first = post_str('first_name', 80);
             $last  = post_str('last_name', 80);
             $email = strtolower(post_str('email', 190));
-            $role  = post_str('role', 10) === 'admin' ? 'admin' : 'learner';
+            $role  = post_str('role', 10);
+            if (!in_array($role, ['admin', 'trainer', 'learner'], true)) $role = 'learner';
             $empno = post_str('employee_no', 40);
             $dept  = post_str('department', 120);
 
@@ -127,11 +128,15 @@ if (is_post()) {
            short of editing the database by hand through the host's panel.
            ------------------------------------------------------------------- */
         } elseif ($action === 'role') {
-            $to = post_str('role', 10) === 'admin' ? 'admin' : 'learner';
+            /* Three roles since 10 Sep 2026. Validated against a list rather
+               than a ternary, so an unexpected value falls to 'learner' and loses
+               access rather than being written into the column as-is. */
+            $to = post_str('role', 10);
+            if (!in_array($to, ['admin', 'trainer', 'learner'], true)) $to = 'learner';
 
             if ((int) $target['id'] === (int) $me['id']) {
                 $error = 'You cannot change your own role. Ask another administrator to do it.';
-            } elseif ($to === 'learner' && $target['role'] === 'admin'
+            } elseif ($to !== 'admin' && $target['role'] === 'admin'
                       && (int) db_one('SELECT COUNT(*) c FROM users
                                        WHERE tenant_id = ? AND role = ? AND status = ?',
                                       [tenant_id(), 'admin', 'active'])['c'] <= 1) {
@@ -198,6 +203,48 @@ if (is_post()) {
                             : ' has been switched off and can no longer sign in. '
                               . 'Their learner record is untouched.');
             }
+        } elseif ($action === 'courses') {
+            /* Which courses a trainer may see. Only meaningful for a trainer:
+               an administrator sees every course by virtue of the role, and
+               storing rows for one would create a second, quieter answer to
+               "what may this person see" that could disagree with the first. */
+            if ($target['role'] !== 'trainer') {
+                $error = 'Courses are assigned to trainers. Change the role first.';
+            } else {
+                $valid  = array_keys(learner_catalogue());
+                $picked = array_values(array_intersect(
+                    array_map('strval', (array) ($_POST['courses'] ?? [])), $valid));
+
+                /* Replace rather than merge: the checkboxes are the whole
+                   answer, and an unticked box has to be able to remove one. */
+                $ok = db_optional(static function () use ($target, $picked, $me): bool {
+                    db_run('DELETE FROM trainer_courses WHERE tenant_id = ? AND user_id = ?',
+                           [tenant_id(), (int) $target['id']]);
+                    foreach ($picked as $slug) {
+                        db_insert('trainer_courses', [
+                            'tenant_id'   => tenant_id(),
+                            'user_id'     => (int) $target['id'],
+                            'course_slug' => $slug,
+                            'created_at'  => now(),
+                            'created_by'  => (int) $me['id'],
+                        ]);
+                    }
+                    return true;
+                }, false);
+
+                if (!$ok) {
+                    $error = 'Course assignments need the trainer_courses table, which is '
+                           . 'not on this server yet. Run setup.php, then try again.';
+                } else {
+                    audit('user.courses_changed', 'users', (int) $target['id'],
+                          $picked ? implode(', ', $picked) : 'none');
+                    $notice = trim($target['first_name'] . ' ' . $target['last_name'])
+                            . ($picked
+                                ? ' now sees ' . count($picked) . ' course'
+                                  . (count($picked) === 1 ? '' : 's') . '.'
+                                : ' now sees no courses.');
+                }
+            }
         }
         csrf_rotate();
     }
@@ -224,6 +271,18 @@ $rows = db_all(
 );
 
 audit('users.viewed', 'users', null, count($rows) . ' shown');
+
+/* Course assignments for the trainers on this page, in one query rather than
+   one per row. db_optional because the deploy lands before setup.php is run:
+   until the table exists every trainer shows no ticked boxes, which is exactly
+   what trainer_slugs() will be telling them on their own page. */
+$assigned = [];
+foreach (db_optional(static fn() => db_all(
+    'SELECT user_id, course_slug FROM trainer_courses WHERE tenant_id = ?',
+    [tenant_id()]
+), []) ?: [] as $r) {
+    $assigned[(int) $r['user_id']][] = (string) $r['course_slug'];
+}
 
 /* Enrolments for everybody on the page, in one query rather than one per row. */
 $enrolByUser = [];
@@ -359,7 +418,8 @@ function when_u(?string $utc): string
           <tr<?= $u['status'] !== 'active' ? ' class="adm-off"' : '' ?>>
             <td>
               <strong><?= e(trim($u['first_name'] . ' ' . $u['last_name'])) ?></strong>
-              <?php if ($u['role'] === 'admin'): ?><span class="adm-role">Administrator</span><?php endif; ?>
+              <?php if ($u['role'] === 'admin'): ?><span class="adm-role">Administrator</span>
+              <?php elseif ($u['role'] === 'trainer'): ?><span class="adm-role adm-role-tr">Trainer</span><?php endif; ?>
               <?php if ($isMe): ?><span class="adm-sub">This is you</span><?php endif; ?>
               <?php if ($u['employee_no']): ?><span class="adm-sub"><?= e((string) $u['employee_no']) ?></span><?php endif; ?>
               <?php if ($u['department']): ?><span class="adm-sub"><?= e((string) $u['department']) ?></span><?php endif; ?>
@@ -422,23 +482,47 @@ function when_u(?string $utc): string
                          no shell on this hosting to undo it. The POST handler refuses
                          it as well — a control you cannot see is not a check. */ ?>
                 <?php if (!$isMe): ?>
-                  <form method="POST" class="adm-act"
-                        onsubmit="return confirm(<?= e(json_encode(
-                          $u['role'] === 'admin'
-                            ? 'Take administrator rights away from ' . trim($u['first_name'] . ' ' . $u['last_name'])
-                              . '? They keep their account and their progress, and will only see their own.'
-                            : 'Make ' . trim($u['first_name'] . ' ' . $u['last_name'])
-                              . ' an administrator? They will be able to see every learner on this site, '
-                              . 'enrol people, set passwords and add accounts.'
-                        )) ?>)">
+                  <?php /* A select rather than the old two-way button: with three
+                           roles a toggle cannot say where it is going. The warning
+                           that used to sit in a confirm() is below the control,
+                           where it is readable before the choice rather than after. */ ?>
+                  <form method="POST" class="adm-act">
                     <?= csrf_field() ?>
                     <input type="hidden" name="a" value="role">
                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                    <input type="hidden" name="role" value="<?= $u['role'] === 'admin' ? 'learner' : 'admin' ?>">
-                    <button type="submit" class="linkish adm-toggle">
-                      <?= $u['role'] === 'admin' ? 'Remove administrator rights' : 'Make an administrator' ?>
-                    </button>
+                    <label class="adm-rolepick">
+                      <span>Role</span>
+                      <select name="role">
+                        <option value="learner"<?= $u['role'] === 'learner' ? ' selected' : '' ?>>Learner</option>
+                        <option value="trainer"<?= $u['role'] === 'trainer' ? ' selected' : '' ?>>Trainer</option>
+                        <option value="admin"<?= $u['role'] === 'admin'   ? ' selected' : '' ?>>Administrator</option>
+                      </select>
+                    </label>
+                    <button type="submit" class="linkish adm-toggle">Save role</button>
                   </form>
+                  <p class="adm-rolehelp">
+                    A <b>trainer</b> sees the courses assigned to them and the learners on
+                    those courses, and can change nothing. An <b>administrator</b> sees every
+                    learner on this site, every registration, and can set passwords and add
+                    accounts.
+                  </p>
+
+                  <?php if ($u['role'] === 'trainer'): ?>
+                    <form method="POST" class="adm-act adm-courses">
+                      <?= csrf_field() ?>
+                      <input type="hidden" name="a" value="courses">
+                      <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                      <span class="adm-coursehead">Courses this trainer may see</span>
+                      <?php foreach (learner_catalogue() as $slug => $c): ?>
+                        <label class="adm-coursebox">
+                          <input type="checkbox" name="courses[]" value="<?= e($slug) ?>"
+                                 <?= in_array($slug, $assigned[(int) $u['id']] ?? [], true) ? 'checked' : '' ?>>
+                          <?= e((string) ($c['title'] ?? $slug)) ?>
+                        </label>
+                      <?php endforeach; ?>
+                      <button type="submit" class="linkish adm-toggle">Save courses</button>
+                    </form>
+                  <?php endif; ?>
                 <?php endif; ?>
               <?php endif; ?>
             </td>

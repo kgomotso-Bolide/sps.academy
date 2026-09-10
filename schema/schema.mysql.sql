@@ -636,3 +636,31 @@ CREATE TABLE IF NOT EXISTS letters_sent (
   CONSTRAINT fk_letter_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_letter_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Which courses a trainer may see.
+--
+-- Added 10 Sep 2026 with the trainer role. A trainer account on its own grants
+-- nothing: rights here are additive from zero, so an account with no rows in
+-- this table sees no courses and no learners. That is the safe direction, and
+-- it is also what a brand-new trainer account should look like until somebody
+-- decides what they teach.
+--
+-- Nothing joins this to the published trainer list in trainers.js, on purpose.
+-- That file says who may be NAMED on a public page; this table says who may
+-- SIGN IN and look at a cohort. A person can be either without being both, and
+-- conflating them would mean publishing somebody to give them a login.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS trainer_courses (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  user_id     INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  created_at  DATETIME     NOT NULL,
+  created_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_traincourse (tenant_id, user_id, course_slug),
+  KEY ix_traincourse_user (tenant_id, user_id),
+  CONSTRAINT fk_traincourse_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_traincourse_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

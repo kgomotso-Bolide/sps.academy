@@ -316,6 +316,131 @@ function require_user(string $fallback = '/my'): array
     return $u;
 }
 
+
+/* ---------------------------------------------------------------------------
+   THE THREE ROLES
+   ---------------
+   'admin'    runs the academy: registrations, accounts, material, the lot.
+   'trainer'  teaches on it. May LOOK at the courses they are assigned and at
+              the learners on them, and may change nothing at all.
+   'learner'  everybody else.
+
+   Added 10 Sep 2026. Before it there were two roles, and the only way to let a
+   specialist see how their own learners were doing was to make them an
+   administrator — which would also have handed a partner company every
+   registration, every learner account on the academy, and the power to promote
+   anyone else. That is the gap this closes.
+
+   ANYTHING UNRECOGNISED IS A LEARNER. The column is a VARCHAR, not an enum, so
+   a typo is possible; a typo must lose access rather than grant it.
+
+   WRITING IS STILL ADMIN-ONLY. require_admin() has not moved an inch — every
+   page that could change something still calls it. Trainers reach the reading
+   pages through require_staff() below, and each of those pages asks
+   staff_may_write() before it acts on a POST. Hiding a button is not a
+   permission; the check has to be on the writing side.
+   --------------------------------------------------------------------------- */
+
+/** True for a trainer account. Trainers may look; they may not touch. */
+function is_trainer(): bool
+{
+    $u = current_user();
+    return $u !== null && $u['role'] === 'trainer';
+}
+
+/** Admin or trainer — anyone with a reason to see the academy's own pages. */
+function is_staff(): bool
+{
+    $u = current_user();
+    return $u !== null && ($u['role'] === 'admin' || $u['role'] === 'trainer');
+}
+
+/**
+ * May the signed-in person change anything on a staff page?
+ *
+ * Only administrators. Every staff page that handles a POST calls this before
+ * it writes, so a trainer who forges a form gets the same 403 as a trainer who
+ * never saw the button.
+ */
+function staff_may_write(): bool
+{
+    return is_admin();
+}
+
+/**
+ * Gate for pages a trainer may READ: material, reading, quizzes, their learners.
+ *
+ * Refuses a learner exactly as require_admin() refuses one, and audits it the
+ * same way, so a denied attempt looks the same in the log whichever gate caught
+ * it.
+ */
+function require_staff(): array
+{
+    $u = current_user();
+    if ($u === null) {
+        redirect('login?next=' . rawurlencode($_SERVER['REQUEST_URI'] ?? '/admin'));
+    }
+    if ($u['role'] !== 'admin' && $u['role'] !== 'trainer') {
+        audit('access.denied', 'page', null, (string) ($_SERVER['REQUEST_URI'] ?? ''));
+        http_response_code(403);
+        exit('You do not have access to this page.');
+    }
+    return $u;
+}
+
+/**
+ * Refuse a write attempted by someone who may only read.
+ *
+ * Call it at the top of the POST branch of a staff page. Separate from
+ * require_staff() because the two answer different questions and a page needs
+ * both: may you be here, and may you do this.
+ */
+function require_write(): void
+{
+    if (staff_may_write()) return;
+    audit('write.denied', 'page', null, (string) ($_SERVER['REQUEST_URI'] ?? ''));
+    http_response_code(403);
+    exit('Your account can read this page but not change it.');
+}
+
+/**
+ * The course slugs a trainer is assigned to, or null for an administrator,
+ * meaning "no restriction".
+ *
+ * FAILS CLOSED, deliberately, and in two directions:
+ *
+ *   - A trainer with no rows gets an empty list, and an empty list must be read
+ *     by callers as "nothing", never as "no filter". That is why an admin gets
+ *     null and a trainer gets an array: the two cases cannot be confused by a
+ *     caller that forgets to check the role.
+ *   - If trainer_courses does not exist yet — the deploy lands before the
+ *     migration is run, every time — db_optional() returns the fallback, and
+ *     the fallback here is an empty list. A trainer then sees none of their
+ *     courses until setup.php has been run, which is the safe way round.
+ */
+function trainer_slugs(?array $u = null): ?array
+{
+    $u = $u ?? current_user();
+    if ($u === null) return [];
+    if ($u['role'] === 'admin') return null;          // no restriction
+    if ($u['role'] !== 'trainer') return [];          // learners hold nothing
+
+    $rows = db_optional(static fn() => db_all(
+        'SELECT course_slug FROM trainer_courses WHERE tenant_id = ? AND user_id = ?
+         ORDER BY course_slug',
+        [tenant_id(), (int) $u['id']]
+    ), []);
+
+    return array_values(array_map(static fn($r) => (string) $r['course_slug'], $rows ?: []));
+}
+
+/** True if this person may see this course at all. Admins may see every course. */
+function may_see_course(string $slug, ?array $u = null): bool
+{
+    $slugs = trainer_slugs($u);
+    return $slugs === null || in_array($slug, $slugs, true);
+}
+
 /** Send anyone who is not an administrator to the sign-in page. */
 function require_admin(): array
 {

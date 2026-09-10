@@ -185,8 +185,13 @@ function chrome_nav(string $variant, array $o = []): void
         echo '      <a href="./" data-nav="home">Home</a>' . "\n";
         echo '      <a href="courses" data-nav="courses">Courses</a>' . "\n";
         echo '      <a href="my" class="active">My learning</a>' . "\n";
+        /* A trainer needs the same way through from the learner pages that an
+           administrator has, or the only route to their own page is typing the
+           URL. Two keys rather than one so the link can say where it goes. */
         if (!empty($o['admin'])) {
             echo '      <a href="admin">Administration</a>' . "\n";
+        } elseif (!empty($o['trainer'])) {
+            echo '      <a href="trainer">My learners</a>' . "\n";
         }
         echo '      <a href="contact" data-nav="contact">Contact</a>' . "\n";
         echo '      ' . chrome_signout() . "\n";
@@ -195,9 +200,19 @@ function chrome_nav(string $variant, array $o = []): void
 
     } elseif ($variant === 'admin') {
         echo '    <div class="nav-links" id="navLinks">' . "\n";
-        echo '      <a href="admin"' . $on('admin') . '>Registrations</a>' . "\n";
-        echo '      <a href="admin-progress"' . $on('admin-progress') . '>Progress</a>' . "\n";
-        echo '      <a href="admin-users"' . $on('admin-users') . '>Accounts</a>' . "\n";
+        /* Two navs share this variant: a trainer signs in to the same chrome as
+           an administrator and only the links differ. Registrations, Accounts,
+           Progress and B-BBEE are administration; Material, Reading and Quizzes
+           are the course, and a trainer reads those. The pages enforce this
+           themselves — the nav only decides what is worth offering. */
+        $staff = function_exists('is_trainer') && is_trainer();
+        if (!$staff) {
+            echo '      <a href="admin"' . $on('admin') . '>Registrations</a>' . "\n";
+            echo '      <a href="admin-progress"' . $on('admin-progress') . '>Progress</a>' . "\n";
+            echo '      <a href="admin-users"' . $on('admin-users') . '>Accounts</a>' . "\n";
+        } else {
+            echo '      <a href="trainer"' . $on('trainer') . '>My learners</a>' . "\n";
+        }
         echo '      <a href="admin-materials"' . $on('admin-materials') . '>Material</a>' . "\n";
         echo '      <a href="admin-lessons"' . $on('admin-lessons') . '>Reading</a>' . "\n";
         echo '      <a href="admin-quizzes"' . $on('admin-quizzes') . '>Quizzes</a>' . "\n";
@@ -205,7 +220,9 @@ function chrome_nav(string $variant, array $o = []): void
            nav and nowhere else. It was briefly in the public footer; if you find
            yourself adding it back to the 'site' variant above, re-read the note
            at the top of scorecard.php first. */
-        echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
+        if (!$staff) {
+            echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
+        }
         echo '      <a href="./">View the site</a>' . "\n";
         echo '      ' . chrome_signout('Sign out (' . (string) ($o['name'] ?? '') . ')') . "\n";
         echo '    </div>' . "\n";

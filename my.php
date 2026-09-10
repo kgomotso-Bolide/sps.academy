@@ -94,7 +94,7 @@ function when_local(?string $utc): string
 <link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<?php chrome_nav('learner', ['admin' => $me['role'] === 'admin']); ?>
+<?php chrome_nav('learner', ['admin' => $me['role'] === 'admin', 'trainer' => $me['role'] === 'trainer']); ?>
 
 <section class="section-dark page-top">
   <div class="wrap">

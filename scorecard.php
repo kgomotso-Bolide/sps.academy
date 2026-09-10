@@ -36,6 +36,7 @@ declare(strict_types=1);
 require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
+require __DIR__ . '/lib/csrf.php';   // chrome_signout() builds a form; without this the page is a 500
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/chrome.php';
 

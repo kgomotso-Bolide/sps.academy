@@ -39,7 +39,7 @@ require __DIR__ . '/lib/curriculum.php';
 require __DIR__ . '/lib/bundle.php';
 require __DIR__ . '/lib/chrome.php';
 
-$me = require_admin();
+$me = require_staff();   // trainers may read this page — see require_write() below
 
 $courses = array_filter(learner_catalogue(),
                         fn(array $c): bool => (bool) ($c['tracked'] ?? false));
@@ -54,6 +54,11 @@ $notice = '';
 $errors = [];
 
 if (is_post()) {
+    /* A trainer reaches this page but may not change it. The check is here, on
+       the writing side, and not on whether the form was rendered: a hidden
+       button is not a permission. */
+    require_write();
+
     /* An upload bigger than post_max_size arrives as an EMPTY $_POST and an
        empty $_FILES — PHP discards the body before this file runs. The CSRF
        token goes with it, so without this the page would report that the form

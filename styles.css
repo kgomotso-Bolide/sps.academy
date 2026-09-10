@@ -1747,6 +1747,22 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 }
 html{scroll-behavior:auto!important}
 
+/* The trainer page groups its table by course. .adm-block is the wrapper for
+   one of those groups; everything inside it is existing admin styling. */
+.adm-block{margin:0 0 34px}
+.adm-block h3{font-size:17px;margin:0 0 2px;color:var(--grey)}
+.adm-block .adm-sub{margin:0 0 14px}
+
+/* The three-role controls on the Accounts page (10 Sep 2026). */
+.adm-rolepick{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft)}
+.adm-rolepick select{font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.adm-rolehelp{margin:5px 0 9px;font-size:12px;line-height:1.55;color:var(--ink-soft);max-width:52ch}
+.adm-role-tr{background:var(--green-tint);color:var(--green-deep)}
+.adm-courses{display:block;margin:0 0 6px}
+.adm-coursehead{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 5px}
+.adm-coursebox{display:block;font-size:12.5px;color:var(--ink);margin:0 0 3px}
+.adm-coursebox input{margin-right:6px}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------

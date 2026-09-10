@@ -166,7 +166,7 @@ if (!$available && $result === null) http_response_code(!$enrolled ? 403 : 200);
 <link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
 <body>
-<?php chrome_nav('learner', ['admin' => $me['role'] === 'admin']); ?>
+<?php chrome_nav('learner', ['admin' => $me['role'] === 'admin', 'trainer' => $me['role'] === 'trainer']); ?>
 
 <section class="section-soft page-top">
   <div class="wrap" style="max-width:760px">
