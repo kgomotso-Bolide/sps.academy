@@ -62,12 +62,13 @@ DirectoryIndex index.html index.php
   # meant to publish staying up.
   #
   # To publish a trainer photograph, add its name here in the same edit that
-  # sets consent:true in trainers.js. Below are the cleared three, all
-  # confirmed 25 Aug 2026.
+  # sets consent:true in trainers.js. Below are the cleared four: three
+  # confirmed 25 Aug 2026, and Sibusiso Seopela added 10 Sep 2026 — he asked
+  # for his own card, so the clearance and the photograph both came from him.
   #
   # Relative, like every rule in this file — no leading slash — so it holds in
   # the folder layout and at a document root both.
-  RewriteCond %{REQUEST_URI} !/(fiston-nselike|tarryn-norris|taryn-mccormick)\.jpg$
+  RewriteCond %{REQUEST_URI} !/(fiston-nselike|sibusiso-seopela|tarryn-norris|taryn-mccormick)\.jpg$
   RewriteRule ^images/trainers/ - [R=404,L]
 
   # Force HTTPS. Registration posts personal information; it does not travel in

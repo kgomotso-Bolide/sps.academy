@@ -244,6 +244,50 @@
       photo: 'images/trainers/taryn-mccormick.jpg',
       linkedin: '',
       consent: true          // confirmed 25 Aug 2026 — name and photograph both
+    },
+    /* Artificial intelligence, and the platform the academies themselves run on.
+
+       Sibusiso asked for this card on 10 Sep 2026, relaying Kgomotso: he is to
+       be the one teaching AI across the academies, and his picture should go up
+       with the rest.
+
+       CONSENT IS NOT THE USUAL QUESTION HERE. Everybody else on this list was
+       cleared by somebody on their behalf, which is why each entry carries a
+       date and a source. This one is the person himself asking to be listed,
+       and supplying his own photograph to do it with. Recorded the same way
+       regardless, because a card that says who cleared it is the point.
+
+       WHAT IS HIS AND WHAT IS NOT. The role, the titles and the qualification
+       below are his own words. He did not name an employer, so the org line
+       carries the three titles and no company — add one when he says which,
+       rather than assuming Centenary because the signature file says so.
+
+       THE PHOTOGRAPH is his own studio portrait, cropped to head-and-shoulders
+       to match the other three and the 180px card column: the original is
+       full-length, and at that crop his face would have been about a tenth of
+       the frame. The full-length original is in private/trainers/, so the crop
+       can be redone without asking him for the file again. */
+    {
+      name: 'Sibusiso Seopela',
+      role: 'Artificial intelligence, and software development',
+      org: 'Software Engineer · AI Engineer · Academies Developer',
+      creds: 'Diploma in Information Technology (NQF 6) · Four years in software development',
+      teaches: [
+        ['ai-fundamentals', 'AI Fundamentals for the Workplace'],
+        ['ai-tools-productivity', 'AI Tools for Productivity'],
+        ['responsible-ai', 'Responsible & Ethical AI Use'],
+        ['ai-leaders', 'AI for Leaders & Managers'],
+        ['ai-software-development', 'AI & Software Development']
+      ],
+      bio: 'A software engineer working in AI, and the developer of the academy platform ' +
+           'itself — the catalogue, the learner accounts, the course material and the ' +
+           'self-check quizzes are all his. He holds a Diploma in Information Technology ' +
+           'at NQF 6 and four years in software development, and he teaches the AI line ' +
+           'across the academies: what the tools actually do, how to use them in the ' +
+           'working day, and how to build with them.',
+      photo: 'images/trainers/sibusiso-seopela.jpg',
+      linkedin: '',
+      consent: true          // 10 Sep 2026 — he asked for the card himself
     }
   ];
 
