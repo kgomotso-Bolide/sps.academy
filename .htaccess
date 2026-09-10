@@ -44,6 +44,32 @@ DirectoryIndex index.html index.php
   # denied file reads the same as one that never existed.
   RewriteRule ^\.user\.ini$ - [R=404,L]
 
+  # WHICH TRAINER PHOTOGRAPHS MAY BE SERVED. A whitelist, not a blocklist.
+  #
+  # images/ is mirrored to the server wholesale and the deploy does not delete
+  # (delete_removed is off, by design), so taking a photograph OUT of the
+  # repository does not take it off the servers it already reached. On
+  # 10 Sep 2026 a trainer came off the site pending her contract, and her
+  # picture was already live.
+  #
+  # images/trainers/README.md says the answer is a rule naming the one file.
+  # This is that idea inverted, for two reasons. A rule that names the blocked
+  # person writes her name into a file that lives in a PUBLIC repository and
+  # sits on four public servers, which is most of what we are trying to undo.
+  # And a blocklist is a rule somebody has to remember to DELETE, while a
+  # whitelist is one somebody has to remember to ADD to — and forgetting that
+  # fails safe: a photograph falls back to initials, rather than a face nobody
+  # meant to publish staying up.
+  #
+  # To publish a trainer photograph, add its name here in the same edit that
+  # sets consent:true in trainers.js. Below are the cleared three, all
+  # confirmed 25 Aug 2026.
+  #
+  # Relative, like every rule in this file — no leading slash — so it holds in
+  # the folder layout and at a document root both.
+  RewriteCond %{REQUEST_URI} !/(fiston-nselike|tarryn-norris|taryn-mccormick)\.jpg$
+  RewriteRule ^images/trainers/ - [R=404,L]
+
   # Force HTTPS. Registration posts personal information; it does not travel in
   # the clear. X-Forwarded-Proto is checked too because shared hosting often
   # terminates TLS at a proxy, where %{HTTPS} reads "off" on an https request.

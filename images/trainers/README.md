@@ -51,7 +51,15 @@ has to remember to delete later. `private/` is excluded from the deploy mirror
 outright, so there is nothing to remember and nothing to leak.
 
 Move the file in here in the same edit that sets `consent: true`. That is the
-route `irisha-luhanga.jpg` took on 3 Sep 2026; nothing is waiting there now.
+route `irisha-luhanga.jpg` took on 3 Sep 2026 — and back out again on
+10 Sep 2026, when Kgomotso held her back pending the contract. Her file is in
+`private/trainers/` now, and `_drafts/trainer-irisha-luhanga.md` has the record
+and the steps to put her back.
+
+Her picture had already been deployed by then, and the mirror does not delete,
+so `.htaccess` now carries a WHITELIST of the trainer photographs that may be
+served rather than a rule naming her. The note beside that rule explains why
+that way round, and it is the rule to add a name to when somebody is cleared.
 
 ## Ask about the photograph you were actually sent
 

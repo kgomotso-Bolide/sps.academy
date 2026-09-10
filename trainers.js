@@ -94,9 +94,15 @@
    So a person we have not cleared does not go in this array at all, not even
    switched off. Their drafted record waits in _drafts/, which is excluded from
    the deploy mirror, from make-deploy-zip.php, from .htaccess and from the dev
-   server, and it moves in here in the same edit that sets consent:true. That is
-   the route Irisha Luhanga's record took on 3 Sep 2026; nobody is waiting there
-   now.
+   server, and it moves in here in the same edit that sets consent:true.
+
+   That road runs both ways, and a record has gone back down it — on 10 Sep 2026,
+   for a trainer whose contract is not signed yet. This note used to name the
+   person it was describing, which was fine while they were published here and
+   is not fine now: saying in a public file that a named individual is waiting
+   in our drafts folder is the same disclosure the paragraph above is about.
+   Who it is, and how to put them back, is in _drafts/ where it cannot be read
+   from the web.
 
    The same reasoning is why an uncleared photograph gets a RewriteRule in
    .htaccess rather than just being left unlinked: the deploy mirrors images/
@@ -238,74 +244,6 @@
       photo: 'images/trainers/taryn-mccormick.jpg',
       linkedin: '',
       consent: true          // confirmed 25 Aug 2026 — name and photograph both
-    },
-
-    /* Coaching, organisational development and entrepreneurship.
-
-       Tarryn Norris emailed Sibusiso on 3 Sep 2026: "Please see attached the
-       bio for Irisha Luhanga. Please include her on the platform." Irisha had
-       separately written to Kgomotso herself, attaching her bio and CV — "some
-       of the training that we facilitate as well as my BIO and CV to give you a
-       better understanding".
-
-       CLEARED TO PUBLISH 3 Sep 2026. Sibusiso confirmed that everything we were
-       sent is material we received for her profile and is to be used. That is
-       what turned consent from false to true, and it covers the photograph too.
-
-       The bio below is drawn from her own coaching bio — a marketing document,
-       carrying her website, her LinkedIn and a closing "connect with Irisha
-       Luhanga!", so plainly written to be shown — plus the training menu she
-       set out in her own email. Same footing as Tarryn's Waria deck.
-
-       TWO THINGS TO CONFIRM WITH HER AS THIS BEDS IN:
-
-       1. Which the MPhil is. Her bio's heading lists "MPHIL- Leadership
-          Coaching" among her qualifications, while its body says she "recently
-          submitted her thesis towards a Master's Degree in Leadership
-          Coaching". Those are different claims. Marked below the conservative
-          way, the same way Tarryn's in-progress MBA is marked — correct it
-          upward once she confirms, rather than guessing upward now.
-
-       2. The named clients. Sasol, WomHub, De Beers Trailblazer and WPP are
-          hers to claim and she listed them herself, but they are third parties
-          who did not choose to appear on four academy websites. Worth a nod
-          from her before this is pushed to the other academies.
-
-       NOT HERE. Her mobile number and personal email address: the card has no
-       contact field, and contact details are not profile copy. Her own bio PDF
-       stays in private/trainers/ and is not linked from anywhere — using what
-       it says is not the same as publishing her CV as a downloadable file, and
-       it carries both of those numbers. It moved out of images/trainers/ on
-       3 Sep 2026, where the deploy would have published it: the mirror has no
-       blanket *.pdf exclude, because resources/ holds real course PDFs.
-
-       NO COURSE TO POINT AT YET. There is no coaching, leadership-development
-       or HR course on the site, so `teaches` is empty and the card omits the
-       row. Add the course, then add the slug here — do not invent one. */
-    {
-      name: 'Irisha Luhanga',
-      role: 'Leadership coaching, organisational development and entrepreneurship',
-      org: 'Founder, Redefine Human Capital',
-      creds: 'MPhil Leadership Coaching (thesis submitted) · BA Hons · BTech · ' +
-             'NLP Master Practitioner & Coach · Enneagram Practitioner & Coach · ' +
-             'Licensed GrowthWheel Business Advisor',
-      teaches: [],           // no coaching or leadership course exists yet — see note above
-      bio: 'An accredited coach with a background in learning product development, ' +
-           'programme management and people leadership. Across twenty-five years of work ' +
-           'she spent the last twelve building and leading a learning design and delivery ' +
-           'team operating across the African continent, and she now runs Redefine Human ' +
-           'Capital. Her training covers leadership and management development, ' +
-           'organisational design and change, HR frameworks and people operations, and ' +
-           'the design of graduate, learnership and mentorship programmes; her leadership ' +
-           'coaching for founders and entrepreneurs has been delivered with clients ' +
-           'including Sasol, WomHub, De Beers Trailblazer and WPP. A recent board member ' +
-           'of the South African Women in ICT Forum, she pushed there for STEM training ' +
-           'and development to be set against youth unemployment. Her Master’s research ' +
-           'asked what business coaching actually does for women-owned businesses inside ' +
-           'South African incubators.',
-      photo: 'images/trainers/irisha-luhanga.jpg',
-      linkedin: 'https://www.linkedin.com/in/irisha-luhanga-58aa2029',
-      consent: true          // confirmed 3 Sep 2026 — name, profile and photograph
     }
   ];
 
