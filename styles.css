@@ -112,6 +112,26 @@ section{padding:80px 0}
 .hero-curve{position:absolute;left:0;right:0;bottom:-1px;z-index:2;line-height:0;pointer-events:none}
 .hero-curve svg{width:100%;height:70px;display:block}
 
+
+/* THE SKILLS BUILDING BAND — first thing under the landing hero.
+   Added 10 Sep 2026. Kgomotso sent a card from a Centenary deck and liked what
+   it said: "Upskilling, reskilling, and workforce training to prepare
+   individuals for employment and entrepreneurship." The sentence below keeps
+   her three ideas and her order, and turns "individuals" into "you", because
+   every other line on these sites talks to the reader ("around your shift",
+   "yours to keep") and one paragraph in the third person reads as pasted in.
+
+   The white disc and the certificate mark are the nod to her card. The rest is
+   this site's own idiom rather than the deck's navy panel, and it is a LIGHT
+   band on purpose: the intake band directly below it is dark, and two dark
+   bands stacked lose the edge between them. */
+.pillar{background:var(--bg-soft);padding:44px 0}
+.pillar-inner{display:flex;align-items:center;gap:26px}
+.pillar-ico{flex:0 0 auto;width:64px;height:64px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--grey)}
+.pillar-ico svg{width:31px;height:31px}
+.pillar .eyebrow{display:block;margin-bottom:7px}
+.pillar p{font-size:clamp(16.5px,1.9vw,21px);line-height:1.45;color:var(--grey);max-width:62ch;margin:0}
+
 /* FEATURES / PILLARS */
 .features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;transition:box-shadow .25s}
