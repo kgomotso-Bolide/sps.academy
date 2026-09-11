@@ -216,6 +216,11 @@ function chrome_nav(string $variant, array $o = []): void
         echo '      <a href="admin-materials"' . $on('admin-materials') . '>Material</a>' . "\n";
         echo '      <a href="admin-lessons"' . $on('admin-lessons') . '>Reading</a>' . "\n";
         echo '      <a href="admin-quizzes"' . $on('admin-quizzes') . '>Quizzes</a>' . "\n";
+        /* Offered to both, unlike everything above: an admin schedules classes
+           and a trainer marks the register of the ones they facilitate. It is
+           the one page in this nav where a trainer can write — the narrow
+           exception argued for in lib/classes.php. */
+        echo '      <a href="admin-classes"' . $on('classes') . '>In-person</a>' . "\n";
         /* HR only, on Kgomotso's instruction of 25 Aug 2026 — it is in the admin
            nav and nowhere else. It was briefly in the public footer; if you find
            yourself adding it back to the 'site' variant above, re-read the note

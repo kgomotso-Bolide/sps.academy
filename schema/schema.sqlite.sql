@@ -322,3 +322,37 @@ CREATE TABLE IF NOT EXISTS trainer_courses (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_traincourse ON trainer_courses (tenant_id, user_id, course_slug);
 CREATE INDEX IF NOT EXISTS ix_traincourse_user ON trainer_courses (tenant_id, user_id);
+
+-- In-person classes and the register a facilitator marks. See the long note in
+-- schema.mysql.sql for why attendance is its own table and why marked_by is
+-- recorded.
+CREATE TABLE IF NOT EXISTS classes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id      INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug    TEXT    NOT NULL,
+  title          TEXT    NOT NULL,
+  venue          TEXT        NULL,
+  held_on        TEXT    NOT NULL,
+  starts_at      TEXT        NULL,
+  ends_at        TEXT        NULL,
+  facilitator_id INTEGER     NULL REFERENCES users (id),
+  notes          TEXT        NULL,
+  status         TEXT    NOT NULL DEFAULT 'scheduled',
+  created_at     TEXT    NOT NULL,
+  created_by     INTEGER     NULL
+);
+CREATE INDEX IF NOT EXISTS ix_class_course ON classes (tenant_id, course_slug, held_on);
+CREATE INDEX IF NOT EXISTS ix_class_facil  ON classes (tenant_id, facilitator_id);
+
+CREATE TABLE IF NOT EXISTS class_attendance (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  class_id   INTEGER NOT NULL REFERENCES classes (id),
+  user_id    INTEGER NOT NULL REFERENCES users (id),
+  status     TEXT    NOT NULL,
+  note       TEXT        NULL,
+  marked_at  TEXT    NOT NULL,
+  marked_by  INTEGER     NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_attend_once ON class_attendance (tenant_id, class_id, user_id);
+CREATE INDEX IF NOT EXISTS ix_attend_user ON class_attendance (tenant_id, user_id);

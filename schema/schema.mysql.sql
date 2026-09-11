@@ -664,3 +664,66 @@ CREATE TABLE IF NOT EXISTS trainer_courses (
   CONSTRAINT fk_traincourse_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_traincourse_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- In-person classes, and the register a facilitator marks.
+--
+-- Added 11 Sep 2026 at Tarryn's request. The academy is not only online: a
+-- course can be delivered in a room, and the room needs a register.
+--
+-- TWO TABLES, NOT ONE. A class exists whether or not anybody has been marked
+-- yet, and an unmarked class is a real thing — it is a class that has been
+-- scheduled and not run. Storing attendance on the class row would have meant
+-- either inventing a row per learner up front, or having no way to tell "not
+-- marked" from "absent". Those are very different facts about a person.
+--
+-- ATTENDANCE IS NOT ENROLMENT. The register lists whoever is enrolled on the
+-- course at the time it is opened; marking somebody absent does not touch
+-- their enrolment, and un-enrolling somebody does not erase that they were in
+-- the room on the day. The two questions are asked by different people for
+-- different reasons, and a B-BBEE audit needs the second one to stay true.
+--
+-- WHY marked_by IS RECORDED. A register is evidence. "Present" with nobody's
+-- name against it is worth much less than "present, marked by T. Norris at
+-- 14:12" — the whole point of a facilitator marking it is that a named person
+-- is saying so.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS classes (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id     INT UNSIGNED NOT NULL,
+  course_slug   VARCHAR(60)  NOT NULL,
+  title         VARCHAR(160) NOT NULL,
+  venue         VARCHAR(160)     NULL,
+  held_on       DATE         NOT NULL,
+  starts_at     VARCHAR(5)       NULL,   -- "09:00", local time, as typed
+  ends_at       VARCHAR(5)       NULL,
+  facilitator_id INT UNSIGNED    NULL,   -- the trainer who marks it
+  notes         TEXT             NULL,
+  status        VARCHAR(20)  NOT NULL DEFAULT 'scheduled',  -- scheduled | held | cancelled
+  created_at    DATETIME     NOT NULL,
+  created_by    INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  KEY ix_class_course (tenant_id, course_slug, held_on),
+  KEY ix_class_facil (tenant_id, facilitator_id),
+  CONSTRAINT fk_class_tenant FOREIGN KEY (tenant_id)      REFERENCES tenants (id),
+  CONSTRAINT fk_class_facil  FOREIGN KEY (facilitator_id) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS class_attendance (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id  INT UNSIGNED NOT NULL,
+  class_id   INT UNSIGNED NOT NULL,
+  user_id    INT UNSIGNED NOT NULL,
+  -- present | absent | late | excused. No "unknown": a learner with no row
+  -- here has not been marked, which the register shows as exactly that.
+  status     VARCHAR(12)  NOT NULL,
+  note       VARCHAR(200)     NULL,
+  marked_at  DATETIME     NOT NULL,
+  marked_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_attend_once (tenant_id, class_id, user_id),
+  KEY ix_attend_user (tenant_id, user_id),
+  CONSTRAINT fk_attend_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_attend_class  FOREIGN KEY (class_id)  REFERENCES classes (id),
+  CONSTRAINT fk_attend_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

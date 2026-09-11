@@ -1833,6 +1833,64 @@ html{scroll-behavior:auto!important}
 .adm-coursebox{display:block;font-size:12.5px;color:var(--ink);margin:0 0 3px}
 .adm-coursebox input{margin-right:6px}
 
+
+/* ---- In-person classes and the register (11 Sep 2026) -------------------- */
+/* Uses the house .form / .field / .two pattern, so it matches the other admin
+   forms; only the three-across time row needs a grid of its own. */
+.cls-form{padding:26px}
+.cls-form select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:15px;background:var(--bg-soft);color:var(--ink)}
+.cls-form select:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.cls-form select:disabled{opacity:.6}
+.cls-times{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cls-actions{display:flex;gap:10px;margin-top:18px}
+@media (max-width:640px){ .cls-times{grid-template-columns:1fr} }
+.cls-sub{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.cls-none{color:var(--ink-soft);font-style:italic}
+.cls-act{white-space:nowrap}
+.cls-act .btn{padding:6px 12px;font-size:12.5px;margin-right:6px}
+.cls-state{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:20px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cls-state-held{background:var(--green-tint);color:var(--green-deep)}
+.cls-state-cancelled{background:#fff0ef;color:var(--err)}
+
+/* The register. One row per learner, one column per mark — a facilitator
+   reads down a column to see who is missing, which is how a room is counted. */
+.reg-tally{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.reg-chip{padding:5px 12px;border-radius:20px;font-size:12.5px;color:var(--ink-soft);
+  background:var(--bg-soft);border:1px solid var(--line)}
+.reg-chip strong{color:var(--ink);font-size:13.5px}
+.reg-present{background:var(--green-tint);border-color:var(--green)}
+.reg-present strong{color:var(--green-deep)}
+.reg-absent{background:#fff0ef;border-color:var(--err)}
+.reg-absent strong{color:var(--err)}
+.reg-table th.reg-h{text-align:center;font-size:11.5px;white-space:nowrap}
+.reg-table td.reg-pick{text-align:center;width:64px}
+.reg-row-unmarked{background:repeating-linear-gradient(45deg,transparent,transparent 6px,
+  rgba(0,0,0,.018) 6px,rgba(0,0,0,.018) 12px)}
+.reg-radio{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  width:100%;padding:6px 0}
+.reg-radio input{position:absolute;opacity:0;width:0;height:0}
+.reg-dot{display:block;width:19px;height:19px;border-radius:50%;
+  border:2px solid var(--line);background:#fff;transition:none}
+.reg-radio:hover .reg-dot{border-color:var(--ink-soft)}
+.reg-radio input:focus-visible + .reg-dot{outline:2px solid var(--ink);outline-offset:2px}
+.reg-radio input:checked + .reg-dot-present{background:var(--green);border-color:var(--green)}
+.reg-radio input:checked + .reg-dot-absent{background:var(--err);border-color:var(--err)}
+.reg-radio input:checked + .reg-dot-late{background:var(--orange-deep);border-color:var(--orange-deep)}
+.reg-radio input:checked + .reg-dot-excused{background:var(--ink-soft);border-color:var(--ink-soft)}
+.reg-radio input:disabled + .reg-dot{opacity:.5}
+.reg-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.reg-note{width:100%;min-width:110px;font:inherit;font-size:12.5px;padding:6px 9px;
+  border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.reg-note[readonly]{background:var(--bg-soft);color:var(--ink-soft)}
+.reg-by{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.reg-save{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:20px}
+@media (max-width:760px){
+  .reg-table td.reg-pick{width:48px}
+  .reg-note{min-width:80px}
+  .reg-by{display:none}
+}
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------

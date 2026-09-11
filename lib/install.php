@@ -43,7 +43,8 @@ function install_tables(): array
             'password_resets', 'account_invites', 'enrolments', 'learner_progress',
             'progress_reports', 'materials', 'material_files', 'quizzes',
             'quiz_questions', 'quiz_choices', 'quiz_attempts',
-            'quiz_attempt_answers', 'topic_sections', 'letters_sent', 'trainer_courses'];
+            'quiz_attempt_answers', 'topic_sections', 'letters_sent', 'trainer_courses',
+            'classes', 'class_attendance'];
 }
 
 /** Which of the expected tables are not there yet. */

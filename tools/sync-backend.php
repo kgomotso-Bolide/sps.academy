@@ -73,7 +73,7 @@ $shared = [
     // anything this tool checked. If you add a page below that requires a new
     // library, the library belongs here in the same edit.
     'lib/invite.php', 'lib/material_files.php', 'lib/quiz.php', 'lib/sections.php',
-    'lib/bundle.php', 'lib/curriculum.php', 'lib/letters.php',
+    'lib/bundle.php', 'lib/curriculum.php', 'lib/letters.php', 'lib/classes.php',
 
     // The database.
     'schema/schema.mysql.sql', 'schema/schema.sqlite.sql',
@@ -97,6 +97,14 @@ $shared = [
     // is the only page a trainer account has of its own, so a site without it
     // gives them a nav link to a 404.
     'trainer.php',
+
+    // In-person classes, 11 Sep 2026. admin-classes.php is linked from the
+    // admin nav in lib/chrome.php — which IS synced — so a site without it gets
+    // an "In-person" link to a 404; register.php is linked from every row of
+    // that page for the same reason. lib/classes.php is hard-required by both,
+    // so it travels with them: see the note above about shipping a page without
+    // its library.
+    'admin-classes.php', 'register.php',
 
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
