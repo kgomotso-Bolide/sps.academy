@@ -43,11 +43,18 @@ $classId = (int) ($_GET['class'] ?? $_POST['class'] ?? 0);
 $class   = $classId > 0 ? db_optional(fn() => class_get($classId)) : null;
 
 if ($class === null) {
-    http_response_code(404);
+    /* Two different reasons land here and they need different answers. If the
+       tables are not there yet, the class may well exist and this server has
+       simply not been migrated — telling somebody "that class does not exist"
+       would send them looking for a data problem that is not there. */
+    $migrating = db_schema_incomplete();
+    http_response_code($migrating ? 503 : 404);
     header('Content-Type: text/html; charset=utf-8');
-    echo '<!DOCTYPE html><meta charset="utf-8"><title>Not found</title>'
+    echo '<!DOCTYPE html><meta charset="utf-8"><title>'
+       . ($migrating ? 'Not ready yet' : 'Not found') . '</title>'
        . '<p style="font:16px/1.6 system-ui,sans-serif;max-width:34em;margin:12vh auto;padding:0 6vw">'
-       . 'That class does not exist on this academy. <a href="admin-classes">Back to the classes</a>.</p>';
+       . e($migrating ? db_schema_notice() : 'That class does not exist on this academy.')
+       . ' <a href="admin-classes">Back to the classes</a>.</p>';
     exit;
 }
 
@@ -87,10 +94,19 @@ if (is_post()) {
             if (is_numeric($uid)) $notes[(int) $uid] = (string) $n;
         }
 
-        [$ok, $msg] = class_mark_register(
+        /* Wrapped for the same reason as admin-classes.php: reachable before
+           the migration, and a half-written register must never be the way we
+           find that out. */
+        $res = db_optional(fn() => class_mark_register(
             (int) $class['id'], (string) $class['course_slug'], $marks, $notes, (int) $me['id']
-        );
-        $ok ? $notice = $msg : $error = $msg;
+        ), null);
+
+        if ($res === null) {
+            $error = db_schema_notice();
+        } else {
+            [$ok, $msg] = $res;
+            $ok ? $notice = $msg : $error = $msg;
+        }
         csrf_rotate();
         $class = db_optional(fn() => class_get($classId)) ?? $class;   // status may have moved
     }

@@ -46,12 +46,22 @@ if (is_post()) {
     } elseif (!csrf_valid()) {
         $error = 'That form had expired — nothing was saved. Please try again.';
     } else {
+        /* Wrapped, because this page is reachable between a deploy and its
+           migration and the tables may not exist yet. Reading already degrades
+           through db_optional(); without this the WRITE would be a 500 the
+           first time somebody filled the form in, which is exactly when the
+           notice at the top of the page is telling them to run /setup. */
         $action = (string) ($_POST['action'] ?? '');
+        $res = null;
         if ($action === 'create') {
-            [$ok, $msg] = class_create($_POST, (int) $me['id']);
-            $ok ? $notice = $msg : $error = $msg;
+            $res = db_optional(fn() => class_create($_POST, (int) $me['id']), null);
         } elseif ($action === 'update') {
-            [$ok, $msg] = class_update((int) ($_POST['id'] ?? 0), $_POST, (int) $me['id']);
+            $res = db_optional(fn() => class_update((int) ($_POST['id'] ?? 0), $_POST, (int) $me['id']), null);
+        }
+        if ($res === null && $action !== '') {
+            $error = db_schema_notice();
+        } elseif (is_array($res)) {
+            [$ok, $msg] = $res;
             $ok ? $notice = $msg : $error = $msg;
         }
         csrf_rotate();
