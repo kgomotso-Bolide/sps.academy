@@ -108,8 +108,119 @@ $questions = ($quiz !== null && (bool) $quiz['published'])
     : [];
 $available = $enrolled && $quiz !== null && (bool) $quiz['published'] && count($questions) > 0;
 
+/**
+ * Tick the topic off when the learner reaches the pass mark.
+ *
+ * ONLY EVER TICKS, NEVER UN-TICKS. Somebody who passed on Tuesday and then
+ * retook the same questions for practice on Friday and scored 40% has not
+ * un-learnt the topic, and taking the tick away would punish the practising
+ * this page exists to encourage. The tick means "reached the bar at least
+ * once", which is also what quiz_results_summary_for_user() reports, since it
+ * reads the BEST attempt rather than the last.
+ *
+ * Written here rather than left to the browser so that it is true even if the
+ * fetch that follows never lands — a learner who passes and closes the laptop
+ * has still passed. The widget re-reads progress afterwards rather than
+ * assuming.
+ */
+function quiz_tick_topic_on_pass(array $me, string $course, string $code, array $result): bool
+{
+    if (($result['pass'] ?? null) !== true) return false;
+
+    /* A topic quiz is keyed by its topic code (KM-01-KT01) and belongs to a
+       module (KM-01); a module-level quiz is keyed by the module itself and
+       takes the empty item_code that means "module complete" — see the note on
+       item_code in schema.mysql.sql. */
+    $module = curriculum_module_of($code);
+    $item   = ($module !== '' && $module !== $code) ? $code : '';
+    if ($module === '') { $module = $code; $item = ''; }
+
+    $already = db_optional(fn() => learner_progress_has((int) $me['id'], $course, $module, $item), false);
+    if ($already) return false;
+
+    $set = db_optional(fn() => learner_progress_set((int) $me['id'], $course, $module, $item, true), false);
+    if ($set) {
+        audit('quiz.passed_topic', 'learner_progress', (int) $me['id'],
+              $course . ' ' . $code . ' — ' . $result['pct'] . '% (bar ' . $result['pass_pct'] . '%)');
+    }
+    return $set;
+}
+
 $result = null;
 $error  = '';
+
+/* The module page takes these inline now, so both halves of the exchange have
+   a JSON shape. The HTML page below is kept and still works: it is what a
+   learner gets with JavaScript off, and what the emailed links point at. */
+$asJson = (($_GET['as'] ?? $_POST['as'] ?? '') === 'json');
+
+if ($asJson && !is_post()) {
+    if (!$available) {
+        qout(['in' => true, 'available' => false,
+              'enrolled' => $enrolled,
+              'message' => $enrolled
+                  ? 'There is no self-check for this topic yet.'
+                  : 'You are not on the course this topic belongs to.'], $enrolled ? 200 : 403);
+    }
+    $best = db_optional(fn() => quiz_best_result((int) $me['id'], (int) $quiz['id']));
+    qout([
+        'in' => true, 'available' => true, 'enrolled' => true,
+        'course' => $course, 'module' => $module,
+        'pass_pct' => quiz_pass_pct($quiz),
+        /* Choice TEXT ONLY — is_correct never reaches the browser before the
+           answers are posted. Same rule as the HTML page; see the header. */
+        'questions' => array_map(static fn(array $q) => [
+            'id'      => (int) $q['id'],
+            'prompt'  => (string) $q['prompt'],
+            'choices' => array_map(
+                static fn(array $c) => ['id' => (int) $c['id'], 'text' => (string) $c['choice_text']],
+                $q['choices']
+            ),
+        ], array_values($questions)),
+        'best' => $best ? ['pct' => (int) $best['pct'], 'attempts' => (int) $best['attempts']] : null,
+        'disclaimer' => QUIZ_DISCLAIMER,
+    ]);
+}
+
+if ($asJson && is_post()) {
+    if (!$available) {
+        qout(['in' => true, 'available' => false, 'message' => 'This self-check is not available right now.'], 409);
+    }
+    if (!csrf_valid()) {
+        qout(['in' => true, 'error' => 'token',
+              'message' => 'This page had been open a while. Reload it and try again.'], 403);
+    }
+
+    $answers = [];
+    foreach ((array) ($_POST['a'] ?? []) as $qid => $cid) {
+        if (is_numeric($qid) && is_numeric($cid)) $answers[(int) $qid] = (int) $cid;
+    }
+    $graded = quiz_grade_and_record((int) $quiz['id'], (int) $me['id'], $answers);
+    $ticked = quiz_tick_topic_on_pass($me, $course, $module, $graded);
+    csrf_rotate();
+
+    letter_module_completed($me, $course, $module, learner_course_title($course));
+
+    /* The answer key goes back ONLY in the response to a graded submission,
+       never in the GET above. Without it a learner who got one wrong has no
+       way to learn which, and re-reading is the whole point of the retry. */
+    $key = [];
+    foreach ($questions as $q) $key[(int) $q['id']] = quiz_choice_correct_id($q);
+
+    qout([
+        'in' => true, 'available' => true, 'graded' => true,
+        'pct' => $graded['pct'], 'pass' => $graded['pass'], 'pass_pct' => $graded['pass_pct'],
+        'score_count' => $graded['score_count'], 'question_count' => $graded['question_count'],
+        'ticked' => $ticked,
+        'token' => csrf_token(),        // the rotated one, so a retry can post
+        'breakdown' => array_map(static fn(array $b) => [
+            'question_id' => $b['question_id'],
+            'choice_id'   => $b['choice_id'],
+            'correct'     => $b['correct'],
+            'correct_id'  => $key[$b['question_id']] ?? null,
+        ], $graded['breakdown']),
+    ]);
+}
 
 if (is_post()) {
     if (!$available) {
@@ -122,6 +233,9 @@ if (is_post()) {
             if (is_numeric($qid) && is_numeric($cid)) $answers[(int) $qid] = (int) $cid;
         }
         $result = quiz_grade_and_record((int) $quiz['id'], (int) $me['id'], $answers);
+        /* The same tick the inline widget gets. Without this line a learner
+           with JavaScript off could pass and still show the topic untouched. */
+        quiz_tick_topic_on_pass($me, $course, $module, $result);
         csrf_rotate();
 
         /* If that was the last topic quiz outstanding in this module, post the

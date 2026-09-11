@@ -1087,15 +1087,37 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .my-untracked{font-size:14px;color:var(--ink-soft);line-height:1.7;background:var(--bg-soft);
   border-left:3px solid var(--line);border-radius:0 8px 8px 0;padding:14px 16px}
 
-.my-quiz{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-.my-quiz .lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
-  font-weight:700;color:var(--ink-soft);margin-bottom:8px}
-.my-quiz-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:9px 4px;font-size:13.5px;color:var(--ink);border-bottom:1px solid var(--line)}
-.my-quiz-row:last-child{border-bottom:0}
-.my-quiz-row:hover .my-quiz-mod{color:var(--orange-deep)}
-.my-quiz-mod{font-weight:700}
-.my-quiz-status{color:var(--ink-soft)}
+/* Module by module, on the dashboard. Replaced a flat list of every topic
+   quiz (11 Sep 2026) — fifty-one undifferentiated rows told a learner nothing
+   about which module they were actually in the middle of. */
+.my-mods{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.my-mods .lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+  font-weight:700;color:var(--ink-soft);margin-bottom:10px}
+.my-mod{display:flex;align-items:center;gap:14px;padding:11px 12px;border-radius:11px;
+  color:var(--ink);border:1px solid transparent}
+.my-mod:hover{background:var(--bg-soft);border-color:var(--line)}
+.my-mod-code{flex:none;width:58px;font-size:12px;font-weight:700;color:var(--ink-soft);
+  letter-spacing:.02em}
+.my-mod-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.my-mod-body strong{font-size:14.5px;font-weight:700;line-height:1.4}
+.my-mod-sub{font-size:12.5px;color:var(--ink-soft)}
+.my-mod-bar{display:block;height:4px;border-radius:3px;background:var(--line);
+  overflow:hidden;margin-top:4px}
+.my-mod-bar i{display:block;height:100%;background:var(--ink-soft);border-radius:3px}
+.my-mod-pct{flex:none;font-size:13px;font-weight:700;color:var(--ink-soft);
+  min-width:38px;text-align:right}
+/* Done, started, untouched — a learner should be able to find the one they are
+   in the middle of without reading any numbers. */
+.my-mod-all .my-mod-bar i{background:var(--green)}
+.my-mod-all .my-mod-pct{color:var(--green-deep)}
+.my-mod-part .my-mod-bar i{background:var(--orange-deep)}
+.my-mod-part .my-mod-pct{color:var(--orange-deep)}
+.my-mod-none .my-mod-pct{color:var(--ink-soft);font-weight:600}
+.my-mod-note{margin:12px 2px 0;font-size:12.5px;line-height:1.65;color:var(--ink-soft)}
+@media (max-width:560px){
+  .my-mod{gap:10px;padding:10px 8px}
+  .my-mod-code{width:48px;font-size:11.5px}
+}
 
 /* "Carry on with" — the single most useful thing on the page, so it is the one
    element here that gets to look like a button-sized target. */
@@ -1683,6 +1705,54 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
 .qz-topic-score{flex:1 1 auto;font-size:13.5px;color:var(--ink-soft)}
 .qz-topic-score strong{color:var(--ink)}
 .qz-topic .btn{flex:0 0 auto;padding:8px 16px;font-size:13px}
+
+/* ---- Taking it in place, on the card (11 Sep 2026) ----------------------
+   The questions, the marked result and the way back to the reading all render
+   inside .qz-topic, so the loop read → answer → re-read → answer never moves
+   the learner to another page. Everything here is scoped under .qz-topic
+   because the plain .qz-* names above belong to the admin editor and the
+   standalone quiz.php page, and both must keep their own look. */
+.qz-topic-open{display:block;padding:18px 22px 20px;background:var(--bg-soft)}
+.qz-topic-passed{background:var(--green-tint)}
+.qz-topic .qz-bar{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft)}
+.qz-topic .qz-bar strong{color:var(--ink)}
+
+.qz-topic .qz-q{border:1px solid var(--line);border-radius:11px;margin:0 0 12px;
+  padding:14px 16px;background:#fff}
+.qz-topic .qz-q legend{display:flex;gap:10px;align-items:flex-start;padding:0;
+  font-size:15px;font-weight:700;line-height:1.5;color:var(--ink)}
+.qz-topic .qz-n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--header);
+  color:var(--ink);font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:2px}
+.qz-topic .qz-choice{display:flex;align-items:flex-start;gap:10px;margin-top:9px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14.5px;line-height:1.55}
+.qz-topic .qz-choice:hover{background:var(--bg-soft)}
+.qz-topic .qz-choice input{flex:none;margin-top:3px}
+
+.qz-topic .qz-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.qz-topic .qz-err{margin:12px 0 0;padding:10px 13px;border-radius:8px;
+  background:#fff0ef;color:var(--err);font-size:13.5px}
+
+/* The marked paper. Overrides the centred .qz-result used on quiz.php — here
+   it sits inside a card and reads left to right. */
+.qz-topic .qz-result{display:flex;align-items:center;gap:18px;text-align:left;
+  padding:16px 18px;border-radius:12px;margin:0 0 14px}
+.qz-topic .qz-result-pct{flex:none;font-size:34px;font-weight:800;line-height:1}
+.qz-topic .qz-result-say{display:flex;flex-direction:column;gap:3px;font-size:14px;
+  line-height:1.6;color:var(--ink-soft)}
+.qz-topic .qz-result-say strong{color:var(--ink);font-size:15px}
+
+.qz-topic .qz-review{margin:0 0 4px}
+.qz-topic .qz-review .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+.qz-topic .qz-review-q{border-left:3px solid var(--err);padding:2px 0 2px 13px;margin-bottom:12px}
+.qz-topic .qz-review-prompt{margin:0 0 5px;font-size:14.5px;font-weight:700;color:var(--ink)}
+.qz-topic .qz-review-mine{margin:0;font-size:13.5px;color:var(--err)}
+.qz-topic .qz-review-right{margin:2px 0 0;font-size:13.5px;color:var(--green-deep);font-weight:600}
+
+@media (max-width:560px){
+  .qz-topic-open{padding:16px 16px 18px}
+  .qz-topic .qz-result{flex-direction:column;align-items:flex-start;gap:8px}
+}
 
 /* ---- Quizzes are authored per topic, grouped under their module ---------- */
 .qz-modhead{margin:26px 0 8px;font-size:13px;font-weight:700;letter-spacing:.04em;

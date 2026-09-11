@@ -45,6 +45,38 @@ const QUIZ_MAX_CHOICES = 6;
    fills a log rather than a disk. Same reasoning as LEARNER_PROGRESS_MAX_ROWS. */
 const QUIZ_ATTEMPT_MAX_PER_QUIZ = 200;
 
+/* The mark a learner has to reach for a topic to count as done — Kgomotso's
+   figure, 11 Sep 2026.
+ *
+ * WHY THIS IS A DEFAULT IN CODE RATHER THAN A NUMBER WRITTEN INTO EVERY ROW
+ *
+ * quizzes.pass_pct stays nullable and an explicit value still wins, so a quiz
+ * that needs a different bar can have one. But null used to mean "show a score
+ * and say nothing about passing", and every one of the 51 topic quizzes now
+ * live was loaded with null. Writing 80 into all of them would have meant a
+ * data migration per site, on five servers, for a number that is the same
+ * everywhere — and any topic loaded afterwards would have come back null again
+ * and quietly had no pass mark. A default reads the same on every site on the
+ * day it deploys and cannot be forgotten for new content.
+ *
+ * The cost is that null now means 80 rather than "no opinion", so an admin who
+ * genuinely wants a scored-but-ungated quiz has to say so. Nobody had asked for
+ * one; being gated is the thing that was asked for. */
+const QUIZ_DEFAULT_PASS_PCT = 80;
+
+/**
+ * The bar for one quiz: its own pass_pct when set, otherwise the academy
+ * default above. One place, so the take page, the grader, the summary and the
+ * module page can never disagree about what passing means.
+ *
+ * @param array<string,mixed> $quiz
+ */
+function quiz_pass_pct(array $quiz): int
+{
+    $own = $quiz['pass_pct'] ?? null;
+    return $own !== null ? (int) $own : QUIZ_DEFAULT_PASS_PCT;
+}
+
 /* ---------------------------------------------------------------------------
    Reading
    --------------------------------------------------------------------------- */
@@ -389,7 +421,7 @@ function quiz_grade_and_record(int $quizId, int $userId, array $posted): array
         $pct = $questionCount > 0 ? (int) round($scoreCount / $questionCount * 100) : 0;
         return [
             'score_count' => $scoreCount, 'question_count' => $questionCount, 'pct' => $pct,
-            'pass' => $quiz['pass_pct'] !== null ? $pct >= (int) $quiz['pass_pct'] : null,
+            'pass' => $pct >= quiz_pass_pct($quiz), 'pass_pct' => quiz_pass_pct($quiz),
             'breakdown' => $breakdown,
         ];
     }
@@ -420,7 +452,7 @@ function quiz_grade_and_record(int $quizId, int $userId, array $posted): array
     $pct = $questionCount > 0 ? (int) round($scoreCount / $questionCount * 100) : 0;
     return [
         'score_count' => $scoreCount, 'question_count' => $questionCount, 'pct' => $pct,
-        'pass' => $quiz['pass_pct'] !== null ? $pct >= (int) $quiz['pass_pct'] : null,
+        'pass' => $pct >= quiz_pass_pct($quiz), 'pass_pct' => quiz_pass_pct($quiz),
         'breakdown' => $breakdown,
     ];
 }
@@ -513,8 +545,13 @@ function quiz_results_summary_for_user(int $userId, string $courseSlug): array
         $out[(string) $q['module_code']] = [
             'published' => (bool) $q['published'],
             'questions' => (int) $q['question_count'],
-            'pass_pct'  => $q['pass_pct'] !== null ? (int) $q['pass_pct'] : null,
+            /* The effective bar, not the raw column — a null here used to mean
+               "no pass mark" and now means the academy default. Callers show
+               this number to learners, so it has to be the one they are graded
+               against. See quiz_pass_pct(). */
+            'pass_pct'  => quiz_pass_pct($q),
             'best'      => $best,
+            'passed'    => $best !== null && $best['pct'] >= quiz_pass_pct($q),
         ];
     }
     return $out;

@@ -170,6 +170,20 @@
 
     all: function () { return store(); },
 
+    /**
+     * Re-read progress from the account and repaint every listener.
+     *
+     * Exposed for the one case where something OTHER than this file changed a
+     * learner's progress: passing a topic quiz ticks the topic on the server
+     * (see quiz_tick_topic_on_pass() in quiz.php), so the copy held here is a
+     * tick behind and nothing in this file knows it. Re-reading is right rather
+     * than ticking locally as well — the server has already decided, and a
+     * second toggle would post a duplicate and could un-tick it.
+     *
+     * A no-op without an account, where the local store is already the truth.
+     */
+    resync: function () { resync(); },
+
     topicDone: function (moduleId, topicCode) {
       var m = store()[moduleId];
       return !!(m && m.topics && m.topics[topicCode]);

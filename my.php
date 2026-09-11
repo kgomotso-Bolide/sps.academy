@@ -32,6 +32,7 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password(), via learner.php
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
+require __DIR__ . '/lib/curriculum.php';   // groups the topic quizzes by module, below
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_user();
@@ -164,23 +165,67 @@ function when_local(?string $utc): string
               /* Rendered here, not fetched client-side like the progress
                  panel above — that one needs a script because it has a
                  localStorage-vs-account fallback to resolve; nobody reaches
-                 this page signed out, so there is nothing to resolve here. */
+                 this page signed out, so there is nothing to resolve here.
+
+                 WHY THIS IS A MODULE LIST AND NOT A LIST OF QUIZZES
+                 (changed 11 Sep 2026)
+
+                 It used to print one row per quiz. That was readable while the
+                 question bank was a handful of modules; the bank is now written
+                 per topic, so it had become fifty-one rows of "KM-04-KT03 · 10
+                 questions, not attempted yet" with no shape to it — a learner
+                 could not see which MODULE they were in the middle of, which is
+                 the thing they came to look at.
+
+                 Grouping needs the curriculum, and the curriculum is
+                 pm-modules.js. This page's header says progress is not computed
+                 in PHP for exactly that reason — but lib/curriculum.php now
+                 PARSES that same file rather than restating it, so reading it
+                 here does not create the second copy that rule was protecting
+                 against. There is still only one curriculum. */
               $quizSummary = db_optional(fn() => quiz_results_summary_for_user((int) $me['id'], $slug), []);
               $quizSummary = array_filter($quizSummary, fn(array $q) => $q['published'] && $q['questions'] > 0);
+              $tree    = db_optional(fn() => learner_progress_tree((int) $me['id'], $slug), []);
+              $modules = curriculum_modules();
             ?>
-            <?php if ($quizSummary): ?>
-              <div class="my-quiz">
-                <span class="lbl">Self-check quizzes</span>
-                <?php foreach ($quizSummary as $mod => $q): ?>
-                  <a class="my-quiz-row" href="<?= e('quiz?course=' . rawurlencode($slug) . '&module=' . rawurlencode($mod)) ?>">
-                    <span class="my-quiz-mod"><?= e($mod) ?></span>
-                    <span class="my-quiz-status">
-                      <?= $q['best']
-                            ? e($q['best']['pct'] . '% best of ' . $q['best']['attempts'] . ' attempt' . ($q['best']['attempts'] === 1 ? '' : 's'))
-                            : e($q['questions'] . ' question' . ($q['questions'] === 1 ? '' : 's') . ', not attempted yet') ?>
+            <?php if ($quizSummary && $modules): ?>
+              <div class="my-mods">
+                <span class="lbl">Where you are, module by module</span>
+                <?php foreach ($modules as $mid => $mod): ?>
+                  <?php
+                    $topics = array_keys($mod['topics']);
+                    if (!$topics) continue;
+                    $ticked = 0;
+                    $passed = 0;
+                    $withQuiz = 0;
+                    foreach ($topics as $tc) {
+                        if (!empty($tree[$mid]['topics'][$tc])) $ticked++;
+                        if (isset($quizSummary[$tc])) {
+                            $withQuiz++;
+                            if (!empty($quizSummary[$tc]['passed'])) $passed++;
+                        }
+                    }
+                    $total = count($topics);
+                    $pct   = $total ? (int) round($ticked / $total * 100) : 0;
+                    $state = $ticked === 0 ? 'none' : ($ticked >= $total ? 'all' : 'part');
+                  ?>
+                  <a class="my-mod my-mod-<?= e($state) ?>" href="<?= e('module?m=' . rawurlencode($mid)) ?>">
+                    <span class="my-mod-code"><?= e($mid) ?></span>
+                    <span class="my-mod-body">
+                      <strong><?= e($mod['title']) ?></strong>
+                      <span class="my-mod-sub">
+                        <?= (int) $ticked ?> of <?= (int) $total ?> topics done<?php
+                          if ($withQuiz > 0): ?> · <?= (int) $passed ?> of <?= (int) $withQuiz ?> quizzes passed<?php endif; ?>
+                      </span>
+                      <span class="my-mod-bar" aria-hidden="true"><i style="width:<?= (int) $pct ?>%"></i></span>
                     </span>
+                    <span class="my-mod-pct"><?= (int) $pct ?>%</span>
                   </a>
                 <?php endforeach; ?>
+                <p class="my-mod-note">A topic ticks itself off when you pass its questions at
+                  <?= (int) QUIZ_DEFAULT_PASS_PCT ?>%. You can also tick one yourself on the module page,
+                  and you can retake any set of questions as often as you like — your best
+                  score is the one kept.</p>
               </div>
             <?php endif; ?>
           <?php else: ?>
