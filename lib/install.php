@@ -102,6 +102,13 @@ function install_seed_tenants(?string $contact = null): int
            if it is sold, standing the site up is configuration, not a
            migration. If it is not, an unused row does no harm. */
         ['tracker', 'Tracker',                           'Tracker Academy'],
+        /* M&T Development, the sixth, stood up 12 Sep 2026. Seeded everywhere
+           for the same reason as Tracker: its row is part of the platform, so
+           the M&T server's own /setup creates it and standing the site up
+           needs no separate data step. The slug is "mt" — no ampersand, since
+           it is compared against the 'tenant' line in a config file and has no
+           business carrying a character that needs escaping. */
+        ['mt',      'M&T Development',                   'M&T Academy'],
     ];
 
     $added = 0;

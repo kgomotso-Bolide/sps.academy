@@ -180,7 +180,11 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    Targets
    --------------------------------------------------------------------------- */
 
-$defaultTargets = ['../fungi', '../Maziv', '../Equinix'];
+/* M-T joined on 12 Sep 2026, the day it was stood up — added here at once rather
+   than "when it goes live", because a site left off this list is exactly how
+   Fungi drifted 293 lines behind. Tracker is still named explicitly on the
+   command line, since it has no remote and cannot be deployed. */
+$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------
