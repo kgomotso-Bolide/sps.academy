@@ -184,7 +184,7 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    than "when it goes live", because a site left off this list is exactly how
    Fungi drifted 293 lines behind. Tracker is still named explicitly on the
    command line, since it has no remote and cannot be deployed. */
-$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T'];
+$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------
