@@ -126,6 +126,12 @@ $shared = [
     'profile.js', 'profile-page.js', 'pm-progress.js', 'materials.js',
     'quiz-widget.js', 'lessons.js',
 
+    // course-context.js joined on 16 Sep 2026, when a second qualification made
+    // "which course is this page about" a question rather than a constant. The
+    // four files above read the answer from it, and a copy of it that disagreed
+    // with them would file material and progress under the wrong course.
+    'course-context.js',
+
     // The graduate list. Centenary's people, not the client's, so it is the same
     // list on all four sites and there is no reason for four copies of it to
     // disagree about who has given consent. graduates.html is NOT here: like
@@ -149,11 +155,12 @@ $shared = [
     // own chrome, and neither is the .pg-* block in styles.css.
     'programmes.js',
 
-    // The registered curriculum. Identical in all four repositories and read by
-    // module.html, the pathway page and the Material admin page — one source of
-    // truth for the module codes, or the admin page offers slots for modules that
-    // no longer exist.
-    'pm-modules.js',
+    // The registered curricula — Project Manager, and Procurement Officer since
+    // 16 Sep 2026. Identical in every repository and read by module.html, the
+    // pathway page and the Material admin page — one source of truth for the
+    // module codes, or the admin page offers slots for modules that no longer
+    // exist. Generated from the provider's QCTO documents, never hand-edited.
+    'pm-modules.js', 'po-modules.js',
 
     // Server configuration and the tools.
     '.htaccess',
