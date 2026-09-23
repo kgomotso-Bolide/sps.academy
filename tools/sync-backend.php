@@ -155,12 +155,18 @@ $shared = [
     // own chrome, and neither is the .pg-* block in styles.css.
     'programmes.js',
 
-    // The registered curricula — Project Manager, and Procurement Officer since
-    // 16 Sep 2026. Identical in every repository and read by module.html, the
-    // pathway page and the Material admin page — one source of truth for the
-    // module codes, or the admin page offers slots for modules that no longer
-    // exist. Generated from the provider's QCTO documents, never hand-edited.
-    'pm-modules.js', 'po-modules.js',
+    // The registered curricula — Project Manager, Procurement Officer since
+    // 16 Sep 2026, and New Venture Creation since 23 Sep 2026. Identical in
+    // every repository and read by module.html, the pathway page and the
+    // Material admin page — one source of truth for the module codes, or the
+    // admin page offers slots for modules that no longer exist. Generated from
+    // the provider's own documents, never hand-edited.
+    //
+    // nvc-modules.js also carries the LABELS that keep a unit-standard
+    // qualification from being described in QCTO language — "knowledge module",
+    // "notional hours", "EISA". A stale copy of it would put the wrong words on
+    // a page rather than merely an old module title, so it travels with them.
+    'pm-modules.js', 'po-modules.js', 'nvc-modules.js',
 
     // Server configuration and the tools.
     '.htaccess',
