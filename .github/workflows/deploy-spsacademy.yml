@@ -84,6 +84,16 @@ jobs:
           case "$DIR" in
             *..*) echo "::error::server_dir must not contain '..' — got '$DIR'."; exit 1 ;;
           esac
+          # This repository must never be able to write into another academy's
+          # folder. Different company, different repository, different learners'
+          # personal information — and they are all siblings in one public_html,
+          # so the only thing between them is this list. The shape check above
+          # passes "public_html/fungiacademy" perfectly happily.
+          case "$DIR" in
+            public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy|public_html/trackeracademy|public_html/mtacademy|public_html/cricketsaacademy|public_html/inhanceacademy)
+              echo "::error::That is another academy's directory. This repository deploys only to public_html/spsacademy."
+              exit 1 ;;
+          esac
           echo "Target '$DIR' is a real subdirectory of the web root. Good."
 
       - name: Fail early if the credentials are missing
@@ -131,6 +141,12 @@ jobs:
           else
             echo "::warning::Could not fetch the client homepage beforehand; the after-check will be skipped."
           fi
+          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+                   "https://centenarynetworks.com/$nb/" || echo 000)
+            echo "before_$nb=$code" >> "$GITHUB_ENV"
+            echo "Neighbour $nb answered $code before this deploy."
+          done
 
       - name: Install lftp and sshpass
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp sshpass
@@ -201,6 +217,21 @@ jobs:
             fi
             echo "Client homepage unchanged."
           fi
+          # The other academies are other companies' learner records, sitting in
+          # sibling directories. If this deploy touched one of them, that has to
+          # stop the build.
+          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+                   "https://centenarynetworks.com/$nb/" || echo 000)
+            prev=$(printenv "before_$nb" || echo '')
+            echo "  neighbour $nb answers $code (was ${prev:-unknown})"
+            # A 404 is fine — that academy may not be deployed yet. A neighbour
+            # that WAS answering and has stopped is the thing worth failing for.
+            if [ "$prev" = "200" ] && [ "$code" != "200" ]; then
+              echo "::error::$nb stopped answering during this deploy. Check the target directory immediately."
+              exit 1
+            fi
+          done
           curl -sS --max-time 30 -o /dev/null -w 'client assets: %{http_code}\n' \
             https://centenarynetworks.com/assets/cn-logo.png || true
 
@@ -280,6 +311,28 @@ jobs:
             *'"in":false'*) ;;
             *) echo "::error::/account.php did not answer with a session probe."; fail=1 ;;
           esac
+          # The tenant check, and the one that matters most once there is more
+          # than one academy. If ~/private/spsacademy-config.php is missing
+          # or names the wrong tenant, every page still renders perfectly — it
+          # just renders another company's registrations and learners under this
+          # company's logo. Nothing errors, nothing 500s, and not one of the
+          # checks above would notice.
+          #
+          # Checked as "no OTHER academy's name appears", not "this one's does",
+          # because there are eight of them and the one you forget to name is the
+          # one that leaks.
+          home=$(curl -sS --max-time 30 "$base/contact" || echo '')
+          leak=""
+          for other in "Fungi Academy" "Maziv Academy" "Equinix Academy" "Tracker Academy" "M&amp;T Academy" "Cricket SA Academy" "Inhance Academy"; do
+            case "$home" in *"$other"*) leak="$leak $other" ;; esac
+          done
+          if [ -n "$leak" ]; then
+            echo "::error::This site's contact page is carrying another academy's branding ($leak). Check ~/private/spsacademy-config.php names the right tenant."
+            fail=1
+          else
+            echo "  tenant                 no other academy's branding on these pages"
+          fi
+
           # Server code must never be readable.
           for p in "/lib/db.php" "/schema/schema.mysql.sql" "/lib/bootstrap.php"; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
