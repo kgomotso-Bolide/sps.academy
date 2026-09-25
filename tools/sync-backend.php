@@ -209,9 +209,13 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
 
 /* M-T joined on 12 Sep 2026, the day it was stood up — added here at once rather
    than "when it goes live", because a site left off this list is exactly how
-   Fungi drifted 293 lines behind. Tracker is still named explicitly on the
-   command line, since it has no remote and cannot be deployed. */
-$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa'];
+   Fungi drifted 293 lines behind. Inhance joined on 25 Sep 2026 for the same
+   reason, on the day it was cloned and while it is still only a pitch: a site
+   that is not on this list is a site whose shared core stops moving, and
+   "we'll add it when they sign" is how that starts. Tracker is still named
+   explicitly on the command line, since it has no remote and cannot be
+   deployed. */
+$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa', '../inhance'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------

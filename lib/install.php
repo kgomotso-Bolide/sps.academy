@@ -116,6 +116,12 @@ function install_seed_tenants(?string $contact = null): int
            the Cricket World Cup volunteer portal Centenary also built for them,
            which is a separate application with its own database. */
         ['cricketsa', 'Cricket South Africa',            'Cricket SA Academy'],
+        /* Inhance Supply Chain Solutions, the eighth, started 25 Sep 2026 after
+           Kgomotso introduced them as a white-label prospect. Seeded everywhere
+           for the same reason as Tracker: the tenants table describes the
+           platform, not the installation, so if it is sold, standing the site up
+           is configuration rather than a migration. */
+        ['inhance', 'Inhance Supply Chain Solutions',    'Inhance Academy'],
     ];
 
     $added = 0;
