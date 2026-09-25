@@ -106,6 +106,20 @@ $shared = [
     // its library.
     'admin-classes.php', 'register.php',
 
+    // Live sessions, the logbook and the paper trail, 25 Sep 2026 — and all four
+    // files travel together for the reason at the top of this list.
+    //
+    // lib/sessions.php is required by admin-classes.php AND by my.php, both of
+    // which are already here, so a site that got the pages without it is a white
+    // screen on the learner dashboard rather than a missing feature.
+    //
+    // logbook.php is linked from the LEARNER nav in lib/chrome.php and admin-poe.php
+    // from the admin nav — both of those navs are synced, so leaving either page
+    // behind puts a nav link to a 404 on every other academy. lib/logbook.php
+    // carries both the logbook and the hand-in record and is hard-required by
+    // both pages.
+    'lib/sessions.php', 'lib/logbook.php', 'logbook.php', 'admin-poe.php',
+
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
     // produces, so a site without it silently offers a much smaller one.
