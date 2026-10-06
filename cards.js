@@ -29,7 +29,8 @@
   ];
   // An id with a slash is a photo of our own under images/; anything else is an Unsplash id.
   // The optional 4th item is background-position: the card is a wide 2:1 crop, so a photo with a person
-  // in it is anchored near the top or the face gets cropped out.
+  // in it is anchored near the top or the face gets cropped out. backgroundSize is set here because the
+  // card's inline "background:linear-gradient(...)" shorthand resets it to auto, which shows the photo at native size.
   var img=function(id){return id.indexOf("/")>-1?id:"https://images.unsplash.com/photo-"+id+"?auto=format&fit=crop&w=720&q=70";};
   var ARROW=' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;color:var(--accent)"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   document.querySelectorAll('.ccard').forEach(function(card){
@@ -41,7 +42,7 @@
     if(!hit) return;
     var slug=hit[1], photo=hit[2], pos=hit[3]||"center", href="course?c="+slug;
     var inner=card.querySelector('.ccard-img-inner'), imgWrap=card.querySelector('.ccard-img');
-    if(inner&&imgWrap){ var pre=new Image(); pre.onload=(function(inner,imgWrap,photo,pos){return function(){inner.style.backgroundPosition=pos;inner.style.backgroundImage="url('"+img(photo)+"')";inner.style.backgroundColor="#15131a";imgWrap.classList.add('has-photo');};})(inner,imgWrap,photo,pos); pre.src=img(photo); }
+    if(inner&&imgWrap){ var pre=new Image(); pre.onload=(function(inner,imgWrap,photo,pos){return function(){inner.style.backgroundSize="cover";inner.style.backgroundRepeat="no-repeat";inner.style.backgroundPosition=pos;inner.style.backgroundImage="url('"+img(photo)+"')";inner.style.backgroundColor="#15131a";imgWrap.classList.add('has-photo');};})(inner,imgWrap,photo,pos); pre.src=img(photo); }
     if(!h.querySelector('a')) h.innerHTML='<a href="'+href+'" style="color:inherit">'+h.innerHTML+'</a>';
     card.style.cursor='pointer';
     card.addEventListener('click',function(e){ if(e.target.closest('a,button'))return; location.href=href; });
