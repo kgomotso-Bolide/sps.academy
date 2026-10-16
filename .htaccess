@@ -71,6 +71,11 @@ DirectoryIndex index.html index.php
   RewriteCond %{REQUEST_URI} !/(fiston-nselike|sibusiso-seopela|tarryn-norris|taryn-mccormick)\.jpg$
   RewriteRule ^images/trainers/ - [R=404,L]
 
+  # The trainers page was taken down on 16 Oct 2026. The deploy mirror runs with
+  # delete_removed OFF, so the old trainers.html is still on the server even though
+  # it is gone from the repository; this makes it unreachable by name.
+  RewriteRule ^trainers(\.html)?/?$ - [R=404,L]
+
   # Force HTTPS. Registration posts personal information; it does not travel in
   # the clear. X-Forwarded-Proto is checked too because shared hosting often
   # terminates TLS at a proxy, where %{HTTPS} reads "off" on an https request.
