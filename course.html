@@ -149,11 +149,6 @@
 <script src="pm-modules.js?v=20260916"></script>
 <script src="po-modules.js?v=20260916"></script>
 <script src="nvc-modules.js?v=20260923"></script>
-<!-- Loaded here, BEFORE the catalogue script below, because that script calls
-     render() synchronously and the facilitator panel asks this file who may be
-     named. Loaded later, the check would silently find nothing and the panel
-     would quietly fall back to the academy-team wording. -->
-<script src="trainers.js?v=20260913"></script>
 <script>
   // Placeholder intro clip: "A Designer Interacting With a Chatbot" (Coverr).
   // Coverr licence: free for commercial use, no attribution required. Self-hosted
@@ -459,23 +454,6 @@
 
      draftSyllabus stays TRUE until Kgomotso signs it off and the material is in
      — the headings being real does not make the course ready to date. */
-  /* A named facilitator, for the courses that have one. Everything else falls
-     back to the academy-team wording in the markup — most of the catalogue is
-     delivered by whoever is free, and inventing a face for it would be worse
-     than saying so.
-
-     Only what a person has published about themselves goes here. The bio below
-     is drawn from the Waria Consulting profile, which is a marketing document
-     written to be shown, and from the qualifications on her CV. The client
-     savings figures, the schooling and the personal section of that CV are NOT
-     here: a CV is sent to be read, not to be published, and a facilitator bio
-     needs credentials rather than someone's sports. */
-  const FAC_WARIA={
-    name:"Tarryn Norris",
-    role:"Managing Director, Waria Consulting (Pty) Ltd · MCIPS",
-    bio:"Over twenty years in procurement, sourcing and operations across financial services and insurance — Hollard, Absa, First National Bank and Standard Bank — covering strategic sourcing, category management, tenders, contract and supplier relationship management. She founded Waria Consulting in 2017 and consults on procurement strategy and supplier development. MCIPS, through the Chartered Institute of Procurement & Supply; B.Com in Business Management and Marketing; currently reading for an MBA in Supply Chain."
-  };
-
   const MOD_PROC=[
     {t:"Procurement Fundamentals",lessons:["What procurement is for, and where the office sits","The procurement cycle, end to end","The language: RFQ, RFP, RFx, PO, SLA","Policy, process, and the approvals that bind you"]},
     {t:"Strategic Sourcing and Category Strategy",lessons:["Category spend analysis and segmentation","Building a commodity strategy and a category plan","Make or buy, and where outsourcing actually pays","Benchmarking, and a business case that gets approved"]},
@@ -508,9 +486,9 @@
        acc is deliberately unset: "Locally accredited" on this site means the
        QCTO accreditation named in the footer, and ECSA registration is neither
        that nor an NQF qualification. Saying so plainly is the whole job here. */
-    "engineering-candidacy":{title:"Engineering Candidacy Programme",cat:"Engineering",mode:"Online or in person",level:"Professional registration",img:"images/hero.jpg",draftSyllabus:true,steps:true,facilitator:{name:"Fiston Nselike"},regOpen:true,partsLabel:"Two routes, by experience",modules:MOD_CAND,facts:[["Programme type","Candidacy"],["Duration","1 to more than 3 years"],["Registration category","Professional Engineering Technician"],["Entry","N Diploma (TVET) or National Diploma in engineering"],["Delivery","Group and individual mentoring sessions"],["Registered by","ECSA, on its own assessment"]],learnNote:"Candidacy is not a syllabus. It is structured mentoring on the engineering work you are already doing, so that what you have done adds up to what ECSA asks of a candidate technician.",learn:["Where you stand against what ECSA asks of a candidate technician \u2014 the gap analysis comes first","Which of the projects you have worked on count as engineering work, and which do not","How to record experience so that it reads as evidence rather than as a job description","How your work maps to the competency outcomes for the category you are registering in","What reports, references and records ECSA asks a candidate to submit","How the professional review works, and how to prepare for it"],modNote:"Both routes begin with a gap analysis, because what you still need depends on the engineering work you have already done. The candidacy programme fills the gaps, and the last step is the application itself \u2014 which ECSA assesses.",certTitle:"Registration, not a certificate",certBody:"Finishing the candidacy programme does not register you. It prepares the application. Registration as a Professional Engineering Technician is the Engineering Council of South Africa\u2019s decision, on its own assessment of your evidence.",lead:"The structured route to registering with the Engineering Council of South Africa as a Professional Engineering Technician. It is open to technicians holding a National N Diploma (TVET) or a National Diploma in engineering, and it runs on the engineering work you are already doing: a gap analysis first, then mentoring in group and individual sessions until your projects and experience match what ECSA asks of a candidate, then the registration application itself. Registration is ECSA\u2019s own decision \u2014 this programme prepares you for it and does not award it. Not an NQF qualification, and it carries no credits."},
+    "engineering-candidacy":{title:"Engineering Candidacy Programme",cat:"Engineering",mode:"Online or in person",level:"Professional registration",img:"images/hero.jpg",draftSyllabus:true,steps:true,regOpen:true,partsLabel:"Two routes, by experience",modules:MOD_CAND,facts:[["Programme type","Candidacy"],["Duration","1 to more than 3 years"],["Registration category","Professional Engineering Technician"],["Entry","N Diploma (TVET) or National Diploma in engineering"],["Delivery","Group and individual mentoring sessions"],["Registered by","ECSA, on its own assessment"]],learnNote:"Candidacy is not a syllabus. It is structured mentoring on the engineering work you are already doing, so that what you have done adds up to what ECSA asks of a candidate technician.",learn:["Where you stand against what ECSA asks of a candidate technician \u2014 the gap analysis comes first","Which of the projects you have worked on count as engineering work, and which do not","How to record experience so that it reads as evidence rather than as a job description","How your work maps to the competency outcomes for the category you are registering in","What reports, references and records ECSA asks a candidate to submit","How the professional review works, and how to prepare for it"],modNote:"Both routes begin with a gap analysis, because what you still need depends on the engineering work you have already done. The candidacy programme fills the gaps, and the last step is the application itself \u2014 which ECSA assesses.",certTitle:"Registration, not a certificate",certBody:"Finishing the candidacy programme does not register you. It prepares the application. Registration as a Professional Engineering Technician is the Engineering Council of South Africa\u2019s decision, on its own assessment of your evidence.",lead:"The structured route to registering with the Engineering Council of South Africa as a Professional Engineering Technician. It is open to technicians holding a National N Diploma (TVET) or a National Diploma in engineering, and it runs on the engineering work you are already doing: a gap analysis first, then mentoring in group and individual sessions until your projects and experience match what ECSA asks of a candidate, then the registration application itself. Registration is ECSA\u2019s own decision \u2014 this programme prepares you for it and does not award it. Not an NQF qualification, and it carries no credits."},
     "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
-    "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,facilitator:FAC_WARIA,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
+    "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
     "ai-tools-productivity":{title:"AI Tools for Productivity",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1581091226825-a6a2a5aee158",lead:"Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools and workflow automation."},
     "responsible-ai":{title:"Responsible & Ethical AI Use",cat:"Compliance",mode:"Online or in person",level:"Intermediate",img:"1620712943543-bcc4688e7485",lead:"Using AI safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of AI in a professional setting."},
@@ -628,37 +606,6 @@
       : '';
 
     document.getElementById('c-rpl').innerHTML = draftNote + rplNote + pathNote + planNote;
-
-    /* Named facilitator, where the course record carries one AND that person is
-       on the published trainer list.
-
-       THE SECOND HALF OF THAT IS NOT BELT AND BRACES. This panel had no consent
-       check until 24 Aug 2026, and the result was that Tarryn's name, employer
-       and qualifications went live on four sites while /trainers — which does
-       have the check — was correctly publishing nobody. The record of who may be
-       named lives in trainers.js and nowhere else; this reads it.
-
-       trainers.js is loaded above this script and publishes window.ACADEMY_TRAINERS.
-       If it ever fails to load, the lookup finds nothing and the panel keeps the
-       academy-team wording already in the markup. It fails closed, which is the
-       only acceptable direction for this particular check. */
-    if(c.facilitator){
-      const f=c.facilitator;
-      /* The published trainer record is the one copy of this person.
-         A course record may carry just {name:...} and take the role and
-         the bio from there — two copies of somebody's job title is two
-         things that can disagree, and the trainers page is the one they
-         consented to. A record that states its own still wins, which is
-         how the procurement facilitator keeps her course-specific bio. */
-      const trainer=(window.ACADEMY_TRAINERS||[]).find(t=>t.name===f.name);
-      if(trainer){
-        document.getElementById('c-fac-name').textContent='Facilitated by '+f.name;
-        document.getElementById('c-fac-role').textContent=
-          f.role||[trainer.org,trainer.creds].filter(Boolean).join(' · ');
-        const bio=f.bio||trainer.bio||'';
-        if(bio)document.getElementById('c-fac-bio').textContent=bio;
-      }
-    }
 
     /* A locked course still renders — people arrive on bookmarks and on the
        legacy /ai-fundamentals redirect — but it must not offer enrolment. The

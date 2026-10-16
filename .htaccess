@@ -68,8 +68,9 @@ DirectoryIndex index.html index.php
   #
   # Relative, like every rule in this file — no leading slash — so it holds in
   # the folder layout and at a document root both.
-  RewriteCond %{REQUEST_URI} !/(fiston-nselike|sibusiso-seopela|tarryn-norris|taryn-mccormick)\.jpg$
   RewriteRule ^images/trainers/ - [R=404,L]
+  # The trainer list is not published: the page, its script and the photographs are all unreachable.
+  RewriteRule ^trainers\.js$ - [R=404,L]
 
   # The trainers page was taken down on 16 Oct 2026. The deploy mirror runs with
   # delete_removed OFF, so the old trainers.html is still on the server even though
