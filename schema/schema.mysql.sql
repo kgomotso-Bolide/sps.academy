@@ -844,6 +844,12 @@ CREATE TABLE IF NOT EXISTS logbook_entries (
 -- ---------------------------------------------------------------------------
 -- WHERE THE PAPER IS
 --
+-- SUPERSEDED IN PART ON 7 OCT 2026. The workbook and the practical workbook are now
+-- uploaded as Word documents and stored in poe_files, so for those two this table
+-- holds the STATUS only and the argument below no longer applies. The logbook is
+-- still on paper and still lives here alone. The rest of this note is how it was
+-- decided on 25 Sep and is kept because the status design still stands.
+--
 -- Added 25 Sep 2026. Every submission on this qualification is physical: the
 -- learner completes the workbook and the logbook on paper, hands them to their
 -- facilitator, and the facilitator builds the portfolio of evidence that goes
@@ -920,4 +926,76 @@ CREATE TABLE IF NOT EXISTS quiz_attempt_grants (
   CONSTRAINT fk_qgrant_quiz   FOREIGN KEY (quiz_id)    REFERENCES quizzes (id),
   CONSTRAINT fk_qgrant_user   FOREIGN KEY (user_id)    REFERENCES users (id),
   CONSTRAINT fk_qgrant_staff  FOREIGN KEY (granted_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- THE NOTICE BOARD
+--
+-- Added 7 Oct 2026. Somewhere staff can tell learners things: a class that will
+-- be held in Google Classroom, a changed date, a reminder that a workbook is
+-- due. course_slug NULL means everybody on the academy, a slug means learners
+-- enrolled on that course only.
+--
+-- link_url is optional and holds what a notice most often exists to carry: the
+-- address of the Classroom or Meet session. It is a link and nothing else, for
+-- the same reason class_links is. The platform does not model the meeting.
+--
+-- expires_on lets a notice about last Tuesday's class go quiet by itself without
+-- anybody having to remember to delete it. NULL means it stays until removed.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS notices (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)      NULL,
+  title       VARCHAR(160) NOT NULL,
+  body        TEXT         NOT NULL,
+  link_url    VARCHAR(500)     NULL,
+  link_label  VARCHAR(80)      NULL,
+  pinned      TINYINT(1)   NOT NULL DEFAULT 0,
+  expires_on  DATE             NULL,
+  created_at  DATETIME     NOT NULL,
+  created_by  INT UNSIGNED     NULL,
+  updated_at  DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_notice_feed (tenant_id, course_slug, created_at),
+  CONSTRAINT fk_notice_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_notice_user   FOREIGN KEY (created_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- WORKBOOKS SUBMITTED ON THE PLATFORM
+--
+-- Added 7 Oct 2026. On 25 Sep every submission was physical and poe_submissions
+-- only said where the paper was. From now the workbook and the practical
+-- workbook are completed as Word documents and uploaded here, so this table
+-- holds the file itself. The logbook is still typed here, printed and signed.
+--
+-- APPEND-ONLY. A resubmission is a new row, never an overwrite, so what the
+-- facilitator assessed is still on file after the learner sends a better one.
+-- The newest row for a slot is the current submission.
+--
+-- The status of a slot (handed in, assessed, returned) is NOT here. It stays in
+-- poe_submissions, which an upload writes to and a facilitator updates, so the
+-- Files grid facilitators already use shows both paper and uploads.
+--
+-- The bytes live outside the web root, named by a random id with no extension,
+-- exactly as material_files does it. disk_name is that id.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS poe_files (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id     INT UNSIGNED NOT NULL,
+  user_id       INT UNSIGNED NOT NULL,
+  course_slug   VARCHAR(60)  NOT NULL,
+  module_code   VARCHAR(20)  NOT NULL,
+  kind          VARCHAR(20)  NOT NULL,
+  disk_name     VARCHAR(64)  NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  mime_type     VARCHAR(100) NOT NULL,
+  size_bytes    INT UNSIGNED NOT NULL,
+  submitted_at  DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_poefile_slot (tenant_id, user_id, course_slug, module_code, kind),
+  KEY ix_poefile_course (tenant_id, course_slug, module_code),
+  CONSTRAINT fk_poefile_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_poefile_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

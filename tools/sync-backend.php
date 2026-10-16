@@ -120,6 +120,17 @@ $shared = [
     // both pages.
     'lib/sessions.php', 'lib/logbook.php', 'logbook.php', 'admin-poe.php',
 
+    // The notice board and workbooks submitted on the platform, 7 Oct 2026. Same
+    // rule as above: notices.php and submit.php are linked from the LEARNER nav in
+    // lib/chrome.php and admin-notices.php from the admin nav, so a site that gets
+    // the nav without them has links to 404s. poe-file.php is how a submitted file
+    // is read back and lib/submissions.php is hard-required by it, by submit.php and
+    // by admin-poe.php. NOTE the schema changes (notices, poe_files): a site that
+    // receives these also needs its /setup run, or the pages show a notice instead
+    // of working.
+    'lib/notices.php', 'notices.php', 'admin-notices.php',
+    'lib/submissions.php', 'submit.php', 'poe-file.php',
+
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
     // produces, so a site without it silently offers a much smaller one.

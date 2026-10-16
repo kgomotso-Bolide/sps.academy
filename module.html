@@ -44,7 +44,7 @@
     <div class="sec-head reveal">
       <span class="eyebrow">Your documents</span>
       <h2>What you work from</h2>
-      <p id="m-docsintro">The learner guide carries the full notes for this module; the workbook holds the activities and self-assessments you hand to your facilitator for your portfolio of evidence.</p>
+      <p id="m-docsintro">The learner guide carries the full notes for this module; the workbook holds the activities and self-assessments. Complete the workbook in Word and <a href="submit?c=project-management">submit it on the platform</a> as part of your portfolio of evidence.</p>
     </div>
     <div class="dgrid two-up reveal" id="m-docs"></div>
     <p class="sg-caveat reveal" style="max-width:820px;margin-top:26px"><strong>These are shared with you because you're enrolled, and every open is logged.</strong> They're Centenary's material — some hosted here, some at Centenary directly — so the links above go to the controlled copy rather than a public download. If a link isn't working for you, <a href="mailto:kgomotso@centenarynetworks.com">ask HR</a> — don't pass copies around, because the version you're assessed against has to be the current one.</p>
@@ -240,7 +240,7 @@
          with a Workplace Guide, and a card labelled "Workbook" would send a
          learner to HR asking for a document by a name nobody there uses. */
       ? docCard(CUR.workbookName||'Learner Workbook',
-          CUR.workbookDesc||'The activities, exercises and self-assessments for this module. Completed and handed to your facilitator.',
+          CUR.workbookDesc||'The activities, exercises and self-assessments for this module. Complete it in Word, then submit it on the platform from "Submit work".',
           m.docs.workbook)
       : '');
   document.getElementById('m-docs').classList.toggle('two-up', !!CUR.workbooks);
@@ -258,6 +258,14 @@
       'again. Ask the academy what evidence they would want to see.';
   }
 
+  /* Uploading a workbook on the platform is built for the Project Manager only
+     (lib/submissions.php, SUBMISSION_WORKBOOK_COURSES). Another pack's workbook is
+     still handed to the facilitator, so its intro keeps the original wording. */
+  if(CUR.workbooks && SLUG!=='project-management'){
+    document.getElementById('m-docsintro').textContent=
+      'The learner guide carries the full notes for this module; the workbook holds the activities '+
+      'and self-assessments you hand to your facilitator for your portfolio of evidence.';
+  }
   if(!CUR.workbooks){
     document.getElementById('m-docsintro').textContent=
       'The learner guide carries the full notes for this module — every topic written out, '+

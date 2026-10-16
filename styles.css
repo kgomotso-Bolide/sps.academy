@@ -2147,6 +2147,30 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
   .pg-back{width:100%;justify-content:center}
 }
 
+/* ---- Notice board and workbook submissions (7 Oct 2026) ---- */
+.nb-rooms{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 22px;padding:14px 18px;border:1px solid var(--line);border-radius:12px;background:var(--bg-soft)}
+.nb-rooms strong{color:var(--grey);margin-right:4px}
+.nb-list{display:grid;gap:16px;max-width:820px}
+.nb-card{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:12px;padding:20px 24px;background:#fff}
+.nb-card.is-pinned{border-left-color:var(--orange);background:var(--orange-tint)}
+.nb-card h3{margin:0 0 4px;font-size:19px;color:var(--grey)}
+.nb-meta{font-size:13px;color:var(--ink-soft);margin:0 0 10px}
+.nb-body{font-size:15.5px;line-height:1.7;margin:0 0 14px}
+.nb-pin{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--orange);border-radius:20px;padding:2px 9px;margin-right:6px}
+.box-note{max-width:820px;margin:0 0 26px;padding:16px 22px;border-left:5px solid var(--green);background:var(--green-tint);border-radius:0 12px 12px 0}
+.box-note ol{margin:8px 0 8px 20px}.box-note a{color:var(--orange-deep);font-weight:700}
+.sub-list{display:grid;gap:14px;max-width:900px;margin-bottom:30px}
+.sub-card{border:1px solid var(--line);border-radius:12px;padding:16px 20px;background:#fff}
+.sub-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 14px;margin-bottom:8px}
+.sub-links,.sub-last{font-size:14px;margin:0 0 8px;color:var(--ink-soft)}
+.sub-links a,.sub-last a{color:var(--orange-deep);font-weight:700}
+.sub-form{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:6px}
+.sub-form input[type=file]{flex:1 1 260px;min-width:0;font-size:14px}
+.my-notices{margin:0 0 28px}
+.my-notices .nb-card{padding:14px 20px}
+.poe-dl{display:inline-block;margin-left:4px;font-weight:800;color:var(--orange-deep);text-decoration:none}
+.poe-file{font-size:13px;margin:0 0 8px}.poe-file a{color:var(--orange-deep);font-weight:700;word-break:break-all}
+
 /* ---- Hyper-personalised learning band (landing page) ---- */
 .hp{background:var(--bg-soft);padding:72px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .hp-head{max-width:760px;margin:0 auto 38px;text-align:center}

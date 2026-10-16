@@ -433,3 +433,37 @@ CREATE TABLE IF NOT EXISTS quiz_attempt_grants (
   granted_by INTEGER     NULL REFERENCES users (id)
 );
 CREATE INDEX IF NOT EXISTS ix_qgrant_quiz_user ON quiz_attempt_grants (tenant_id, quiz_id, user_id);
+
+-- The notice board and workbooks submitted on the platform. See the long notes
+-- in schema.mysql.sql.
+CREATE TABLE IF NOT EXISTS notices (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT        NULL,
+  title       TEXT    NOT NULL,
+  body        TEXT    NOT NULL,
+  link_url    TEXT        NULL,
+  link_label  TEXT        NULL,
+  pinned      INTEGER NOT NULL DEFAULT 0,
+  expires_on  TEXT        NULL,
+  created_at  TEXT    NOT NULL,
+  created_by  INTEGER     NULL REFERENCES users (id),
+  updated_at  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_notice_feed ON notices (tenant_id, course_slug, created_at);
+
+CREATE TABLE IF NOT EXISTS poe_files (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants (id),
+  user_id       INTEGER NOT NULL REFERENCES users (id),
+  course_slug   TEXT    NOT NULL,
+  module_code   TEXT    NOT NULL,
+  kind          TEXT    NOT NULL,
+  disk_name     TEXT    NOT NULL,
+  original_name TEXT    NOT NULL,
+  mime_type     TEXT    NOT NULL,
+  size_bytes    INTEGER NOT NULL,
+  submitted_at  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_poefile_slot   ON poe_files (tenant_id, user_id, course_slug, module_code, kind);
+CREATE INDEX IF NOT EXISTS ix_poefile_course ON poe_files (tenant_id, course_slug, module_code);

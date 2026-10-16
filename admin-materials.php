@@ -37,6 +37,7 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/materials.php';
 require __DIR__ . '/lib/material_files.php';
+require __DIR__ . '/lib/submissions.php';   // the practical modules, which the curriculum file does not carry
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_staff();   // trainers may read this page — see require_write() below
@@ -369,14 +370,28 @@ $uploadCapBytes = material_file_effective_upload_cap();
                              : Math.round(n / 1024) + ' KB';
   }
 
+  /* The practical modules (PM-01 to PM-13) are not in the curriculum file. They carry the
+     practical manual and the practical workbook the learner completes and submits, and
+     nothing else, so they get their own two slots. */
+  var PRACT = <?= json_encode(array_map(
+      fn($id, $t) => ['id' => $id, 'title' => $t, 'practical' => true],
+      array_keys(submission_practicals($course)), array_values(submission_practicals($course))
+  ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  var PKINDS = [
+    ['guide',    'Practical manual',   'What the practical asks you to do'],
+    ['workbook', 'Practical workbook', 'The Word document the learner completes and submits']
+  ];
+  MODS = MODS.concat(PRACT);
+
   rows.innerHTML = MODS.map(function (m) {
+    var kinds = m.practical ? PKINDS : KINDS;
     var have = HAVE[m.id] || {};
-    var slots = KINDS.filter(function (k) {
+    var slots = kinds.filter(function (k) {
       var v = have[k[0]];
       return v && (v.url || v.file);
     });
     var n = slots.length;
-    var fields = KINDS.map(function (k) {
+    var fields = kinds.map(function (k) {
       var v      = have[k[0]] || { url: '', file: null };
       var id     = m.id + '-' + k[0];
       var status = v.file
@@ -400,7 +415,7 @@ $uploadCapBytes = material_file_effective_upload_cap();
        somebody came here to fill in. */
     return '<details class="mat-mod"' + (n ? '' : ' open') + '>' +
       '<summary><span class="mat-code">' + esc(m.id) + '</span> ' + esc(m.title) +
-        '<span class="mat-have' + (n ? ' on' : '') + '">' + n + ' of 3</span></summary>' +
+        '<span class="mat-have' + (n ? ' on' : '') + '">' + n + ' of ' + kinds.length + '</span></summary>' +
       '<div class="mat-fields">' + fields + '</div></details>';
   }).join('');
 

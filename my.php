@@ -34,6 +34,7 @@ require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
 require __DIR__ . '/lib/classes.php';    // class_when(), for the live-session list
 require __DIR__ . '/lib/sessions.php';   // where the live teaching actually happens
+require __DIR__ . '/lib/notices.php';    // the latest few notices, above the live sessions
 require __DIR__ . '/lib/curriculum.php';   // groups the topic quizzes by module, below
 require __DIR__ . '/lib/chrome.php';
 
@@ -119,6 +120,31 @@ function when_local(?string $utc): string
     <?php endif; ?>
     <?php if ($notice !== ''): ?><p class="adm-notice" role="status"><?= e($notice) ?></p><?php endif; ?>
     <?php if ($error  !== ''): ?><p class="form-err"   role="alert" ><?= e($error)  ?></p><?php endif; ?>
+
+    <?php
+      /* ---- Notice board (7 Oct 2026) ---------------------------------------
+         The latest few notices, so a class announced this morning is the first
+         thing a learner sees rather than something they have to go and find.
+         The full board, with everything older, is notices.php. */
+      $latestNotices = array_slice(db_optional(fn() => notices_for_learner((int) $me['id'], 3), []) ?: [], 0, 3);
+    ?>
+    <?php if ($latestNotices): ?>
+      <h3 class="my-h">Notice board</h3>
+      <div class="my-notices nb-list">
+        <?php foreach ($latestNotices as $n): ?>
+          <article class="nb-card<?= !empty($n['pinned']) ? ' is-pinned' : '' ?>">
+            <?php if (!empty($n['pinned'])): ?><span class="nb-pin">Pinned</span><?php endif; ?>
+            <strong><?= e((string) $n['title']) ?></strong>
+            <p class="nb-meta"><?= e(notice_audience($n)) ?> · <?= e(notice_when((string) $n['created_at'])) ?></p>
+            <div class="nb-body"><?= nl2br(e((string) $n['body'])) ?></div>
+            <?php if (!empty($n['link_url'])): ?>
+              <a class="btn btn-primary" href="<?= e((string) $n['link_url']) ?>" target="_blank" rel="noopener"><?= e((string) ($n['link_label'] ?? 'Open the link')) ?> →</a>
+            <?php endif; ?>
+          </article>
+        <?php endforeach; ?>
+        <p><a href="notices">See the whole notice board →</a></p>
+      </div>
+    <?php endif; ?>
 
     <?php
       /* ---- Live sessions (25 Sep 2026) -------------------------------------
@@ -232,6 +258,7 @@ function when_local(?string $utc): string
             <?php if ($slug === 'project-management'): ?>
               <div class="my-actions">
                 <a class="btn btn-primary" href="pm-schedule">My study plan</a>
+                <a class="btn btn-primary" href="<?= e('submit?c=' . rawurlencode($slug)) ?>">Submit my workbooks</a>
                 <a class="btn btn-ghost" href="pm-progress">Progress report for my manager</a>
                 <a class="btn btn-ghost" href="pm-pathway">How this fits with Google</a>
               </div>

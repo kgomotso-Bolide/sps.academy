@@ -211,6 +211,8 @@ function chrome_nav(string $variant, array $o = []): void
         $here = (string) ($o['active'] ?? 'my');
         echo '      <a href="my"' . ($here === 'my' ? ' class="active"' : '') . '>My learning</a>' . "\n";
         echo '      <a href="logbook"' . ($here === 'logbook' ? ' class="active"' : '') . '>My logbook</a>' . "\n";
+        echo '      <a href="submit"' . ($here === 'submit' ? ' class="active"' : '') . '>Submit work</a>' . "\n";
+        echo '      <a href="notices"' . ($here === 'notices' ? ' class="active"' : '') . '>Notice board</a>' . "\n";
         /* A trainer needs the same way through from the learner pages that an
            administrator has, or the only route to their own page is typing the
            URL. Two keys rather than one so the link can say where it goes. */
@@ -253,6 +255,9 @@ function chrome_nav(string $variant, array $o = []): void
            rather than "POE" because that is the word used out loud about the
            physical folder this page tracks. */
         echo '      <a href="admin-poe"' . $on('poe') . '>Files</a>' . "\n";
+        /* Offered to both: an admin posts to anybody and a facilitator to the courses
+           they are assigned to. See lib/notices.php for why that is the narrow kind. */
+        echo '      <a href="admin-notices"' . $on('notices') . '>Notices</a>' . "\n";
         /* HR only, on Kgomotso's instruction of 25 Aug 2026 — it is in the admin
            nav and nowhere else. It was briefly in the public footer; if you find
            yourself adding it back to the 'site' variant above, re-read the note

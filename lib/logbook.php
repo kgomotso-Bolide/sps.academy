@@ -43,7 +43,7 @@ defined('APP_BOOTED') or exit('lib/logbook.php is not a page.');
 const LOGBOOK_MAX_ROWS = 2000;
 
 /** What goes in and out of a facilitator's hands. Constrained in PHP, per the schema note. */
-const POE_KINDS = ['workbook', 'logbook'];
+const POE_KINDS = ['workbook', 'practical', 'logbook'];
 
 /* handed_in → assessed → returned. Only ever set by staff, and never inferred:
    a workbook that was handed in and lost is not "assessed", and the register's
@@ -52,7 +52,7 @@ const POE_STATUSES = ['handed_in', 'assessed', 'returned'];
 
 function poe_kind_label(string $kind): string
 {
-    return ['workbook' => 'Workbook', 'logbook' => 'Logbook'][$kind] ?? $kind;
+    return ['workbook' => 'Workbook', 'practical' => 'Practical workbook', 'logbook' => 'Logbook'][$kind] ?? $kind;
 }
 
 /**

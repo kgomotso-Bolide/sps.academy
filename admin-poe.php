@@ -37,6 +37,8 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/curriculum.php';
 require __DIR__ . '/lib/logbook.php';
+require __DIR__ . '/lib/material_files.php';   // submissions.php shares its size and upload helpers
+require __DIR__ . '/lib/submissions.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_staff();
@@ -100,6 +102,8 @@ $learners = $course !== ''
       ), []) ?: [])
     : [];
 $have = $course !== '' ? (db_optional(fn() => poe_for_course($course), []) ?: []) : [];
+$practicals = $course !== '' ? submission_practicals($course) : [];
+$uploads    = $course !== '' ? (db_optional(fn() => submission_latest_for_course($course), []) ?: []) : [];
 $mayWrite = $course !== '' && poe_may_record($course, $me);
 
 /* One cell, opened for editing: ?cell=<userId>:<moduleCode>:<kind>. A form per
@@ -118,12 +122,48 @@ audit('poe.viewed', 'poe_submissions', null, $course . ' — ' . count($learners
  * because an include in the web root is a file the server can be asked for
  * directly, and this markup is not a page.
  */
+function poe_cell(int $userId, string $code, string $kind, string $course, array $have,
+                  array $uploads, string $openCell, bool $mayWrite): void
+{
+    $cell = $userId . ':' . $code . ':' . $kind;
+    $row  = $have[$cell] ?? null;
+    $file = $uploads[$cell] ?? null;
+    ?>
+    <td class="poe-cell<?= $row ? ' poe-' . e((string) $row['status']) : '' ?>">
+      <?php if ($openCell === $cell && $mayWrite): ?>
+        <?php poe_cell_form($cell, $course, $userId, $code, $kind, $row, $file); ?>
+      <?php elseif ($row): ?>
+        <a class="poe-mark" href="<?= e($mayWrite ? poe_qs(['cell' => $cell]) : poe_qs()) ?>"
+           title="<?= e(poe_status_label((string) $row['status'])
+                        . ($row['on_date'] ? ' — ' . (string) $row['on_date'] : '')
+                        . ($row['note'] ? ' — ' . (string) $row['note'] : '')) ?>">
+          <?= e(poe_short((string) $row['status'])) ?>
+        </a>
+        <?php if ($file): ?>
+          <a class="poe-dl" href="<?= e('poe-file?id=' . (int) $file['id']) ?>" title="Download <?= e((string) $file['original_name']) ?>">&darr;</a>
+        <?php endif; ?>
+      <?php elseif ($mayWrite): ?>
+        <a class="poe-empty" href="<?= e(poe_qs(['cell' => $cell])) ?>"
+           title="Not handed in — click to record it">+</a>
+      <?php else: ?>
+        <span class="poe-empty">—</span>
+      <?php endif; ?>
+    </td>
+    <?php
+}
+
 function poe_cell_form(string $cell, string $course, int $userId, string $moduleCode,
-                       string $kind, ?array $row): void
+                       string $kind, ?array $row, ?array $file = null): void
 {
     $status = (string) ($row['status'] ?? 'handed_in');
     $date   = (string) ($row['on_date'] ?? gmdate('Y-m-d'));
     ?>
+    <?php if ($file): ?>
+      <p class="poe-file">
+        <a href="<?= e('poe-file?id=' . (int) $file['id']) ?>"><?= e((string) $file['original_name']) ?></a><br>
+        <span class="adm-sub">Submitted online <?= e(submission_when((string) $file['submitted_at'])) ?></span>
+      </p>
+    <?php endif; ?>
     <form method="POST" class="poe-form">
       <?= csrf_field() ?>
       <input type="hidden" name="course" value="<?= e($course) ?>">
@@ -178,9 +218,11 @@ function poe_qs(array $over = []): string
     </div>
 
     <div class="mat-intro">
-      <p>Workbooks and logbooks are handed in on paper and filed into each learner's portfolio
-         of evidence. This page is the record of where that paper is — nothing is submitted or
-         assessed here. An empty cell means not handed in.</p>
+      <p>Workbooks and practical workbooks are completed as Word documents and submitted by the
+         learner on the platform. A cell shows <em>In</em> as soon as one arrives, with an arrow
+         to download the latest version. Open a cell to mark it assessed, or return it so the
+         learner can send a better one. Logbooks are typed on the platform, printed and signed,
+         so they are still recorded here by hand. An empty cell means not handed in.</p>
       <?php if (!$mayWrite && $course !== ''): ?>
         <p>Your account can read this page. Hand-ins are recorded by the facilitator the paper
            was given to, or by the academy.</p>
@@ -228,6 +270,9 @@ function poe_qs(array $over = []): string
               <?php foreach ($modules as $mid => $m): ?>
                 <th title="<?= e((string) $m['title']) ?>"><?= e((string) $mid) ?></th>
               <?php endforeach; ?>
+              <?php foreach ($practicals as $pid => $ptitle): ?>
+                <th title="Practical workbook — <?= e($ptitle) ?>"><?= e($pid) ?></th>
+              <?php endforeach; ?>
               <th>Logbook</th>
             </tr>
           </thead>
@@ -240,27 +285,10 @@ function poe_qs(array $over = []): string
                 </td>
 
                 <?php foreach ($modules as $mid => $m): ?>
-                  <?php
-                    $cell = (int) $l['id'] . ':' . (string) $mid . ':workbook';
-                    $row  = $have[$cell] ?? null;
-                  ?>
-                  <td class="poe-cell<?= $row ? ' poe-' . e((string) $row['status']) : '' ?>">
-                    <?php if ($openCell === $cell && $mayWrite): ?>
-                      <?php poe_cell_form($cell, $course, (int) $l['id'], (string) $mid, 'workbook', $row); ?>
-                    <?php elseif ($row): ?>
-                      <a class="poe-mark" href="<?= e($mayWrite ? poe_qs(['cell' => $cell]) : poe_qs()) ?>"
-                         title="<?= e(poe_status_label((string) $row['status'])
-                                      . ($row['on_date'] ? ' — ' . (string) $row['on_date'] : '')
-                                      . ($row['note'] ? ' — ' . (string) $row['note'] : '')) ?>">
-                        <?= e(poe_short((string) $row['status'])) ?>
-                      </a>
-                    <?php elseif ($mayWrite): ?>
-                      <a class="poe-empty" href="<?= e(poe_qs(['cell' => $cell])) ?>"
-                         title="Not handed in — click to record it">+</a>
-                    <?php else: ?>
-                      <span class="poe-empty">—</span>
-                    <?php endif; ?>
-                  </td>
+                  <?php poe_cell((int) $l['id'], (string) $mid, 'workbook', $course, $have, $uploads, $openCell, $mayWrite); ?>
+                <?php endforeach; ?>
+                <?php foreach ($practicals as $pid => $ptitle): ?>
+                  <?php poe_cell((int) $l['id'], $pid, 'practical', $course, $have, $uploads, $openCell, $mayWrite); ?>
                 <?php endforeach; ?>
 
                 <?php
