@@ -110,7 +110,6 @@
         <h3 id="c-fac-name">Facilitated by the SPS Academy team</h3>
         <div class="role" id="c-fac-role">AI Skills &amp; Workforce Development</div>
         <p id="c-fac-bio">Your courses are delivered by experienced facilitators. Lessons are practical and built around the work we do here — designed so anyone at SPS can follow along, whatever your technical background.</p>
-        <a id="c-fac-more" href="trainers" hidden style="display:inline-block;margin-top:12px;font-size:13.5px;font-weight:700;color:var(--orange-deep);text-decoration:underline">Meet the trainers</a>
       </div>
     </div>
   </div>
@@ -658,7 +657,6 @@
           f.role||[trainer.org,trainer.creds].filter(Boolean).join(' · ');
         const bio=f.bio||trainer.bio||'';
         if(bio)document.getElementById('c-fac-bio').textContent=bio;
-        document.getElementById('c-fac-more').hidden=false;
       }
     }
 
