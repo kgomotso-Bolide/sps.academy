@@ -180,7 +180,6 @@ function chrome_nav(string $variant, array $o = []): void
            styles.css) into a target repo BEFORE syncing chrome.php into it, or
            this link 404s on that site. Same footing as the Graduates link below,
            which has always had the same requirement. */
-        echo '      <a href="trainers" data-nav="trainers">Trainers</a>' . "\n";
         echo '      <a href="graduates" data-nav="graduates">Graduates</a>' . "\n";
         echo '      <a href="contact" data-nav="contact"' . $on('contact') . '>Contact</a>' . "\n";
         echo '      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile">'
