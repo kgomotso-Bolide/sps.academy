@@ -90,7 +90,7 @@ jobs:
           # so the only thing between them is this list. The shape check above
           # passes "public_html/fungiacademy" perfectly happily.
           case "$DIR" in
-            public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy|public_html/trackeracademy|public_html/mtacademy|public_html/cricketsaacademy|public_html/inhanceacademy)
+            public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy|public_html/trackeracademy|public_html/mtacademy|public_html/cricketsaacademy|public_html/inhanceacademy|public_html/angloamericanacademy|public_html/altcapitalpartnersacademy)
               echo "::error::That is another academy's directory. This repository deploys only to public_html/spsacademy."
               exit 1 ;;
           esac
@@ -141,7 +141,7 @@ jobs:
           else
             echo "::warning::Could not fetch the client homepage beforehand; the after-check will be skipped."
           fi
-          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy; do
+          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy angloamericanacademy altcapitalpartnersacademy; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
                    "https://centenarynetworks.com/$nb/" || echo 000)
             echo "before_$nb=$code" >> "$GITHUB_ENV"
@@ -220,7 +220,7 @@ jobs:
           # The other academies are other companies' learner records, sitting in
           # sibling directories. If this deploy touched one of them, that has to
           # stop the build.
-          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy; do
+          for nb in fungiacademy mazivacademy equinixacademy trackeracademy mtacademy cricketsaacademy inhanceacademy angloamericanacademy altcapitalpartnersacademy; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
                    "https://centenarynetworks.com/$nb/" || echo 000)
             prev=$(printenv "before_$nb" || echo '')
@@ -323,7 +323,7 @@ jobs:
           # one that leaks.
           home=$(curl -sS --max-time 30 "$base/contact" || echo '')
           leak=""
-          for other in "Fungi Academy" "Maziv Academy" "Equinix Academy" "Tracker Academy" "M&amp;T Academy" "Cricket SA Academy" "Inhance Academy"; do
+          for other in "Fungi Academy" "Maziv Academy" "Equinix Academy" "Tracker Academy" "M&amp;T Academy" "Cricket SA Academy" "Inhance Academy" "Anglo American Academy" "ALT Capital Partners Academy"; do
             case "$home" in *"$other"*) leak="$leak $other" ;; esac
           done
           if [ -n "$leak" ]; then
