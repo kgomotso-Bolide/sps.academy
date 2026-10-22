@@ -10,8 +10,8 @@
     ["AI Fundamentals for the Workplace","ai-fundamentals","images/course-ai-fundamentals.jpg","50% 20%"],
     ["AI Tools for Productivity","ai-tools-productivity","images/course-ai-tools-productivity.jpg","50% 15%"],
     ["Responsible & Ethical AI Use","responsible-ai","images/course-responsible-ai.jpg","50% 25%"],
-    ["AI for Leaders & Managers","ai-leaders","1552664730-d307ca884978"],
-    ["AI & New Venture Creation","new-venture","1559136555-9303baea8ebd"],
+    ["AI for Leaders & Managers","ai-leaders","images/course-ai-leaders.jpg","50% 25%"],
+    ["AI & New Venture Creation","new-venture","images/course-ai-new-venture.jpg","50% 20%"],
     ["Deploying TinyML","deploying-tinyml","1593376853899-fbb47a057fa0"],
     ["Fundamentals of TinyML","fundamentals-tinyml","1518770660439-4636190af475"],
     ["AI Strategy for Business Leaders","ai-strategy","1542744173-8e7e53415bb0"],
@@ -23,7 +23,7 @@
     ["Computer Science for Lawyers","cs-for-lawyers","1589829545856-d10d557cf95f"],
     ["AI Essentials for Business","ai-essentials-business","1454165804606-c3d57bc86b40"],
     ["Agentic AI Foundations","agentic-ai","1531746790731-6c087fecd65a"],
-    ["Competing in the Age of AI","competing-age-ai","1485827404703-89b55fcc595e"],
+    ["Competing in the Age of AI","competing-age-ai","images/course-competing-age-ai.jpg","50% 25%"],
     ["Leadership in Emerging Technology","leadership-emerging-tech","1521737604893-d14cc237f11d"],
     ["AI in Medicine: Biomedical Signal","ai-medicine-signal","1559757148-5c350d0d3c56"]
   ];
