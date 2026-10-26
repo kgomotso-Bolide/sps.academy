@@ -258,12 +258,20 @@ function chrome_nav(string $variant, array $o = []): void
         /* Offered to both: an admin posts to anybody and a facilitator to the courses
            they are assigned to. See lib/notices.php for why that is the narrow kind. */
         echo '      <a href="admin-notices"' . $on('notices') . '>Notices</a>' . "\n";
-        /* HR only, on Kgomotso's instruction of 25 Aug 2026 — it is in the admin
-           nav and nowhere else. It was briefly in the public footer; if you find
-           yourself adding it back to the 'site' variant above, re-read the note
-           at the top of scorecard.php first. */
+        /* The B-BBEE Scorecard Tool (centenarynetworks.com/beetool) — admins/HR
+           only, on Sibusiso's instruction of 26 Oct 2026, following Kgomotso's
+           25 Aug rule that B-BBEE is HR's business and not learners'. It is a
+           separate application with its own logins per company, so this is
+           only a doorway: signing in here does not sign anyone in there.
+
+           "B-BBEE" is this academy's own verified-scorecard page, and only
+           where one has been built (SPS today). The link used to be printed on
+           every site and was a 404 on the ones without the page. */
         if (!$staff) {
-            echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
+            if (is_file(__DIR__ . '/../scorecard.php')) {
+                echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
+            }
+            echo '      <a href="https://centenarynetworks.com/beetool/" target="_blank" rel="noopener">BEE Tool &#8599;</a>' . "\n";
         }
         echo '      <a href="./">View the site</a>' . "\n";
         echo '      ' . chrome_signout('Sign out (' . (string) ($o['name'] ?? '') . ')') . "\n";
