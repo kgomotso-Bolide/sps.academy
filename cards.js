@@ -2,8 +2,8 @@
 (function(){
   var CARDS=[
     ["Occupational Certificate: Project Manager","project-management","images/course-project-management.jpg","50% 8%"],
-    ["Occupational Certificate: Procurement Officer","procurement-officer","images/course-procurement-officer.jpg","60% 12%"],
-    ["FETC: New Venture Creation","new-venture-creation","images/course-new-venture-creation.jpg","50% 18%"],
+    ["Procurement Officer","procurement-officer","images/course-procurement-officer.jpg","60% 12%"],
+    ["New Venture Creation","new-venture-creation","images/course-new-venture-creation.jpg","50% 18%"],
     ["Engineering Candidacy Programme","engineering-candidacy","images/hero.jpg"],
     ["AI & Software Development","ai-software-development","images/course-ai-software-development.jpg","50% 20%"],
     ["Procurement Skills","procurement","1521737604893-d14cc237f11d"],

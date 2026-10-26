@@ -32,8 +32,8 @@
 
   var OPEN_TITLES = [
     'Occupational Certificate: Project Manager',
-    'Occupational Certificate: Procurement Officer',
-    'FETC: New Venture Creation',
+    'Procurement Officer',
+    'New Venture Creation',
     'Engineering Candidacy Programme',
     'Google Project Management Certificate'
   ];

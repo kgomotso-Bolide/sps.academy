@@ -89,37 +89,33 @@ function learner_catalogue(): array
             'tracked' => true,
             'assessed' => 'the qualification is awarded by the QCTO after the EISA',
         ],
-        /* The second accredited qualification, added 16 Sep 2026 when the
-           provider's pack arrived. Its module structure is po-modules.js.
-           NOT the same thing as 'procurement' below, which is the short course
-           and carries no credits — they are told apart by slug everywhere, and
-           the titles are deliberately written so nobody has to guess. */
+        /* Added 16 Sep 2026 as the second accredited qualification. Listed as a
+           NON-ACCREDITED SHORT COURSE since 26 Oct 2026, on Kgomotso's word: the
+           full certificate accreditation has expired, and the QCTO is bringing it
+           back as a short skills course with credits that are not confirmed yet.
+           Until they are, no title, note or sentence here may claim an NQF level,
+           credits or a SAQA ID. Its module structure is po-modules.js.
+           NOT the same thing as 'procurement' below, which is the customised
+           skills course — they are told apart by slug everywhere. */
         'procurement-officer' => [
-            'title'   => 'Occupational Certificate: Procurement Officer',
-            'note'    => 'NQF 5 · 180 credits · SAQA 111445',
+            'title'   => 'Procurement Officer',
+            'note'    => 'A short course, not an accredited qualification',
             'tracked' => true,
-            'assessed' => 'the qualification is awarded by the QCTO after the EISA',
+            'assessed' => 'this short course is not accredited, so it does not lead to a registered qualification',
         ],
-        /* The third accredited qualification, added 23 Sep 2026 when Centenary's
-           curriculum guide for it arrived. Its module structure is
-           nvc-modules.js.
-
-           NOT an occupational certificate, and the note says so in numbers: it
-           is a legacy unit-standard qualification of 149 credits, and what we
-           hold material for is Skills Programme 1 — six unit standards, 31 of
-           those credits. Do not round that up to 149 anywhere. The remaining
-           skills programmes have to come from the provider first.
+        /* Added 23 Sep 2026 as the third accredited qualification (Skills
+           Programme 1 of the FETC). Listed as a NON-ACCREDITED SHORT COURSE
+           beside the Procurement Officer since 26 Oct 2026, on Kgomotso's word.
+           Its module structure is nvc-modules.js.
 
            NOT the same thing as the 'new-venture' short course in the
-           catalogue, which is an AI course of a similar name and carries no
-           credits. They are told apart by slug everywhere. */
+           catalogue, which is an AI course of a similar name. They are told
+           apart by slug everywhere. */
         'new-venture-creation' => [
-            'title'   => 'FETC: New Venture Creation',
-            'note'    => 'NQF 4 · SAQA 66249 · Skills Programme 1, 31 of 149 credits',
+            'title'   => 'New Venture Creation',
+            'note'    => 'A short course, not an accredited qualification',
             'tracked' => true,
-            /* NOT the QCTO and NOT an EISA. This one is assessed by a registered
-               assessor, moderated, and verified by the SETA. */
-            'assessed' => 'competence is decided by a registered assessor and confirmed by a moderator',
+            'assessed' => 'this short course is not accredited, so it does not lead to a registered qualification',
         ],
         /* A professional REGISTRATION route, added 28 Sep 2026 — the first thing
            in this catalogue that is not a course and never becomes one.

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knowledge module — SPS Academy</title>
-<meta name="description" content="A module of an accredited qualification — Occupational Certificate: Project Manager (SAQA 101869), Procurement Officer (SAQA 111445), or FETC: New Venture Creation (SAQA 66249). What it covers topic by topic and the documents you work from.">
+<meta name="description" content="A module of the Occupational Certificate: Project Manager (SAQA 101869), or of the Procurement Officer and New Venture Creation short courses. What it covers topic by topic and the documents you work from.">
 <link rel="stylesheet" href="styles.css?v=20260913c">
 </head>
 <body>
@@ -194,19 +194,27 @@
      "Knowledge module" is not universal either. New Venture Creation has no
      knowledge modules — it has sections of a learner guide, each aligned to one
      unit standard — so the noun comes off the curriculum. */
-  document.getElementById('m-tags').innerHTML=
-    '<span class="accred">'+ESC(CUR.moduleNoun||'Knowledge module')+'</span>'+
-    '<span>'+ESC(m.id)+'</span><span>NQF '+(m.nqf||CUR.nqf)+'</span><span>'+m.credits+' credits</span>';
+  /* A short course (CUR.shortCourse, since 26 Oct 2026) is not accredited, so
+     it shows no NQF level, credits, registered code or EISA anywhere below. */
+  const SHORT=!!CUR.shortCourse;
+  document.getElementById('m-tags').innerHTML=SHORT
+    ? '<span class="accred">Short course · not accredited</span><span>'+ESC(m.id)+'</span>'
+    : '<span class="accred">'+ESC(CUR.moduleNoun||'Knowledge module')+'</span>'+
+      '<span>'+ESC(m.id)+'</span><span>NQF '+(m.nqf||CUR.nqf)+'</span><span>'+m.credits+' credits</span>';
 
   /* Notional hours are registered per module by the QCTO curricula and not at
      all by a unit-standard one, so the row is dropped rather than printed
      empty. Same reasoning for the code label and for what the module is part
      of: "Knowledge — 80 credits" means nothing on a qualification that has no
      knowledge component. */
-  const facts=[[CUR.codeLabel||'Module code',m.code],['Credits',m.credits]];
-  if(m.hours)facts.push(['Notional hours',m.hours]);
-  facts.push(['Topics',m.topics.length],
-             ['Part of',CUR.partOf||('Knowledge — '+CUR.knowledgeCredits+' credits')]);
+  const facts=SHORT
+    ? [['Module',m.id],['Topics',m.topics.length],['Part of',CUR.title+' short course'],['Accreditation','Not accredited']]
+    : [[CUR.codeLabel||'Module code',m.code],['Credits',m.credits]];
+  if(!SHORT){
+    if(m.hours)facts.push(['Notional hours',m.hours]);
+    facts.push(['Topics',m.topics.length],
+               ['Part of',CUR.partOf||('Knowledge — '+CUR.knowledgeCredits+' credits')]);
+  }
   document.getElementById('m-facts').innerHTML=
     facts.map(f=>'<div><span>'+ESC(f[0])+'</span><strong>'+ESC(String(f[1]))+'</strong></div>').join('');
 
@@ -251,7 +259,10 @@
   /* The RPL note ends on the Google certificate, which maps onto the Project
      Manager's modules and nothing else. RPL itself applies to any of them, so
      the sentence stays and only the Google half goes. */
-  if(SLUG!=='project-management'){
+  if(SHORT){
+    /* RPL credits a module towards a qualification; a short course has none. */
+    document.getElementById('m-rpl').remove();
+  } else if(SLUG!=='project-management'){
     document.getElementById('m-rpl').innerHTML=
       '<strong>Already doing this work?</strong> If you can demonstrate this module\'s content '+
       'from experience, Recognition of Prior Learning may credit it without you studying it '+
@@ -279,7 +290,14 @@
      the EISA at the end, and the footer naming SAQA 101869. Both were stated
      as constants and both were already wrong on the Procurement Officer's
      pages before this qualification existed. */
-  if(CUR.finalAssess){
+  if(SHORT){
+    const fa=document.getElementById('m-final');
+    if(fa){
+      fa.querySelector('h3').textContent='At the end of the course';
+      fa.querySelector('p').textContent='This is a short course and is not accredited. Finishing it '+
+        'does not award a registered qualification, NQF level or credits.';
+    }
+  } else if(CUR.finalAssess){
     const fa=document.getElementById('m-final');
     if(fa){
       fa.querySelector('h3').textContent=CUR.finalAssess.h;
@@ -288,7 +306,9 @@
   }
   const disc=document.getElementById('m-disc');
   if(disc){
-    disc.textContent=CUR.discNote||('Module codes, credit values and topic weightings '+
+    disc.textContent=SHORT
+      ? CUR.title+' is a short course and is not accredited. It carries no NQF level or credits.'
+      : CUR.discNote||('Module codes, credit values and topic weightings '+
       'on this page are the registered curriculum for SAQA qualification '+CUR.saqa+
       (CUR.curriculum?', curriculum code '+CUR.curriculum:'')+'.');
   }
@@ -304,7 +324,14 @@
      register them; the third registers none, and a page that shows invented
      percentages would be telling a learner where the marks are on no authority
      at all. */
-  if(CUR.weighted===false){
+  if(SHORT){
+    const syl=document.getElementById('m-syllabusnote');
+    if(syl)syl.textContent=CUR.weighted===false
+      ? 'These are the topics of this section, in the order the learner guide sets them out, '+
+        'with the areas each one covers.'
+      : 'These are the topics for this module, with the weighting the course material gives '+
+        'each one. The percentages are worth reading as a study plan.';
+  } else if(CUR.weighted===false){
     const syl=document.getElementById('m-syllabusnote');
     if(syl)syl.textContent='These are the topics of this section, in the order the learner '+
       'guide sets them out, with the areas each one covers. This qualification registers no '+

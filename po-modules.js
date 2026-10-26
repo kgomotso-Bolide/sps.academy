@@ -262,7 +262,12 @@
   window.ACADEMY_CURRICULA = window.ACADEMY_CURRICULA || {};
   window.ACADEMY_CURRICULA["procurement-officer"] = {
     slug: "procurement-officer",
-    title: "Occupational Certificate: Procurement Officer",
+    title: "Procurement Officer",
+    /* A non-accredited short course since 26 Oct 2026 (Kgomotso): the full
+       certificate's accreditation has expired. module.html reads this flag and
+       stops printing NQF levels, credits, registered codes and the EISA. The
+       figures below stay so the self-check still guards the source data. */
+    shortCourse: true,
     saqa: "111445",
     curriculum: "332302-001-01-00",
     short: "Procurement Officer",

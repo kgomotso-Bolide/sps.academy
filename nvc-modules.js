@@ -529,9 +529,12 @@
   window.ACADEMY_CURRICULA = window.ACADEMY_CURRICULA || {};
   window.ACADEMY_CURRICULA["new-venture-creation"] = {
     slug: "new-venture-creation",
-    title: "FETC: New Venture Creation",
-    fullTitle: "Further Education and Training Certificate: New Venture Creation",
+    title: "New Venture Creation",
+    fullTitle: "New Venture Creation",
     short: "New Venture Creation",
+    /* A non-accredited short course since 26 Oct 2026 (Kgomotso), listed with
+       the Procurement Officer. See po-modules.js. */
+    shortCourse: true,
     saqa: "66249",
     curriculum: "",            // a unit-standard qualification has no curriculum code
     version: "V0001-2017",     // the version of the guide this file was generated from
