@@ -13,7 +13,32 @@
      2. upgrades the nav profile link to an initials avatar once one exists
      3. prefills the registration form */
 (function(){
-  var KEY='sps.profile.v1';
+  /* ---- one store per academy -------------------------------------------
+     localStorage belongs to the hostname, not the folder, so while the
+     academies share centenarynetworks.com (/sps/, /fungi/, /maziv/...) one
+     fixed key meant ONE profile for all of them: a name and department typed
+     into Fungi showed up prefilled on Equinix. The key now carries the folder
+     this file was served from, the same thing app_base_path() scopes the
+     session cookie to, so it stays right when a site is renamed or moves to a
+     subdomain of its own (where the folder is "/").
+
+     LEGACY is the old shared key (until 27 Oct 2026). Whichever academy is
+     opened first adopts it and it is removed, so a "clear" can never leave a
+     copy behind under a name nothing reads any more. */
+  var LEGACY='sps.profile.v1';
+  function basePath(){
+    var s=document.currentScript, p='';
+    try{ p=new URL(s&&s.src?s.src:location.href,location.href).pathname; }catch(e){ p=location.pathname; }
+    return p.slice(0,p.lastIndexOf('/')+1)||'/';
+  }
+  var KEY='acad.profile.v1:'+basePath();
+  try{
+    var old=localStorage.getItem(LEGACY);
+    if(old!==null){
+      if(localStorage.getItem(KEY)===null) localStorage.setItem(KEY,old);
+      localStorage.removeItem(LEGACY);
+    }
+  }catch(e){}
 
   /* ---- the signed-in account, if there is one ---------------------------
      Since Aug 2026 there is a back end, so "profile" has two meanings on this
