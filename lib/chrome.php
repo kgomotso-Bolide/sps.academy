@@ -268,6 +268,9 @@ function chrome_nav(string $variant, array $o = []): void
            where one has been built (SPS today). The link used to be printed on
            every site and was a 404 on the ones without the page. */
         if (!$staff) {
+            /* Training evidence for the B-BBEE submission: HR (admins) only,
+               like everything else in this block. See admin-evidence.php. */
+            echo '      <a href="admin-evidence"' . $on('evidence') . '>Evidence</a>' . "\n";
             if (is_file(__DIR__ . '/../scorecard.php')) {
                 echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
             }
