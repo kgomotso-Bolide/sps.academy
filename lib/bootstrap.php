@@ -65,6 +65,27 @@ function path_inside(string $path, string $dir): bool
 }
 
 /**
+ * A list-valued branding fact from lib/brand.php — [] when the site sets none.
+ *
+ * brand() in lib/chrome.php is for text and is fatal on a missing key; this is
+ * for the optional extras one academy has and the others do not (Anglo
+ * American's Sishen Mine page and its foundation courses). They live in that
+ * site's brand.php, which tools/sync-backend.php never copies, rather than in a
+ * shared file the next sync would overwrite. Here, not in chrome.php, because
+ * learner_catalogue() needs it on requests that never draw a nav.
+ */
+function brand_list(string $key): array
+{
+    static $brand = null;
+    if ($brand === null) {
+        $file  = APP_ROOT . '/lib/brand.php';
+        $brand = is_file($file) ? require $file : [];
+        if (!is_array($brand)) $brand = [];
+    }
+    return isset($brand[$key]) && is_array($brand[$key]) ? $brand[$key] : [];
+}
+
+/**
  * Find and load the config file.
  *
  * It walks UP from the application directory looking for private/sps-config.php,

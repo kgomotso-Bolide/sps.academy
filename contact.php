@@ -33,6 +33,10 @@ $old    = [];
    contact?course=Occupational%20Certificate:%20Project%20Manager — which is how
    the "Register Now" button on the Project Manager page passes its subject. */
 $old['course_title'] = isset($_GET['course']) ? mb_substr(trim((string) $_GET['course']), 0, 190) : '';
+/* The same for the department, so a page like Anglo American's Sishen Mine one
+   (contact?dept=Sishen%20Mine) files everyone it sends here under one cohort
+   without asking them to type it. */
+$old['department'] = isset($_GET['dept']) ? mb_substr(trim((string) $_GET['dept']), 0, 120) : '';
 
 if (is_post()) {
 

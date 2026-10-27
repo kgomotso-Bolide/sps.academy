@@ -181,6 +181,12 @@ function chrome_nav(string $variant, array $o = []): void
            this link 404s on that site. Same footing as the Graduates link below,
            which has always had the same requirement. */
         echo '      <a href="graduates" data-nav="graduates">Graduates</a>' . "\n";
+        /* A site's own extra pages, from 'nav_extra' in its lib/brand.php
+           (href => label) — see brand_list() in lib/bootstrap.php. */
+        foreach (brand_list('nav_extra') as $href => $label) {
+            echo '      <a href="' . e((string) $href) . '" data-nav="' . e((string) $href) . '">'
+               . e((string) $label) . '</a>' . "\n";
+        }
         echo '      <a href="contact" data-nav="contact"' . $on('contact') . '>Contact</a>' . "\n";
         echo '      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile">'
            . '<span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" '
@@ -349,6 +355,7 @@ function chrome_footer(string $variant, array $o = []): void
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
             'graduates'    => 'Graduates',
+        ] + brand_list('nav_extra') + [
             'profile'      => 'Profile',
             'contact'      => 'Contact',
             'privacy'      => 'Privacy',

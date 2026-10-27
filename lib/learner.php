@@ -82,7 +82,7 @@ const LEARNER_PROGRESS_MAX_ROWS = 2000;
  */
 function learner_catalogue(): array
 {
-    return [
+    $catalogue = [
         'project-management' => [
             'title'   => 'Occupational Certificate: Project Manager',
             'note'    => 'NQF 5 · 240 credits · SAQA 101869',
@@ -164,6 +164,14 @@ function learner_catalogue(): array
             'tracked' => false,
         ],
     ];
+
+    /* A site's own courses, from 'extra_courses' in its lib/brand.php — Anglo
+       American's foundation learning for Sishen Mine is the first. Same shape as
+       the entries above, placed before the catch-all short course. They cannot
+       replace a shared course: + keeps the left-hand key. */
+    $short = ['short-course' => $catalogue['short-course']];
+    unset($catalogue['short-course']);
+    return $catalogue + brand_list('extra_courses') + $short;
 }
 
 function learner_course_valid(string $slug): bool

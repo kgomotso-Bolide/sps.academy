@@ -221,6 +221,12 @@ function install_seed_tenants(?string $contact = null): int
            platform, not the installation, so if it is sold, standing the site up
            is configuration rather than a migration. */
         ['inhance', 'Inhance Supply Chain Solutions',    'Inhance Academy'],
+        /* Anglo American (15 Oct 2026) and ALT Capital Partners (20 Oct 2026),
+           the ninth and tenth. Each was cloned with its own row written into its
+           own copy of this file only; brought here on 27 Oct 2026 when both
+           joined tools/sync-backend.php, so syncing does not drop the row. */
+        ['angloamerican',      'Anglo American',       'Anglo American Academy'],
+        ['altcapitalpartners', 'ALT Capital Partners', 'ALT Capital Partners Academy'],
     ];
 
     $added = 0;

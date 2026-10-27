@@ -230,8 +230,10 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    that is not on this list is a site whose shared core stops moving, and
    "we'll add it when they sign" is how that starts. Tracker is still named
    explicitly on the command line, since it has no remote and cannot be
-   deployed. */
-$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa', '../inhance'];
+   deployed. Anglo American and ALT Capital Partners joined on 27 Oct 2026, late
+   — both were cloned without being added, which is the drift described above. */
+$defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa', '../inhance',
+                   '../angloAmerican', '../altcapitalpartners'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------
