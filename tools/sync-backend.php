@@ -131,6 +131,11 @@ $shared = [
     'lib/notices.php', 'notices.php', 'admin-notices.php',
     'lib/submissions.php', 'submit.php', 'poe-file.php',
 
+    // Training evidence for the B-BBEE practitioner, 27 Oct 2026. Linked from the
+    // admin nav in lib/chrome.php, so same rule again. No schema change — it only
+    // reads tables the 7 Oct release already created.
+    'admin-evidence.php',
+
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
     // produces, so a site without it silently offers a much smaller one.
