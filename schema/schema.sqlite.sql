@@ -467,3 +467,49 @@ CREATE TABLE IF NOT EXISTS poe_files (
 );
 CREATE INDEX IF NOT EXISTS ix_poefile_slot   ON poe_files (tenant_id, user_id, course_slug, module_code, kind);
 CREATE INDEX IF NOT EXISTS ix_poefile_course ON poe_files (tenant_id, course_slug, module_code);
+
+-- Recognition of prior learning (28 Oct 2026). See schema.mysql.sql.
+CREATE TABLE IF NOT EXISTS rpl_claims (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id     INTEGER NOT NULL REFERENCES tenants (id),
+  user_id       INTEGER NOT NULL REFERENCES users (id),
+  course_slug   TEXT    NOT NULL,
+  route         TEXT    NOT NULL,
+  verify_url    TEXT,
+  disk_name     TEXT,
+  original_name TEXT,
+  mime_type     TEXT,
+  size_bytes    INTEGER,
+  status        TEXT    NOT NULL,
+  submitted_at  TEXT    NOT NULL,
+  reviewed_at   TEXT,
+  reviewed_by   INTEGER REFERENCES users (id),
+  review_note   TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_rplclaim_user   ON rpl_claims (tenant_id, user_id, course_slug, route);
+CREATE INDEX IF NOT EXISTS ix_rplclaim_course ON rpl_claims (tenant_id, course_slug, status);
+
+CREATE TABLE IF NOT EXISTS rpl_credits (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  user_id     INTEGER NOT NULL REFERENCES users (id),
+  course_slug TEXT    NOT NULL,
+  module_code TEXT    NOT NULL,
+  route       TEXT    NOT NULL,
+  note        TEXT,
+  decided_at  TEXT    NOT NULL,
+  decided_by  INTEGER REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_rplcredit ON rpl_credits (tenant_id, user_id, course_slug, module_code);
+CREATE INDEX IF NOT EXISTS ix_rplcredit_course ON rpl_credits (tenant_id, course_slug);
+
+CREATE TABLE IF NOT EXISTS rpl_standard (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT    NOT NULL,
+  route       TEXT    NOT NULL,
+  module_code TEXT    NOT NULL,
+  set_at      TEXT    NOT NULL,
+  set_by      INTEGER REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_rplstd ON rpl_standard (tenant_id, course_slug, route, module_code);

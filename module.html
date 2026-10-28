@@ -415,6 +415,18 @@
       }
 
       const s=P.moduleStats(m);
+      /* Recognised through RPL (28 Oct 2026): the assessor's decision, from the
+         learner's Google certificate. Nothing to tick and no "mark complete" to
+         undo, so the panel says so instead. See lib/rpl.php. */
+      const rec=P.recognised&&P.recognised(m.id);
+      if(rec){
+        box.innerHTML='<div class="prog"><div class="prog-top"><div><span class="prog-lbl">Your progress on this module</span>'+
+          '<strong>Recognised through RPL</strong></div><div class="prog-pct">100%</div></div>'+
+          '<div class="prog-bar"><i style="width:100%"></i></div>'+
+          '<p class="prog-note">The assessor recognised this module on '+String(rec).slice(0,10)+
+          ', from your Google certificate. You do not need to study it. The topics stay here if you want to read them.</p></div>';
+        return;
+      }
       const done=P.moduleDone(m.id);
       const onAccount=P.mode()==='account';
 

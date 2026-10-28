@@ -999,3 +999,79 @@ CREATE TABLE IF NOT EXISTS poe_files (
   CONSTRAINT fk_poefile_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
   CONSTRAINT fk_poefile_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- RECOGNITION OF PRIOR LEARNING
+--
+-- Added 28 Oct 2026. A learner enrolled on the Project Manager first does the
+-- Google Project Management Certificate on Coursera, hands it in here, and the
+-- assessor — who is also the administrator — records which knowledge modules it
+-- is recognised for. The learner then studies only the rest. See lib/rpl.php.
+--
+-- rpl_claims: what the learner handed in. APPEND-ONLY, like poe_files: a second
+-- hand-in is a new row, so what the assessor looked at stays on file. The
+-- newest row is the current one. The certificate is a Coursera verification
+-- link, a PDF, or both; the PDF's bytes live outside the web root under a
+-- random name, exactly as poe_files does it.
+--
+-- rpl_credits: the decision, one row per recognised module. Taking a module
+-- back deletes its row; the audit log keeps who granted and who withdrew it.
+--
+-- rpl_standard: the list the assessor approves once per route, which every
+-- learner's decision starts from. Empty until the assessor saves it.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS rpl_claims (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id     INT UNSIGNED NOT NULL,
+  user_id       INT UNSIGNED NOT NULL,
+  course_slug   VARCHAR(60)  NOT NULL,
+  route         VARCHAR(30)  NOT NULL,
+  verify_url    VARCHAR(500)     NULL,
+  disk_name     VARCHAR(64)      NULL,
+  original_name VARCHAR(255)     NULL,
+  mime_type     VARCHAR(100)     NULL,
+  size_bytes    INT UNSIGNED     NULL,
+  status        VARCHAR(20)  NOT NULL,   -- submitted | accepted | declined
+  submitted_at  DATETIME     NOT NULL,
+  reviewed_at   DATETIME         NULL,
+  reviewed_by   INT UNSIGNED     NULL,
+  review_note   VARCHAR(500)     NULL,
+  PRIMARY KEY (id),
+  KEY ix_rplclaim_user (tenant_id, user_id, course_slug, route),
+  KEY ix_rplclaim_course (tenant_id, course_slug, status),
+  CONSTRAINT fk_rplclaim_tenant FOREIGN KEY (tenant_id)   REFERENCES tenants (id),
+  CONSTRAINT fk_rplclaim_user   FOREIGN KEY (user_id)     REFERENCES users (id),
+  CONSTRAINT fk_rplclaim_staff  FOREIGN KEY (reviewed_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rpl_credits (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  user_id     INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  module_code VARCHAR(20)  NOT NULL,
+  route       VARCHAR(30)  NOT NULL,
+  note        VARCHAR(500)     NULL,
+  decided_at  DATETIME     NOT NULL,
+  decided_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rplcredit (tenant_id, user_id, course_slug, module_code),
+  KEY ix_rplcredit_course (tenant_id, course_slug),
+  CONSTRAINT fk_rplcredit_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_rplcredit_user   FOREIGN KEY (user_id)    REFERENCES users (id),
+  CONSTRAINT fk_rplcredit_staff  FOREIGN KEY (decided_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rpl_standard (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  route       VARCHAR(30)  NOT NULL,
+  module_code VARCHAR(20)  NOT NULL,
+  set_at      DATETIME     NOT NULL,
+  set_by      INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_rplstd (tenant_id, course_slug, route, module_code),
+  CONSTRAINT fk_rplstd_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_rplstd_staff  FOREIGN KEY (set_by)    REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

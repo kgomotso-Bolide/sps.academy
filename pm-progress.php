@@ -19,7 +19,7 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/progress.php';
+require __DIR__ . '/lib/progress.php';
 require __DIR__ . '/lib/chrome.php';
 /* Before a single byte is printed. The session cookie is a header, so a page
    that prints first and starts its session later gets no session at all — and
@@ -227,7 +227,9 @@ function old(array $old, string $field): string
       [o.pct+'%','of topics ticked off'],
       [o.topicsDone+' / '+o.topicsTotal,'topics'],
       [o.modulesComplete+' / '+o.modulesTotal,'modules marked complete'],
-      [o.creditsClaimed+' / '+o.creditsTotal,'credits covered by your own record']
+      [o.creditsClaimed+' / '+o.creditsTotal,o.creditsRecognised
+        ? 'credits covered, '+o.creditsRecognised+' of them recognised through RPL'
+        : 'credits covered by your own record']
     ].map(s=>'<div class="stat"><div class="n">'+ESC(String(s[0]))+'</div><div class="l">'+s[1]+'</div></div>').join('');
 
     $('pgTable').innerHTML=
@@ -235,7 +237,11 @@ function old(array $old, string $field): string
       '<th class="num">Progress</th><th>Status</th></tr></thead><tbody>'+
       MODS.map(function(m,i){
         const s=P.moduleStats(m);
-        const status=s.complete
+        /* Recognised through RPL is the assessor's decision, not a tick, so it
+           says so rather than reading as something the learner marked. */
+        const status=s.recognised
+          ? '<span class="pill done">Recognised (RPL) '+s.recognised.slice(0,10)+'</span>'
+          : s.complete
           ? '<span class="pill done">Complete '+s.completedAt.slice(0,10)+'</span>'
           : s.done ? '<span class="pill going">In progress</span>'
                    : '<span class="pill">Not started</span>';
@@ -253,7 +259,9 @@ function old(array $old, string $field): string
     $('pgSummaryField').value=
       o.modulesComplete+' of '+o.modulesTotal+' modules complete · '+
       o.topicsDone+' of '+o.topicsTotal+' topics ('+o.pct+'%) · '+
-      o.creditsClaimed+' of '+o.creditsTotal+' credits · self-reported '+
+      o.creditsClaimed+' of '+o.creditsTotal+' credits'+
+      (o.modulesRecognised ? ' · '+o.modulesRecognised+' modules recognised through RPL' : '')+
+      ' · self-reported '+
       new Date().toISOString().slice(0,10);
   }
 

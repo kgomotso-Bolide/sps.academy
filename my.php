@@ -36,6 +36,7 @@ require __DIR__ . '/lib/classes.php';    // class_when(), for the live-session l
 require __DIR__ . '/lib/sessions.php';   // where the live teaching actually happens
 require __DIR__ . '/lib/notices.php';    // the latest few notices, above the live sessions
 require __DIR__ . '/lib/curriculum.php';   // groups the topic quizzes by module, below
+require __DIR__ . '/lib/rpl.php';          // Stage 1: the Google certificate and what it was recognised for
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_user();
@@ -243,6 +244,35 @@ function when_local(?string $utc): string
           </div>
 
           <?php if (learner_course_tracked($slug)): ?>
+            <?php
+              /* ---- Stage 1: the Google certificate (28 Oct 2026) -----------------
+                 Only on a course with a certificate route — the Project Manager.
+                 One line saying where the learner is, linking to the page where
+                 they hand it in. See lib/rpl.php. */
+              $rplCredits = rpl_default_route($slug) !== null
+                  ? (db_optional(fn() => rpl_credits_for((int) $me['id'], $slug), []) ?: []) : [];
+            ?>
+            <?php if (rpl_default_route($slug) !== null): ?>
+              <?php
+                $rc = db_optional(fn() => rpl_latest_claim((int) $me['id'], $slug));
+                $rn = count($rplCredits);
+                [$rplHead, $rplSub] = match (true) {
+                    $rn > 0 => [$rn . ' of ' . count(curriculum_modules($slug)) . ' knowledge modules recognised through RPL',
+                                'Your Google certificate covers these. Study the others below.'],
+                    ($rc['status'] ?? '') === 'submitted' => ['Certificate handed in — waiting for the assessor',
+                                'You can carry on studying in the meantime.'],
+                    ($rc['status'] ?? '') === 'declined'  => ['The assessor sent your certificate back',
+                                'See why, and hand it in again.'],
+                    default => ['Start with the Google Project Management Certificate',
+                                'Hand it in when you have it, and the modules it covers are recognised.'],
+                };
+              ?>
+              <a class="my-next my-rpl" href="<?= e('prior-learning?c=' . rawurlencode($slug)) ?>">
+                <span class="my-next-lbl">Stage 1 · Google certificate &amp; RPL</span>
+                <strong><?= e($rplHead) ?></strong>
+                <span class="my-next-sub"><?= e($rplSub) ?></span>
+              </a>
+            <?php endif; ?>
             <?php /* Filled in by the inline script below, from pm-modules.js and
                      the progress now held against this account. Until that runs
                      it says so, rather than showing a confident 0%. */ ?>
@@ -320,8 +350,9 @@ function when_local(?string $utc): string
                         }
                     }
                     $total = count($topics);
-                    $pct   = $total ? (int) round($ticked / $total * 100) : 0;
-                    $state = $ticked === 0 ? 'none' : ($ticked >= $total ? 'all' : 'part');
+                    $rec   = $rplCredits[$mid] ?? null;   // recognised through RPL: complete, whatever is ticked
+                    $pct   = $rec ? 100 : ($total ? (int) round($ticked / $total * 100) : 0);
+                    $state = $rec ? 'all' : ($ticked === 0 ? 'none' : ($ticked >= $total ? 'all' : 'part'));
                   ?>
                   <?php /* The course rides along: both qualifications have a KM-01, and the
                            module page would otherwise open the other one's. */ ?>
@@ -331,10 +362,11 @@ function when_local(?string $utc): string
                     <span class="my-mod-body">
                       <strong><?= e($mod['title']) ?></strong>
                       <span class="my-mod-sub">
+                        <?php if ($rec): ?>Recognised through RPL · <?= e(rpl_when((string) $rec['decided_at'])) ?><?php else: ?>
                         <?= (int) $ticked ?> of <?= (int) $total ?> topics done<?php
                           if ($withQuiz > 0): ?> · <?= (int) $passed ?> of <?= (int) $withQuiz ?> quizzes passed<?php endif; ?><?php
                           if ($stuck > 0): ?> · <span class="my-mod-stuck"><?= (int) $stuck ?>
-                            <?= $stuck === 1 ? 'needs' : 'need' ?> another try</span><?php endif; ?>
+                            <?= $stuck === 1 ? 'needs' : 'need' ?> another try</span><?php endif; ?><?php endif; ?>
                       </span>
                       <span class="my-mod-bar" aria-hidden="true"><i style="width:<?= (int) $pct ?>%"></i></span>
                     </span>
@@ -474,6 +506,11 @@ function when_local(?string $utc): string
         ('knowledge credits covered by your own record. The practical and ' +
          'workplace credits are assessed separately, against your work at ' +
          COMPANY + '.');
+      /* Credits the assessor recognised through RPL are not "your own record". */
+      if (o.creditsRecognised) {
+        note = note.replace('covered by your own record',
+          'covered — ' + o.creditsRecognised + ' recognised through RPL, the rest by your own record');
+      }
       var next = null;
       for (var i = 0; i < MODS.length; i++) {
         var s = P.moduleStatsFor(slug, MODS[i]);
@@ -495,7 +532,9 @@ function when_local(?string $utc): string
            so the credit count and its sentence are left off rather than shown
            as a claim the course cannot back. */
         '<p class="prog-note">' + o.modulesComplete + ' of ' + o.modulesTotal +
-          ' modules marked complete' + (cur.shortCourse ? '.' :
+          ' modules complete' +
+          (o.modulesRecognised ? ' (' + o.modulesRecognised + ' recognised through RPL)' : '') +
+          (cur.shortCourse ? '.' :
           ' · ' + o.creditsClaimed + ' of ' + o.creditsTotal + ' ' + ESC(note)) + '</p></div>' +
         (next
           ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + q + '">' +

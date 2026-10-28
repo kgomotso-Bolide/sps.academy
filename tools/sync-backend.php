@@ -136,6 +136,13 @@ $shared = [
     // reads tables the 7 Oct release already created.
     'admin-evidence.php',
 
+    // Recognition of prior learning, 28 Oct 2026: the Google certificate route on
+    // the Project Manager. admin-rpl.php is linked from the admin nav and
+    // prior-learning.php from my.php, both synced; lib/rpl.php is hard-required by
+    // all three pages. Schema change (rpl_claims, rpl_credits, rpl_standard), so a
+    // site that receives these needs its /setup run.
+    'lib/rpl.php', 'admin-rpl.php', 'prior-learning.php', 'rpl-file.php',
+
     // Raises the PHP-FPM upload limits that file-backed material needs. Nothing
     // in it is the client, and admin-materials.php reports the effective cap it
     // produces, so a site without it silently offers a much smaller one.

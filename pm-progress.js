@@ -129,6 +129,11 @@
   var mem  = {};         // the account's copy of THIS course, once hydrated
   var allCourses = {};   // every course the account has progress for, by slug
   var acct = null;       // window.SPSAccount, if this page loaded profile.js
+  /* Modules recognised through RPL, by slug: { "KM-02": "2026-10-28T…" }.
+     The assessor's decision, not the learner's tick, so it is never written
+     from here — only read from the account and counted as complete. */
+  var rpl = {};
+  function recFor(slug) { return rpl[slug] || {}; }
 
   function store() { return mode === 'account' ? mem : localStore(); }
 
@@ -143,29 +148,34 @@
     return (p && p.get()[fieldFor(slug)]) || {};
   }
 
-  function statsFrom(tree, mod) {
+  function statsFrom(tree, mod, rec) {
     var saved = tree[mod.id] || { topics: {} };
     var total = mod.topics.length;
+    var on = rec && rec[mod.id];
+    if (on) return { id: mod.id, done: total, total: total, pct: 100,
+                     complete: true, completedAt: on, recognised: on };
     var done  = mod.topics.filter(function (t) { return saved.topics && saved.topics[t.code]; }).length;
     return {
       id: mod.id, done: done, total: total,
       pct: total ? Math.round(done / total * 100) : 0,
-      complete: !!saved.done, completedAt: saved.done || null
+      complete: !!saved.done, completedAt: saved.done || null, recognised: null
     };
   }
 
-  function overallFrom(tree, modules) {
-    var t = 0, d = 0, mods = 0, credits = 0;
+  function overallFrom(tree, modules, rec) {
+    var t = 0, d = 0, mods = 0, credits = 0, recMods = 0, recCredits = 0;
     modules.forEach(function (m) {
-      var s = statsFrom(tree, m);
+      var s = statsFrom(tree, m, rec);
       t += s.total; d += s.done;
       if (s.complete) { mods++; credits += (+m.credits || 0); }
+      if (s.recognised) { recMods++; recCredits += (+m.credits || 0); }
     });
     return {
       topicsDone: d, topicsTotal: t,
       pct: t ? Math.round(d / t * 100) : 0,
       modulesComplete: mods, modulesTotal: modules.length,
       creditsClaimed: credits,
+      modulesRecognised: recMods, creditsRecognised: recCredits,
       creditsTotal: modules.reduce(function (a, m) { return a + (+m.credits || 0); }, 0)
     };
   }
@@ -201,6 +211,7 @@
     if (!acct) return;
     acct.refresh().then(function (s) {
       allCourses = (s && s.progress) || {};
+      rpl = (s && s.rpl) || {};
       mem = allCourses[COURSE] || {};
       announce();
     });
@@ -285,16 +296,19 @@
     /** The slug this page writes to. */
     course: function () { return COURSE; },
 
-    moduleStats: function (mod) { return statsFrom(store(), mod); },
+    moduleStats: function (mod) { return statsFrom(store(), mod, recFor(COURSE)); },
 
-    overall: function (modules) { return overallFrom(store(), modules); },
+    overall: function (modules) { return overallFrom(store(), modules, recFor(COURSE)); },
+
+    /** When the assessor recognised this module through RPL, or null. */
+    recognised: function (moduleId) { return recFor(COURSE)[moduleId] || null; },
 
     /* The same two, for a course this page is not writing to — the dashboard,
        which paints a panel per enrolment. Read-only by construction: they are
        handed a tree rather than reaching for the live store. */
-    moduleStatsFor: function (slug, mod) { return statsFrom(treeFor(slug), mod); },
+    moduleStatsFor: function (slug, mod) { return statsFrom(treeFor(slug), mod, recFor(slug)); },
 
-    overallFor: function (slug, modules) { return overallFrom(treeFor(slug), modules); },
+    overallFor: function (slug, modules) { return overallFrom(treeFor(slug), modules, recFor(slug)); },
 
     /* A flat, dated record — the thing that actually gets sent or printed. It is
        deliberately plain text: it has to survive an email client, a printout and
@@ -304,12 +318,13 @@
       var lines = modules.map(function (m) {
         var s = API.moduleStats(m);
         return [
-          s.complete ? '[x]' : (s.done ? '[~]' : '[ ]'),
+          s.recognised ? '[R]' : (s.complete ? '[x]' : (s.done ? '[~]' : '[ ]')),
           m.id,
           m.title,
           s.done + '/' + s.total + ' topics',
           m.credits + ' cr',
-          s.complete ? 'marked complete ' + s.completedAt.slice(0, 10) : ''
+          s.recognised ? 'recognised through RPL ' + s.recognised.slice(0, 10)
+            : (s.complete ? 'marked complete ' + s.completedAt.slice(0, 10) : '')
         ].filter(Boolean).join('  ');
       });
       return { summary: o, lines: lines, text: lines.join('\n') };
@@ -410,6 +425,7 @@
 
   acct.ready(function (session) {
     if (!session) { announce(); return; }
+    rpl = session.rpl || {};   // before the enrolment check: the dashboard reads every course
 
     /* Active, not merely present. A withdrawn or completed enrolment is refused
        by the server on every write, so treating it as the live store would give

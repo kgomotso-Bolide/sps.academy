@@ -37,6 +37,7 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password(), used by learner.php
 require __DIR__ . '/lib/learner.php';
+require __DIR__ . '/lib/rpl.php';
 
 header('Content-Type: application/json; charset=utf-8');
 // A per-user answer must never be held in a shared cache, and the nav must not
@@ -73,6 +74,7 @@ if (!is_post()) {
 
     $courses  = [];
     $progress = [];
+    $rpl      = [];
 
     /* db_optional throughout: this endpoint is called by every page on the site,
        and between a deploy and its migration the enrolment tables do not exist
@@ -92,6 +94,14 @@ if (!is_post()) {
             $progress[$slug] = (object) db_optional(
                 fn() => learner_progress_tree((int) $me['id'], $slug), []
             );
+            /* Modules the assessor recognised through RPL (28 Oct 2026). Kept apart
+               from the ticks: a tick is the learner's own record, this is somebody
+               else's decision, and pm-progress.js counts both as complete. */
+            if (rpl_default_route($slug) !== null) {
+                $rpl[$slug] = (object) db_optional(
+                    fn() => rpl_credit_map((int) $me['id'], $slug), []
+                );
+            }
         }
     }
 
@@ -110,6 +120,7 @@ if (!is_post()) {
         'admin'    => $me['role'] === 'admin',
         'courses'  => $courses,
         'progress' => (object) $progress,
+        'rpl'      => (object) $rpl,
         'token'    => csrf_token(),
     ]);
 }

@@ -48,6 +48,7 @@ require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
 require __DIR__ . '/lib/classes.php';
 require __DIR__ . '/lib/logbook.php';
+require __DIR__ . '/lib/rpl.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me = require_admin();
@@ -149,6 +150,21 @@ function evidence_gather(string $course, string $from, string $to, string $toEnd
         if ($r['status'] !== 'returned') $files[$u]['in'] += (int) $r['n'];
     }
 
+    /* Knowledge modules recognised through RPL by the end of the period (28 Oct
+       2026). NULL — an empty cell — on a course with no RPL route, which is a
+       different fact from "none recognised". */
+    $rpl = [];
+    if (rpl_default_route($course) !== null) {
+        foreach (db_optional(fn() => db_all(
+            'SELECT user_id, COUNT(*) AS n FROM rpl_credits
+              WHERE tenant_id = ? AND course_slug = ? AND decided_at <= ? GROUP BY user_id',
+            [$t, $course, $toEnd]
+        ), []) ?: [] as $r) {
+            $rpl[(int) $r['user_id']] = (int) $r['n'];
+        }
+    }
+    $hasRpl = rpl_default_route($course) !== null;
+
     foreach ($learners as &$l) {
         $u = (int) $l['id'];
         $attended = 0;
@@ -164,6 +180,7 @@ function evidence_gather(string $course, string $from, string $to, string $toEnd
         $l['quizzes_passed'] = $passed;
         $l['files_in']       = $files[$u]['in'] ?? 0;
         $l['files_assessed'] = $files[$u]['assessed'] ?? 0;
+        $l['rpl']            = $hasRpl ? ($rpl[$u] ?? 0) : null;
     }
     unset($l);
 
@@ -198,14 +215,16 @@ if ($export === 'learners' || $export === 'register') {
     if ($export === 'learners') {
         $put($out, ['Employee no', 'First name', 'Last name', 'Department', 'Course', 'Period',
                     'Enrolled on', 'Enrolment status', 'Classes attended', 'Classes held',
-                    'Quizzes passed', 'Quizzes published', 'Files handed in', 'Files assessed']);
+                    'Quizzes passed', 'Quizzes published', 'Files handed in', 'Files assessed',
+                    'Modules recognised (RPL)']);
         foreach ($data['learners'] as $l) {
             $put($out, [(string) $l['employee_no'], $l['first_name'], $l['last_name'],
                         (string) $l['department'], $courseTitle, $period,
                         substr((string) $l['enrolled_at'], 0, 10), $l['enrol_status'],
                         $l['attended'], count($data['classes']),
                         $l['quizzes_passed'], $data['quizCount'],
-                        $l['files_in'], $l['files_assessed']]);
+                        $l['files_in'], $l['files_assessed'],
+                        $l['rpl'] === null ? '' : $l['rpl']]);
         }
     } else {
         /* One row per learner per class. "Not marked" is written out, never
@@ -319,7 +338,7 @@ function evidence_qs(array $over = []): string
           <thead>
             <tr>
               <th>Learner</th><th>Employee no</th><th>Enrolled</th>
-              <th>Classes attended</th><th>Quizzes passed</th><th>Files in / assessed</th>
+              <th>Classes attended</th><th>Quizzes passed</th><th>Files in / assessed</th><th>RPL</th>
             </tr>
           </thead>
           <tbody>
@@ -333,6 +352,7 @@ function evidence_qs(array $over = []): string
                 <td><?= (int) $l['attended'] ?> of <?= count($data['classes']) ?></td>
                 <td><?= (int) $l['quizzes_passed'] ?> of <?= (int) $data['quizCount'] ?></td>
                 <td><?= (int) $l['files_in'] ?> / <?= (int) $l['files_assessed'] ?></td>
+                <td><?= $l['rpl'] === null ? '—' : (int) $l['rpl'] . ' modules' ?></td>
               </tr>
             <?php endforeach; ?>
           </tbody>

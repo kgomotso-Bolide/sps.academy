@@ -277,6 +277,8 @@ function chrome_nav(string $variant, array $o = []): void
             /* Training evidence for the B-BBEE submission: HR (admins) only,
                like everything else in this block. See admin-evidence.php. */
             echo '      <a href="admin-evidence"' . $on('evidence') . '>Evidence</a>' . "\n";
+            /* Recognition of prior learning: the assessor is an admin. See admin-rpl.php. */
+            echo '      <a href="admin-rpl"' . $on('rpl') . '>RPL</a>' . "\n";
             if (is_file(__DIR__ . '/../scorecard.php')) {
                 echo '      <a href="scorecard"' . $on('scorecard') . '>B-BBEE</a>' . "\n";
             }

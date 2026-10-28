@@ -262,10 +262,10 @@ function submission_may_view(array $row, array $u): bool
     return poe_may_record((string) $row['course_slug'], $u);
 }
 
-/** Send the file as a download. Exits. */
-function submission_stream(array $row): void
+/** Send the file as a download. $sub is the private folder it lives in — rpl-file.php shares this. */
+function submission_stream(array $row, string $sub = 'poe-files'): void
 {
-    $dir  = app_private_dir('poe-files');
+    $dir  = app_private_dir($sub);
     $path = $dir !== null ? $dir . '/' . $row['disk_name'] : null;
     if ($path === null || !is_file($path)) {
         http_response_code(404);

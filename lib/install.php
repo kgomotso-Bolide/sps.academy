@@ -47,7 +47,8 @@ function install_tables(): array
             'classes', 'class_attendance',
             'course_links', 'class_links', 'logbook_entries',
             'poe_submissions', 'quiz_attempt_grants',
-            'notices', 'poe_files'];
+            'notices', 'poe_files',
+            'rpl_claims', 'rpl_credits', 'rpl_standard'];
 }
 
 /** Which of the expected tables are not there yet. */

@@ -2047,6 +2047,16 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
   border-radius:7px;background:#fff;color:var(--ink);cursor:pointer}
 .pw-toggle:hover{border-color:var(--ink-soft)}
 .pw-toggle:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+
+/* Recognition of prior learning — prior-learning.php, admin-rpl.php, my.php. */
+.rpl-form{max-width:760px;margin-top:8px}
+.rpl-mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin:0 0 18px}
+.rpl-mod{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:9px;background:#fff;cursor:pointer;font-size:14px;line-height:1.4}
+.form .rpl-mod input{width:auto;padding:0;margin-top:3px;flex:none}
+.rpl-mod .adm-sub{display:inline}
+.rpl-act{display:flex;flex-wrap:wrap;gap:12px}
+.my-next.my-rpl{margin:0 0 14px}
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------
