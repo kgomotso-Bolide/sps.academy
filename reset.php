@@ -133,4 +133,5 @@ if ($found !== null && is_post()) {
 
 <?php chrome_footer('slim'); ?>
 <script src="<?= e(asset('site.js')) ?>"></script>
+<script src="<?= e(asset('password-toggle.js')) ?>"></script>
 </body></html>

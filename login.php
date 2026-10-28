@@ -5,7 +5,7 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/audit.php';
 require __DIR__ . '/lib/csrf.php';
-require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/chrome.php';
 /* Before a single byte is printed. The session cookie is a header, so a page
    that prints first and starts its session later gets no session at all — and
@@ -120,4 +120,5 @@ if (is_post()) {
 
 <?php chrome_footer('slim'); ?>
 <script src="<?= e(asset('site.js')) ?>"></script>
+<script src="<?= e(asset('password-toggle.js')) ?>"></script>
 </body></html>

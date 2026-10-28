@@ -515,5 +515,6 @@ function when_local(?string $utc): string
 })();
 </script>
 <script src="<?= e(asset('site.js')) ?>"></script>
+<script src="<?= e(asset('password-toggle.js')) ?>"></script>
 </body>
 </html>

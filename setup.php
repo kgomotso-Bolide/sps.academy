@@ -67,19 +67,34 @@ if (is_post()) {
         $seeded = install_seed_tenants();
         $done[] = $seeded
             ? 'Added ' . $seeded . ' company row(s) to the tenants table.'
-            : 'All four companies were already in the tenants table.';
+            : 'Every company was already in the tenants table.';
 
         $done[] = 'This installation serves "' . e((string) app_config('tenant'))
                 . '" (tenant id ' . tenant_id() . ').';
 
-        // The first administrator, only if there is not one already.
+        /* An administrator for this address, if the address has no account here.
+           Until 28 Oct 2026 this ran only when the site had NO administrator,
+           which left no way in once every administrator was locked out — and no
+           shell to fix it from. Holding the token already means holding SFTP, so
+           adding an account is no new power. Changing one would be, so an
+           existing account is left exactly as it is: its owner uses "Forgot
+           password". Both fields left empty means "tables only". */
         $email = strtolower(trim((string) ($_POST['admin_email'] ?? '')));
         $name  = trim((string) ($_POST['admin_name'] ?? ''));
+        $existing = $email === '' ? null
+                  : db_one('SELECT role, status FROM users WHERE tenant_id = ? AND email = ?',
+                           [tenant_id(), $email]);
 
-        if (install_admin_count() > 0) {
-            $done[] = 'An administrator already exists, so none was created. '
-                    . 'Use the sign-in page, or reset a password from the command line.';
-        } elseif ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $name === '') {
+        if ($email === '' && $name === '') {
+            $done[] = install_admin_count() > 0
+                ? 'No administrator was asked for, and this academy already has one.'
+                : 'No administrator was asked for. This academy has none yet — run this '
+                  . 'page again with a name and an email to create one.';
+        } elseif ($existing !== null) {
+            $done[] = e($email) . ' already has an account here (' . e((string) $existing['role'])
+                    . ', ' . e((string) $existing['status']) . '), so nothing about it was changed. '
+                    . 'Use <a href="forgot">Forgot password</a> to set a new password.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || $name === '') {
             $errors[] = 'The tables are ready, but no administrator was created — '
                       . 'a valid email address and a full name are needed for that.';
         } else {
@@ -98,8 +113,8 @@ if (is_post()) {
                 'created_at'    => now(),
                 'last_login_at' => null,
             ]);
-            audit('user.created', 'users', $id, 'first administrator, via setup.php');
-            $done[] = 'Created the first administrator: ' . e($email) . '.';
+            audit('user.created', 'users', $id, 'administrator, via setup.php');
+            $done[] = 'Created an administrator: ' . e($email) . '.';
         }
 
         audit('setup.ran', null, null, count($done) . ' step(s), ' . $applied . ' statements');
@@ -141,7 +156,7 @@ $ready = install_missing_tables() === [];
 
         <div class="legal-draft" style="border-color:var(--err);background:#fdecea">
           <strong>Now remove the token.</strong> Open
-          <code>~/private/sps-config.php</code> over SFTP and set
+          <code>~/private/<?= e(basename(APP_ROOT)) ?>-config.php</code> over SFTP and set
           <code>'setup_token' =&gt; ''</code>. This page stays reachable until you do,
           and it will start returning a plain 404 once you have. Nothing else needs
           changing.
@@ -155,7 +170,7 @@ $ready = install_missing_tables() === [];
       <?php if (!$done): ?>
         <p class="auth-lede">
           This creates the tables and the four company rows, and — the first time it is
-          run — one administrator account. It only ever creates: nothing here deletes or
+          run with a name and an email that has no account here — an administrator account. It only ever creates: nothing here deletes or
           overwrites anything, so running it twice is safe.
         </p>
 
@@ -173,14 +188,14 @@ $ready = install_missing_tables() === [];
           <div class="field">
             <label for="s-token">Setup token</label>
             <input id="s-token" type="password" name="token" required autofocus
-                   placeholder="the value of setup_token in sps-config.php">
+                   placeholder="the value of setup_token in <?= e(basename(APP_ROOT)) ?>-config.php">
           </div>
           <div class="field">
-            <label for="s-name">First administrator — full name</label>
+            <label for="s-name">Administrator — full name</label>
             <input id="s-name" type="text" name="admin_name" placeholder="Kgomotso Moloantoa">
           </div>
           <div class="field">
-            <label for="s-email">First administrator — email</label>
+            <label for="s-email">Administrator — email</label>
             <input id="s-email" type="email" name="admin_email" placeholder="kgomotso@centenarynetworks.com">
           </div>
           <button type="submit" class="btn btn-primary" style="width:100%">Run setup</button>
@@ -189,4 +204,5 @@ $ready = install_missing_tables() === [];
     </div>
   </div>
 </section>
+<script src="password-toggle.js"></script>
 </body></html>

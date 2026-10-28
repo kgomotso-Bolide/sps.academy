@@ -156,6 +156,10 @@ $shared = [
     'profile.js', 'profile-page.js', 'pm-progress.js', 'materials.js',
     'quiz-widget.js', 'lessons.js',
 
+    // password-toggle.js joined on 28 Oct 2026: login, reset, invite, my and
+    // setup load it by name, so a site without it has a broken script tag.
+    'password-toggle.js',
+
     // course-context.js joined on 16 Sep 2026, when a second qualification made
     // "which course is this page about" a question rather than a constant. The
     // four files above read the answer from it, and a copy of it that disagreed

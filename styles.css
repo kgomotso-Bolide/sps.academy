@@ -2038,6 +2038,15 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
   .reg-note{min-width:80px}
   .reg-by{display:none}
 }
+
+/* Show / Hide on password fields — password-toggle.js wraps each one. */
+.pw-wrap{position:relative;display:block}
+.form .pw-wrap input{padding-right:76px}
+.pw-toggle{position:absolute;top:50%;right:8px;transform:translateY(-50%);
+  font:inherit;font-size:13px;font-weight:600;padding:5px 10px;border:1px solid var(--line);
+  border-radius:7px;background:#fff;color:var(--ink);cursor:pointer}
+.pw-toggle:hover{border-color:var(--ink-soft)}
+.pw-toggle:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------

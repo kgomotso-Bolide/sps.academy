@@ -194,7 +194,7 @@ function reset_lookup(string $token): ?array
         [tenant_id(), hash('sha256', $token)]
     ));
     if ($row === null || $row['used_at'] !== null) return null;
-    if (strtotime((string) $row['expires_at']) < time()) return null;
+    if (strtotime((string) $row['expires_at'] . ' UTC') < time()) return null;
 
     $user = db_one('SELECT * FROM users WHERE id = ? AND tenant_id = ?',
                    [(int) $row['user_id'], tenant_id()]);
