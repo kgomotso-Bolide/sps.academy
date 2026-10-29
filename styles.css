@@ -375,6 +375,17 @@ footer{background:var(--dark);color:#a8a39d;padding:52px 0 30px;font-size:14px}
    so the space is reserved before it loads, and without this the attribute
    height survives width:100% and stretches the portrait. */
 .gm-photo img{width:100%;height:auto;display:block}
+/* Full frame (29 Oct 2026, on Kgomotso's request): the leader fills a wide
+   photograph across the section, real background and all, with the message
+   underneath — instead of a cut-out in a narrow column. Used where a
+   landscape original exists; the column layout above stays for the others. */
+.gm.gm-wide{grid-template-columns:1fr;gap:34px}
+.gm-wide .gm-photo{aspect-ratio:25/12}
+.gm-wide .gm-photo img{height:100%;object-fit:cover;object-position:var(--gm-focus,50% 30%)}
+.gm-wide > div:last-child{max-width:780px}
+@media (max-width:760px){
+  .gm-wide .gm-photo{max-width:none;aspect-ratio:3/2}
+}
 .gm .eyebrow{display:block;margin-bottom:16px}
 .gm blockquote{margin:0;color:var(--ink-soft);font-size:16.5px;line-height:1.7}
 .gm blockquote p{margin-bottom:16px}
