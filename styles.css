@@ -2079,6 +2079,9 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
 nav.nav-admin .nav-inner{max-width:none;padding-left:32px;padding-right:32px;gap:28px}
 nav.nav-admin .nav-links{gap:20px}
 nav.nav-admin .nav-links a,nav.nav-admin .nav-links .linkish{white-space:nowrap;font-size:14px;font-weight:600}
+/* The sign-out button is a <button>, so it does not pick up the colour a site
+   gives its nav links. --nav-ink is that colour; sites with white links set it. */
+.nav-links .linkish{color:var(--nav-ink,var(--grey))}
 @media(max-width:1500px){
   nav.nav-admin .nav-toggle{display:block;line-height:0}
   nav.nav-admin .nav-links{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
