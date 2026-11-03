@@ -3,7 +3,7 @@
 # All the academies and the BEE tool share one Xneelo SFTP login, but GitHub
 # secrets are per repository, and the repositories call the secret by
 # different names (they were created at different times). Changing the
-# password in the Xneelo panel therefore means updating eleven secrets; this
+# password in the Xneelo panel therefore means updating twelve secrets; this
 # does all of them from one prompt.
 #
 # Run it in PowerShell from anywhere:
@@ -26,7 +26,8 @@ $targets = @(
   @{ Repo = 'CentenaryNetworks/Inhance';            Secret = 'TRACKER_FTP_PASSWORD' },
   @{ Repo = 'CentenaryNetworks/angloamerican';      Secret = 'TRACKER_FTP_PASSWORD' },
   @{ Repo = 'CentenaryNetworks/altCapitalPartners'; Secret = 'TRACKER_FTP_PASSWORD' },
-  @{ Repo = 'CentenaryNetworks/beetool';            Secret = 'TRACKER_FTP_PASSWORD' }
+  @{ Repo = 'CentenaryNetworks/beetool';            Secret = 'TRACKER_FTP_PASSWORD' },
+  @{ Repo = 'sibusis-code/aianduacademic';         Secret = 'AIANDU_FTP_PASSWORD' }
 )
 
 function Read-Plain([string]$prompt) {
