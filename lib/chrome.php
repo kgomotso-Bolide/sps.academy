@@ -180,7 +180,9 @@ function chrome_nav(string $variant, array $o = []): void
            styles.css) into a target repo BEFORE syncing chrome.php into it, or
            this link 404s on that site. Same footing as the Graduates link below,
            which has always had the same requirement. */
-        echo '      <a href="graduates" data-nav="graduates">Graduates</a>' . "\n";
+        /* "Alumni" on Fungi (3 Nov 2026): 'graduates_label' in a site's
+           lib/brand.php renames the link. The address stays /graduates. */
+        echo '      <a href="graduates" data-nav="graduates">' . e(chrome_graduates_label()) . '</a>' . "\n";
         /* A site's own extra pages, from 'nav_extra' in its lib/brand.php
            (href => label) — see brand_list() in lib/bootstrap.php. */
         foreach (brand_list('nav_extra') as $href => $label) {
@@ -356,7 +358,7 @@ function chrome_footer(string $variant, array $o = []): void
             'about'        => 'About',
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
-            'graduates'    => 'Graduates',
+            'graduates'    => e(chrome_graduates_label()),
         ] + brand_list('nav_extra') + [
             'profile'      => 'Profile',
             'contact'      => 'Contact',
@@ -381,4 +383,10 @@ function chrome_footer(string $variant, array $o = []): void
        footer and one of them reads what the others set up, so if this function
        owned site.js it would silently reorder them. A footer helper is not the
        right place to be making decisions about script execution order. */
+}
+
+/* What the Graduates page is called in the nav and footer. */
+function chrome_graduates_label(): string
+{
+    return brand_has('graduates_label') ? (string) brand('graduates_label') : 'Graduates';
 }
