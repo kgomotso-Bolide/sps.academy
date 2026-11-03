@@ -244,7 +244,7 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    deployed. Anglo American and ALT Capital Partners joined on 27 Oct 2026, late
    — both were cloned without being added, which is the drift described above. */
 $defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa', '../inhance',
-                   '../angloAmerican', '../altcapitalpartners'];
+                   '../angloAmerican', '../altcapitalpartners', '../aiandu'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------

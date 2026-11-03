@@ -228,6 +228,10 @@ function install_seed_tenants(?string $contact = null): int
            joined tools/sync-backend.php, so syncing does not drop the row. */
         ['angloamerican',      'Anglo American',       'Anglo American Academy'],
         ['altcapitalpartners', 'ALT Capital Partners', 'ALT Capital Partners Academy'],
+        /* AI & U, the eleventh, cloned 3 Nov 2026 from ALT. Not a client: AI & U
+           (aiandu.africa) is Centenary Networks' own coding and AI literacy
+           brand, and this is its academy. Seeded here on the day it was cloned. */
+        ['aiandu',             'AI & U',               'AI & U Academy'],
     ];
 
     $added = 0;
