@@ -166,7 +166,9 @@ function chrome_nav(string $variant, array $o = []): void
     $active = (string) ($o['active'] ?? '');
     $on = static fn(string $k): string => $active === $k ? ' class="active"' : '';
 
-    echo '<nav id="nav">' . "\n  " . '<div class="nav-inner">' . "\n    "
+    /* nav-admin: the back-office bar carries a dozen links, so it gets its own
+       width rules in the shared styles (see "Admin nav" there). */
+    echo '<nav id="nav"' . ($variant === 'admin' ? ' class="nav-admin"' : '') . '>' . "\n  " . '<div class="nav-inner">' . "\n    "
        . chrome_logo() . "\n";
 
     if ($variant === 'site') {

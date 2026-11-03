@@ -2068,6 +2068,27 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
 .rpl-mod .adm-sub{display:inline}
 .rpl-act{display:flex;flex-wrap:wrap;gap:12px}
 .my-next.my-rpl{margin:0 0 14px}
+/* ---- Admin nav (3 Nov 2026) ----
+   The back office has a dozen links where the public nav has six. With no room
+   left the browser shrank the logo to a sliver and broke "Sign out (name)" over
+   two lines. So: the logo never shrinks, the bar uses the full screen width,
+   every link stays on one line, and below 1500px the links fold into the same
+   menu button the phone layout uses. The dropdown takes --header, the colour
+   of the bar itself, so the links keep whatever colour they have on the bar. */
+.brand{flex:0 0 auto}
+nav.nav-admin .nav-inner{max-width:none;padding-left:32px;padding-right:32px;gap:28px}
+nav.nav-admin .nav-links{gap:20px}
+nav.nav-admin .nav-links a,nav.nav-admin .nav-links .linkish{white-space:nowrap;font-size:14px;font-weight:600}
+@media(max-width:1500px){
+  nav.nav-admin .nav-toggle{display:block;line-height:0}
+  nav.nav-admin .nav-links{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
+    background:var(--header);border-bottom:1px solid rgba(0,0,0,.12);box-shadow:0 12px 24px -16px rgba(0,0,0,.35);padding:6px 0;display:none}
+  nav.nav-admin .nav-links.open{display:flex}
+  nav.nav-admin .nav-links a{padding:12px 32px}
+  nav.nav-admin .nav-links a.active::after{display:none}
+  nav.nav-admin .nav-links form .linkish{display:block;width:100%;text-align:left;padding:12px 32px}
+}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------
