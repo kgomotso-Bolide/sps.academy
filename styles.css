@@ -2073,10 +2073,10 @@ a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
    left the browser shrank the logo to a sliver and broke "Sign out (name)" over
    two lines. So: the logo never shrinks, the bar uses the full screen width,
    every link stays on one line, and below 1500px the links fold into the same
-   menu button the phone layout uses. The dropdown takes --header, the colour
-   of the bar itself, so the links keep whatever colour they have on the bar. */
+   menu button the phone layout uses. The dropdown inherits the bar's own
+   background (sites paint the bar differently), so the links stay readable. */
 .brand{flex:0 0 auto}
-nav.nav-admin .nav-inner{max-width:none;padding-left:32px;padding-right:32px;gap:28px}
+nav.nav-admin .nav-inner{max-width:none;padding-left:32px;padding-right:32px;gap:28px;background:inherit}
 nav.nav-admin .nav-links{gap:20px}
 nav.nav-admin .nav-links a,nav.nav-admin .nav-links .linkish{white-space:nowrap;font-size:14px;font-weight:600}
 /* The sign-out button is a <button>, so it does not pick up the colour a site
@@ -2085,7 +2085,7 @@ nav.nav-admin .nav-links a,nav.nav-admin .nav-links .linkish{white-space:nowrap;
 @media(max-width:1500px){
   nav.nav-admin .nav-toggle{display:block;line-height:0}
   nav.nav-admin .nav-links{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
-    background:var(--header);border-bottom:1px solid rgba(0,0,0,.12);box-shadow:0 12px 24px -16px rgba(0,0,0,.35);padding:6px 0;display:none}
+    background:inherit;border-bottom:1px solid rgba(0,0,0,.12);box-shadow:0 12px 24px -16px rgba(0,0,0,.35);padding:6px 0;display:none}
   nav.nav-admin .nav-links.open{display:flex}
   nav.nav-admin .nav-links a{padding:12px 32px}
   nav.nav-admin .nav-links a.active::after{display:none}
