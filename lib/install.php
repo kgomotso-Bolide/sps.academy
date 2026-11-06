@@ -215,7 +215,7 @@ function install_seed_tenants(?string $contact = null): int
            everywhere for the same reason as the rest. Not to be confused with
            the Cricket World Cup volunteer portal Centenary also built for them,
            which is a separate application with its own database. */
-        ['cricketsa', 'Cricket South Africa',            'Cricket SA Academy'],
+        ['cricketsa', 'Cricket South Africa',            'Cricket Coders Academy'],
         /* Inhance Supply Chain Solutions, the eighth, started 25 Sep 2026 after
            Kgomotso introduced them as a white-label prospect. Seeded everywhere
            for the same reason as Tracker: the tenants table describes the
