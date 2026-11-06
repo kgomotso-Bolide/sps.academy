@@ -1,17 +1,17 @@
 /* Course cards: real photo banners (loaded over gradient fallback) + link each card to its course page */
 (function(){
   var CARDS=[
-    ["Occupational Certificate: Project Manager","project-management","images/course-project-management.jpg","50% 8%"],
-    ["Procurement Officer","procurement-officer","images/course-procurement-officer.jpg","60% 12%"],
-    ["New Venture Creation","new-venture-creation","images/course-new-venture-creation.jpg","50% 18%"],
+    ["Occupational Certificate: Project Manager","project-management","images/course-project-management-v2.jpg","50% 50%"],
+    ["Procurement Officer","procurement-officer","images/course-procurement-officer-v2.jpg","50% 50%"],
+    ["AI & New Venture Creation","new-venture","images/course-ai-new-venture.jpg","50% 20%"], // before NVC: the match is "title contains", first hit wins
+    ["New Venture Creation","new-venture-creation","images/course-new-venture-creation-v2.jpg","50% 50%"],
     ["Engineering Candidacy Programme","engineering-candidacy","images/hero.jpg"],
-    ["AI & Software Development","ai-software-development","images/course-ai-software-development.jpg","50% 20%"],
-    ["Procurement Skills","procurement","1521737604893-d14cc237f11d"],
-    ["AI Fundamentals for the Workplace","ai-fundamentals","images/course-ai-fundamentals.jpg","50% 20%"],
-    ["AI Tools for Productivity","ai-tools-productivity","images/course-ai-tools-productivity.jpg","50% 15%"],
-    ["Responsible & Ethical AI Use","responsible-ai","images/course-responsible-ai.jpg","50% 25%"],
-    ["AI for Leaders & Managers","ai-leaders","images/course-ai-leaders.jpg","50% 25%"],
-    ["AI & New Venture Creation","new-venture","images/course-ai-new-venture.jpg","50% 20%"],
+    ["AI & Software Development","ai-software-development","images/course-ai-software-development-v2.jpg","50% 50%"],
+    ["Procurement Skills","procurement","images/course-procurement-skills.jpg","50% 50%"],
+    ["AI Fundamentals for the Workplace","ai-fundamentals","images/course-ai-fundamentals-v2.jpg","50% 50%"],
+    ["AI Tools for Productivity","ai-tools-productivity","images/course-ai-tools-productivity-v2.jpg","50% 50%"],
+    ["Responsible & Ethical AI Use","responsible-ai","images/course-responsible-ai-v2.jpg","50% 50%"],
+    ["AI for Leaders & Managers","ai-leaders","images/course-ai-leaders-v2.jpg","50% 50%"],
     ["Deploying TinyML","deploying-tinyml","1593376853899-fbb47a057fa0"],
     ["Fundamentals of TinyML","fundamentals-tinyml","1518770660439-4636190af475"],
     ["AI Strategy for Business Leaders","ai-strategy","1542744173-8e7e53415bb0"],

@@ -77,5 +77,5 @@ return [
 
   /* Bumped on any release that changes styles.css or a .js file.
      See asset() in lib/chrome.php for why this is not optional. */
-  'asset_version' => '20261015',
+  'asset_version' => '20261106',
 ];
