@@ -27,7 +27,7 @@ $targets = @(
   @{ Repo = 'CentenaryNetworks/angloamerican';      Secret = 'TRACKER_FTP_PASSWORD' },
   @{ Repo = 'CentenaryNetworks/altCapitalPartners'; Secret = 'TRACKER_FTP_PASSWORD' },
   @{ Repo = 'CentenaryNetworks/beetool';            Secret = 'TRACKER_FTP_PASSWORD' },
-  @{ Repo = 'sibusis-code/aianduacademic';         Secret = 'AIANDU_FTP_PASSWORD' }
+  @{ Repo = 'CentenaryNetworks/aianduacademic';    Secret = 'TRACKER_FTP_PASSWORD' }
 )
 
 function Read-Plain([string]$prompt) {
