@@ -291,7 +291,7 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
     } else {
         $h .= letter_p('<strong>Signing in</strong>');
         $h .= letter_p('Sign in with your email address, ' . e((string) $user['email'])
-            . ', and the password you have been given. If you do not have one, use '
+            . ', and your password. If you do not have one or have forgotten it, use '
             . '“Forgotten your password?” on the sign-in page.');
         if ($signIn !== '') $h .= letter_button($signIn, 'Sign in');
     }
@@ -337,8 +337,8 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
             . "\n\n  " . $inviteUrl . "\n\n";
     } else {
         $t .= 'SIGNING IN' . "\n"
-            . 'Sign in with your email address, ' . (string) $user['email'] . ', and the '
-            . 'password you have been given. If you do not have one, use "Forgotten your '
+            . 'Sign in with your email address, ' . (string) $user['email'] . ', and '
+            . 'your password. If you do not have one or have forgotten it, use "Forgotten your '
             . 'password?" on the sign-in page.' . "\n";
         if ($signIn !== '') $t .= "\n  " . $signIn . "\n";
         $t .= "\n";

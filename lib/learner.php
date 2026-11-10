@@ -174,6 +174,12 @@ function learner_catalogue(): array
     return $catalogue + brand_list('extra_courses') + $short;
 }
 
+/* The courses a learner may put themselves on, at sign-up (signup.php) and from
+   "Add a course" on /my. Added 10 Nov 2026 when Kgomotso removed the HR step.
+   Only courses with modules and material behind them: a course with nothing on
+   the platform yet would be an empty dashboard and a question for HR. */
+const LEARNER_SELF_ENROL_COURSES = ['project-management', 'procurement-officer', 'new-venture-creation'];
+
 function learner_course_valid(string $slug): bool
 {
     return array_key_exists($slug, learner_catalogue());

@@ -654,7 +654,13 @@
       st.hidden=false;
       const enrol=document.getElementById('c-enrol');
       enrol.textContent='Register Now';
-      enrol.href='contact?course='+encodeURIComponent(c.title);
+      /* Self sign-up (10 Nov 2026): the courses a learner can put themselves on
+         go straight to the account form, with the course already ticked. The
+         rest still go to the registration form. Keep this list the same as
+         LEARNER_SELF_ENROL_COURSES in lib/learner.php. */
+      enrol.href=['project-management','procurement-officer','new-venture-creation'].indexOf(getSlug())>-1
+        ? 'signup?course='+encodeURIComponent(getSlug())
+        : 'contact?course='+encodeURIComponent(c.title);
     }
 
     // hero video
@@ -850,5 +856,6 @@
 </script>
 <script src="profile.js?v=20260820"></script>
 <script src="assistant.js?v=20260820"></script>
+<script src="module-info.js?v=20261110"></script>
 </body>
 </html>

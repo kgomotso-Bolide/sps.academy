@@ -64,7 +64,26 @@ if (is_post()) {
             $error = $message;
         }
         csrf_rotate();
+    } elseif (($_POST['a'] ?? '') === 'enrol_self') {
+        /* "Add a course" (10 Nov 2026): a learner puts themselves on another
+           course without going through HR. Only the self-enrol list, only a
+           learner account (learner_enrol_user() refuses staff), only themselves. */
+        $slug = post_str('course', 60);
+        if (!brand_has('self_signup') || !in_array($slug, LEARNER_SELF_ENROL_COURSES, true)) {
+            $error = 'That course cannot be added from here. Ask the academy about it.';
+        } else {
+            $r = db_optional(fn() => learner_enrol_user((int) $me['id'], $slug));
+            if ($r === null)   $error  = db_schema_notice();
+            elseif ($r['ok'])  $notice = 'You are now on ' . learner_course_title($slug)
+                                       . '. Its modules and files are below.';
+            else               $error  = $r['message'];
+        }
+        csrf_rotate();
     }
+}
+if ($notice === '' && ($_GET['welcome'] ?? '') === '1') {
+    $notice = 'Your account is ready. Your courses are below — open any module to start, '
+            . 'and every guide and workbook is under My files.';
 }
 
 /* Survives the gap between a deploy and its migration — see lib/db.php.
@@ -218,11 +237,8 @@ function when_local(?string $utc): string
     <?php if (!$enrolments): ?>
       <div class="my-empty">
         <strong>You are not on a course yet.</strong>
-        <p>Your account exists, but nobody has enrolled you on anything. If you were
-          expecting to be on a course, email
-          <a href="mailto:<?= e(brand('academy_email')) ?>"><?= e(brand('academy_email')) ?></a> —
-          or have a look at <a href="courses">what the academy runs</a> and register your
-          interest.</p>
+        <p>Choose one below and you can start straight away — or have a look at
+          <a href="courses">what the academy runs</a> first.</p>
       </div>
     <?php else: ?>
       <?php foreach ($enrolments as $en): ?>
@@ -287,6 +303,7 @@ function when_local(?string $utc): string
                      them is generalised. */ ?>
             <?php if ($slug === 'project-management'): ?>
               <div class="my-actions">
+                <a class="btn btn-primary" href="<?= e('files?c=' . rawurlencode($slug)) ?>">My files</a>
                 <a class="btn btn-primary" href="pm-schedule">My study plan</a>
                 <a class="btn btn-primary" href="<?= e('submit?c=' . rawurlencode($slug)) ?>">Submit my workbooks</a>
                 <a class="btn btn-ghost" href="pm-progress">Progress report for my manager</a>
@@ -294,6 +311,7 @@ function when_local(?string $utc): string
               </div>
             <?php else: ?>
               <div class="my-actions">
+                <a class="btn btn-primary" href="<?= e('files?c=' . rawurlencode($slug)) ?>">My files</a>
                 <a class="btn btn-ghost" href="<?= e('course?c=' . rawurlencode($slug)) ?>">What this qualification covers</a>
               </div>
             <?php endif; ?>
@@ -392,6 +410,39 @@ function when_local(?string $utc): string
       <?php endforeach; ?>
     <?php endif; ?>
 
+    <?php
+      /* ---- Add a course (10 Nov 2026) -----------------------------------------
+         The courses on the self-enrol list this learner is not on yet. One press
+         and they are on it: no registration, no HR. Hidden for staff, whose
+         access comes from their role. ?add=<slug> (from a course page's
+         Register Now) puts that one first and says so. */
+      $onSlugs = array_map(fn($e) => (string) $e['course_slug'], $enrolments ?: []);
+      $canAdd  = $me['role'] === 'learner' && brand_has('self_signup')
+          ? array_values(array_diff(LEARNER_SELF_ENROL_COURSES, $onSlugs)) : [];
+      $addWant = (string) ($_GET['add'] ?? '');
+      if (in_array($addWant, $canAdd, true)) {
+          $canAdd = array_values(array_unique(array_merge([$addWant], $canAdd)));
+      }
+    ?>
+    <?php if ($canAdd): ?>
+      <div class="my-add<?= in_array($addWant, $canAdd, true) ? ' my-add-want' : '' ?>" id="add-course">
+        <h4><?= $enrolments ? 'Add another course' : 'Choose a course to start' ?></h4>
+        <p>Pick a course and you are on it straight away. Its modules and files open at once.</p>
+        <div class="my-add-list">
+          <?php foreach ($canAdd as $slug): $cat = learner_catalogue()[$slug] ?? []; ?>
+            <form method="POST" class="my-add-item">
+              <?= csrf_field() ?>
+              <input type="hidden" name="a" value="enrol_self">
+              <input type="hidden" name="course" value="<?= e($slug) ?>">
+              <span><strong><?= e(learner_course_title($slug)) ?></strong>
+                <small><?= e((string) ($cat['note'] ?? '')) ?></small></span>
+              <button type="submit" class="btn btn-primary btn-sm">Add this course</button>
+            </form>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <div class="my-grid">
 
       <section class="my-card">
@@ -467,6 +518,7 @@ function when_local(?string $utc): string
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
 <script src="<?= e(asset('profile.js')) ?>"></script>
 <script src="<?= e(asset('pm-progress.js')) ?>"></script>
+<script src="<?= e(asset('module-info.js')) ?>"></script>
 <script>
 /* Paint the progress panel for every tracked course on the page.
    Waits for the account's progress to arrive before drawing anything — see the

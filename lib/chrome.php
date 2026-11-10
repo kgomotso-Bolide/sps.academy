@@ -220,6 +220,7 @@ function chrome_nav(string $variant, array $o = []): void
            than assumed. Defaulting to 'my' keeps every existing caller right. */
         $here = (string) ($o['active'] ?? 'my');
         echo '      <a href="my"' . ($here === 'my' ? ' class="active"' : '') . '>My learning</a>' . "\n";
+        echo '      <a href="files"' . ($here === 'files' ? ' class="active"' : '') . '>My files</a>' . "\n";
         echo '      <a href="logbook"' . ($here === 'logbook' ? ' class="active"' : '') . '>My logbook</a>' . "\n";
         echo '      <a href="submit"' . ($here === 'submit' ? ' class="active"' : '') . '>Submit work</a>' . "\n";
         echo '      <a href="notices"' . ($here === 'notices' ? ' class="active"' : '') . '>Notice board</a>' . "\n";

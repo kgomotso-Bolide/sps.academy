@@ -86,9 +86,14 @@ if (is_post()) {
     <div class="auth-card">
       <span class="eyebrow"><?= e(brand('academy')) ?></span>
       <h2>Sign in</h2>
+      <?php if (brand_has('self_signup')): ?>
+      <p class="auth-lede">New here? <a href="signup"><strong>Create your account</strong></a>,
+        choose your course and start straight away.</p>
+      <?php else: ?>
       <p class="auth-lede">For academy staff and enrolled learners. If you are registering
         for a course for the first time, you do not need an account —
         <a href="contact">use the registration form</a>.</p>
+      <?php endif; ?>
 
       <form class="form" method="POST" novalidate>
         <?= csrf_field() ?>

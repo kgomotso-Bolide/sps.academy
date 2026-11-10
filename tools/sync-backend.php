@@ -98,6 +98,11 @@ $shared = [
     // gives them a nav link to a 404.
     'trainer.php',
 
+    // 10 Nov 2026. lib/chrome.php's learner nav links to files.php, and my.php
+    // loads module-info.js. signup.php ships everywhere but only switches on
+    // where lib/brand.php has 'self_signup' (SPS only).
+    'files.php', 'signup.php', 'module-info.js',
+
     // In-person classes, 11 Sep 2026. admin-classes.php is linked from the
     // admin nav in lib/chrome.php — which IS synced — so a site without it gets
     // an "In-person" link to a 404; register.php is linked from every row of

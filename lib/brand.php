@@ -77,5 +77,12 @@ return [
 
   /* Bumped on any release that changes styles.css or a .js file.
      See asset() in lib/chrome.php for why this is not optional. */
-  'asset_version' => '20261106',
+  'asset_version' => '20261110',
+
+  /* Self sign-up (10 Nov 2026, Kgomotso): a person creates their own account on
+     signup.php and puts themselves on a course, with no HR step. ON FOR SPS ONLY.
+     Leave it out of every other academy's brand.php unless that client asks:
+     without it signup.php sends people to the registration form, and /my shows
+     no "Add a course" box. */
+  'self_signup' => '1',
 ];
