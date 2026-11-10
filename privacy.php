@@ -153,4 +153,5 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
 
 <?php chrome_footer('site', ['accred' => false, 'employees' => true]); ?>
 <script src="<?= e(asset('site.js')) ?>"></script>
+<?php if (brand_has('self_signup')): ?><script src="<?= e(asset('learner-nav.js')) ?>"></script><?php endif; ?>
 </body></html>

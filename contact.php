@@ -188,4 +188,5 @@ function old(array $old, string $field): string
 <script src="<?= e(asset('site.js')) ?>"></script>
 <script src="<?= e(asset('profile.js')) ?>"></script>
 <script src="<?= e(asset('assistant.js')) ?>"></script>
+<?php if (brand_has('self_signup')): ?><script src="<?= e(asset('learner-nav.js')) ?>"></script><?php endif; ?>
 </body></html>

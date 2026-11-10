@@ -168,8 +168,12 @@ function chrome_nav(string $variant, array $o = []): void
 
     /* nav-admin: the back-office bar carries a dozen links, so it gets its own
        width rules in the shared styles (see "Admin nav" there). */
+    $logo = chrome_logo();
+    if ($variant === 'learner' && brand_has('self_signup')) {
+        $logo = preg_replace('/^<a href="\.\/"/', '<a href="my"', $logo, 1);
+    }
     echo '<nav id="nav"' . ($variant === 'admin' ? ' class="nav-admin"' : '') . '>' . "\n  " . '<div class="nav-inner">' . "\n    "
-       . chrome_logo() . "\n";
+       . $logo . "\n";
 
     if ($variant === 'site') {
         echo '    <div class="nav-links" id="navLinks">' . "\n";
@@ -212,6 +216,29 @@ function chrome_nav(string $variant, array $o = []): void
         echo ($o['tail'] ?? 'contact') === 'signin'
             ? '      <a href="login">Sign in</a>' . "\n"
             : '      <a href="contact" data-nav="contact">Contact</a>' . "\n";
+        echo '    </div>' . "\n";
+        echo '    ' . chrome_nav_toggle() . "\n";
+
+    } elseif ($variant === 'learner' && brand_has('self_signup')) {
+        /* Study-only nav (SPS, 10 Nov 2026, Sibusiso): "like a true learning
+           management system, once logged in you only see studying tabs". No Home
+           or Courses: clicking into the public site made learners think they had
+           been signed out. The logo goes to My learning too — see learner-nav.js,
+           which does the same on the static pages. Staff keep their way back. */
+        $here = (string) ($o['active'] ?? 'my');
+        $a = static fn(string $href, string $key, string $label): string =>
+            '      <a href="' . $href . '"' . ($here === $key ? ' class="active"' : '') . '>' . $label . '</a>' . "\n";
+        echo '    <div class="nav-links" id="navLinks">' . "\n";
+        echo $a('my#account', 'account', 'My account');
+        echo $a('my', 'my', 'My learning');
+        echo $a('files', 'files', 'My files');
+        echo $a('logbook', 'logbook', 'My logbook');
+        echo $a('submit', 'submit', 'Submit work');
+        echo $a('notices', 'notices', 'Notice board');
+        if (!empty($o['admin']))       echo '      <a href="admin">Administration</a>' . "\n";
+        elseif (!empty($o['trainer'])) echo '      <a href="trainer">My learners</a>' . "\n";
+        echo $a('contact', 'contact', 'Contact');
+        echo '      ' . chrome_signout() . "\n";
         echo '    </div>' . "\n";
         echo '    ' . chrome_nav_toggle() . "\n";
 

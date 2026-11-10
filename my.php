@@ -445,7 +445,7 @@ function when_local(?string $utc): string
 
     <div class="my-grid">
 
-      <section class="my-card">
+      <section class="my-card" id="account">
         <h3 class="my-h">Your details</h3>
         <dl class="my-dl">
           <dt>Name</dt><dd><?= e(trim($me['first_name'] . ' ' . $me['last_name'])) ?></dd>
