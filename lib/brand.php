@@ -85,4 +85,6 @@ return [
      without it signup.php sends people to the registration form, and /my shows
      no "Add a course" box. */
   'self_signup' => '1',
+  /* Graduates page taken off SPS, 10 Nov 2026 (nav, footer and the page). */
+  'hide_graduates' => '1',
 ];

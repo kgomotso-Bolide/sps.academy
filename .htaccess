@@ -44,6 +44,10 @@ DirectoryIndex index.html index.php
   # denied file reads the same as one that never existed.
   RewriteRule ^\.user\.ini$ - [R=404,L]
 
+  # Graduates page removed 10 Nov 2026. The deploy never deletes, so the old
+  # graduates.html is still on the server; this makes /graduates 404.
+  RewriteRule ^graduates(\.html)?$ - [R=404,L]
+
   # WHICH TRAINER PHOTOGRAPHS MAY BE SERVED. A whitelist, not a blocklist.
   #
   # images/ is mirrored to the server wholesale and the deploy does not delete

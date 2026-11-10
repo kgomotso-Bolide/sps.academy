@@ -188,7 +188,10 @@ function chrome_nav(string $variant, array $o = []): void
            which has always had the same requirement. */
         /* "Alumni" on Fungi (3 Nov 2026): 'graduates_label' in a site's
            lib/brand.php renames the link. The address stays /graduates. */
-        echo '      <a href="graduates" data-nav="graduates">' . e(chrome_graduates_label()) . '</a>' . "\n";
+        /* 'hide_graduates' in a site's lib/brand.php drops the page (SPS, 10 Nov 2026). */
+        if (!brand_has('hide_graduates')) {
+            echo '      <a href="graduates" data-nav="graduates">' . e(chrome_graduates_label()) . '</a>' . "\n";
+        }
         /* A site's own extra pages, from 'nav_extra' in its lib/brand.php
            (href => label) — see brand_list() in lib/bootstrap.php. */
         foreach (brand_list('nav_extra') as $href => $label) {
@@ -392,8 +395,9 @@ function chrome_footer(string $variant, array $o = []): void
             'about'        => 'About',
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
+        ] + (brand_has('hide_graduates') ? [] : [
             'graduates'    => e(chrome_graduates_label()),
-        ] + brand_list('nav_extra') + (brand_has('self_signup') ? [] : [
+        ]) + brand_list('nav_extra') + (brand_has('self_signup') ? [] : [
             'profile'      => 'Profile',
         ]) + [
             'contact'      => 'Contact',
