@@ -235,6 +235,29 @@ if (is_post()) {
             $error = 'That account no longer exists.';
 
         /* -------------------------------------------------------------------
+           Un-enrolling, and deleting an account (10 Nov 2026).
+
+           Two steps on purpose (Sibusiso): a learner is taken off every course
+           first, and only an account on no course can be deleted. Deleting is
+           permanent and takes their progress, uploads and logbook with it —
+           see learner_delete_account() for what goes and what stays.
+           ------------------------------------------------------------------- */
+        } elseif ($action === 'unenrol') {
+            $r = db_optional(fn() => learner_unenrol_user((int) $target['id'], post_str('course_slug', 60)));
+            if ($r === null)  $error  = db_schema_notice();
+            elseif ($r['ok']) $notice = $r['message'];
+            else              $error  = $r['message'];
+
+        } elseif ($action === 'delete') {
+            if (strtolower(trim(post_str('confirm_email', 190))) !== strtolower((string) $target['email'])) {
+                $error = 'To delete an account, type its email address exactly in the box first.';
+            } else {
+                $r = learner_delete_account((int) $target['id'], (int) $me['id']);
+                if ($r['ok']) $notice = $r['message'];
+                else          $error  = $r['message'];
+            }
+
+        /* -------------------------------------------------------------------
            Changing a role.
 
            The guard that matters: you cannot change your own. Demoting yourself
@@ -647,6 +670,14 @@ Jane Doe, jane@example.com"></textarea>
               <?php endif; ?>
               <?php if ($mine): foreach ($mine as $en): ?>
                 <span class="adm-enrolled"><?= e((string) $en['course_title']) ?></span>
+                <form method="POST" class="adm-act adm-unenrol"
+                      onsubmit="return confirm('Take <?= e(addslashes(trim($u['first_name'] . ' ' . $u['last_name']))) ?> off <?= e(addslashes((string) $en['course_title'])) ?>? They lose access to its modules and files at once. Their progress is kept.')">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="a" value="unenrol">
+                  <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                  <input type="hidden" name="course_slug" value="<?= e((string) $en['course_slug']) ?>">
+                  <button type="submit" class="linkish adm-toggle">Un-enrol</button>
+                </form>
                 <?php
                   $slug = (string) $en['course_slug'];
                   $c = $progressBy[(int) $u['id']][$slug] ?? null;
@@ -693,6 +724,24 @@ Jane Doe, jane@example.com"></textarea>
                     <?= $u['status'] === 'active' ? 'Switch this account off' : 'Switch it back on' ?>
                   </button>
                 </form>
+                <?php if ($u['role'] !== 'admin'): ?>
+                  <?php if ($mine): ?>
+                    <span class="adm-sub adm-del-note">To delete this account, un-enrol them from every course first.</span>
+                  <?php else: ?>
+                    <details class="adm-del">
+                      <summary>Delete this account…</summary>
+                      <form method="POST" class="adm-act"
+                            onsubmit="return confirm('Permanently delete <?= e(addslashes(trim($u['first_name'] . ' ' . $u['last_name']))) ?>? Their progress, quiz attempts, logbook and uploaded work go with it. This cannot be undone.')">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="a" value="delete">
+                        <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                        <label class="adm-sub" for="del-<?= (int) $u['id'] ?>">Type <strong><?= e((string) $u['email']) ?></strong> to confirm</label>
+                        <input id="del-<?= (int) $u['id'] ?>" type="text" name="confirm_email" autocomplete="off" required>
+                        <button type="submit" class="btn adm-del-btn">Delete permanently</button>
+                      </form>
+                    </details>
+                  <?php endif; ?>
+                <?php endif; ?>
                 <?php /* Not offered on your own row. Demoting yourself as the only
                          administrator locks everyone out of these pages, and there is
                          no shell on this hosting to undo it. The POST handler refuses

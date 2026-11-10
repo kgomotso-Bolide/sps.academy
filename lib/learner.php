@@ -632,6 +632,117 @@ function learner_enrol_user(int $userId, string $courseSlug): array
                        . ' is now enrolled on ' . $title . '.'];
 }
 
+/**
+ * Take a learner off one course (10 Nov 2026, admin only — see admin-users.php).
+ *
+ * Removes the enrolment row, which is what every learner page and materials.php
+ * check, so access to that course's modules and files ends at once. Their
+ * progress, quiz attempts and uploads are kept: put them back on the course and
+ * it is all still there. Removing those is what deleting the account is for.
+ */
+function learner_unenrol_user(int $userId, string $courseSlug): array
+{
+    $row = db_one('SELECT e.id, u.first_name, u.last_name FROM enrolments e JOIN users u ON u.id = e.user_id
+                    WHERE e.tenant_id = ? AND e.user_id = ? AND e.course_slug = ?',
+                  [tenant_id(), $userId, $courseSlug]);
+    if ($row === null) return ['ok' => false, 'message' => 'They are not on that course.'];
+    db_run('DELETE FROM enrolments WHERE id = ? AND tenant_id = ?', [(int) $row['id'], tenant_id()]);
+    audit('learner.unenrolled', 'enrolments', (int) $row['id'], 'user ' . $userId . ' · ' . $courseSlug);
+    return ['ok' => true, 'message' => trim($row['first_name'] . ' ' . $row['last_name'])
+                                     . ' is no longer on ' . learner_course_title($courseSlug) . '.'];
+}
+
+/**
+ * Delete an account for good (10 Nov 2026, Sibusiso: "admin must have the power
+ * to remove an account, but first must un-enrol a learner").
+ *
+ * REFUSED unless: it is not your own account, it is not an administrator, it
+ * is on no course (un-enrol first — that is the deliberate second step), and it
+ * is not named as the facilitator of a class. Then everything held against the
+ * person goes in one transaction: progress, quiz attempts and grants, logbook,
+ * workbook uploads and RPL claims (and their files on disk, after the commit),
+ * letters, attendance, consents, resets and invites. Registrations stay, with
+ * the link to the account cleared, because they have their own 12-month purge.
+ * The audit log keeps its rows: it records that things happened, and the
+ * deletion itself is one of them. Columns that only say who DID something
+ * (updated_by, marked_by...) are cleared rather than deleted.
+ */
+function learner_delete_account(int $userId, int $byUserId): array
+{
+    $fail = static fn(string $m): array => ['ok' => false, 'message' => $m];
+    $u = db_one('SELECT * FROM users WHERE id = ? AND tenant_id = ?', [$userId, tenant_id()]);
+    if ($u === null)                    return $fail('That account no longer exists.');
+    if ($userId === $byUserId)          return $fail('You cannot delete your own account.');
+    if ($u['role'] === 'admin')         return $fail('Administrator accounts cannot be deleted here. Change the role to learner first if this person should go.');
+    $on = db_all('SELECT course_slug FROM enrolments WHERE tenant_id = ? AND user_id = ?', [tenant_id(), $userId]);
+    if ($on) {
+        return $fail('Un-enrol ' . trim($u['first_name'] . ' ' . $u['last_name']) . ' from '
+                   . implode(', ', array_map(fn($r) => learner_course_title((string) $r['course_slug']), $on))
+                   . ' first, then delete the account.');
+    }
+    $facil = (int) (db_optional(fn() => db_value('SELECT COUNT(*) FROM classes WHERE tenant_id = ? AND facilitator_id = ?',
+                                                 [tenant_id(), $userId]), 0) ?? 0);
+    if ($facil > 0) return $fail('This person is the facilitator of ' . $facil . ' class(es). Give those classes another facilitator first.');
+
+    /* A table from a later release may not exist on a server that has not run
+       /setup yet; that is "nothing to delete", not a failure. */
+    $run = static function (string $sql, array $p): void {
+        try { db_run($sql, $p); }
+        catch (Throwable $e) {
+            $m = $e->getMessage();
+            if (stripos($m, 'no such table') === false && stripos($m, "doesn't exist") === false) throw $e;
+        }
+    };
+    $files = static function (string $table) use ($userId): array {
+        try {
+            return array_values(array_filter(array_map(fn($r) => (string) ($r['disk_name'] ?? ''),
+                db_all("SELECT disk_name FROM $table WHERE tenant_id = ? AND user_id = ?", [tenant_id(), $userId]))));
+        } catch (Throwable $e) { return []; }
+    };
+    $poeFiles = $files('poe_files');
+    $rplFiles = $files('rpl_claims');
+
+    $owned = ['rpl_credits', 'rpl_claims', 'poe_files', 'poe_submissions', 'quiz_attempt_grants',
+              'quiz_attempts', 'class_attendance', 'logbook_entries', 'letters_sent', 'learner_progress',
+              'progress_reports', 'trainer_courses', 'password_resets', 'account_invites', 'consents'];
+    $byCols = [['enrolments', 'enrolled_by'], ['account_invites', 'invited_by'], ['quiz_attempt_grants', 'granted_by'],
+               ['poe_submissions', 'updated_by'], ['class_attendance', 'marked_by'], ['rpl_claims', 'reviewed_by'],
+               ['rpl_credits', 'decided_by'], ['rpl_standard', 'set_by'], ['materials', 'updated_by'],
+               ['material_files', 'updated_by'], ['quizzes', 'updated_by'], ['topic_sections', 'updated_by'],
+               ['course_links', 'updated_by'], ['class_links', 'updated_by'], ['classes', 'created_by'],
+               ['notices', 'created_by'], ['trainer_courses', 'created_by']];
+
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        /* Answers hang off attempts (fk_qans_attempt, no cascade), so they go
+           first or MySQL refuses the attempts. SQLite does not enforce it, which
+           is how a local test would miss this. */
+        $run('DELETE FROM quiz_attempt_answers WHERE tenant_id = ? AND attempt_id IN
+                (SELECT id FROM quiz_attempts WHERE tenant_id = ? AND user_id = ?)',
+             [tenant_id(), tenant_id(), $userId]);
+        foreach ($owned as $t) $run("DELETE FROM $t WHERE tenant_id = ? AND user_id = ?", [tenant_id(), $userId]);
+        $run('UPDATE registrations SET user_id = NULL WHERE tenant_id = ? AND user_id = ?', [tenant_id(), $userId]);
+        foreach ($byCols as [$t, $c]) $run("UPDATE $t SET $c = NULL WHERE tenant_id = ? AND $c = ?", [tenant_id(), $userId]);
+        db_run('DELETE FROM users WHERE id = ? AND tenant_id = ?', [$userId, tenant_id()]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        app_log('ACCOUNT DELETE FAILED (user ' . $userId . '): ' . $e->getMessage());
+        return $fail('The account could not be deleted. Nothing was changed. (' . mb_substr($e->getMessage(), 0, 160) . ')');
+    }
+
+    foreach ([['poe-files', $poeFiles], ['rpl-files', $rplFiles]] as [$sub, $names]) {
+        $dir = $names ? app_private_dir($sub) : null;
+        if ($dir === null) continue;
+        foreach ($names as $n) {
+            if (preg_match('/^[a-f0-9]{16,64}$/', $n)) @unlink($dir . '/' . $n);
+        }
+    }
+    audit('user.deleted', 'users', $userId, 'role ' . $u['role'] . ' · ' . (count($poeFiles) + count($rplFiles)) . ' file(s) removed');
+    return ['ok' => true, 'message' => trim($u['first_name'] . ' ' . $u['last_name']) . '’s account and everything held against it has been deleted.'];
+}
+
 /** Everything this learner is on, newest first. */
 function learner_enrolments(int $userId): array
 {

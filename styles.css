@@ -2150,6 +2150,16 @@ nav.nav-admin .nav-links a,nav.nav-admin .nav-links .linkish{white-space:nowrap;
 .mod-info .mi-topics li{margin:1px 0}
 .mod-info .mi-more{display:block;margin-top:4px;color:#9c97a8;font-size:12.5px}
 
+/* Admin > Users: un-enrol and delete (10 Nov 2026) */
+.adm-unenrol{display:inline;margin:0 0 0 6px}
+.adm-del{margin-top:8px}
+.adm-del summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--err)}
+.adm-del form{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-width:260px}
+.adm-del input[type=text]{padding:7px 9px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:13px}
+.adm-del-btn{background:var(--err);color:#fff;padding:8px 14px;font-size:13px;border-radius:8px}
+.adm-del-btn:hover{filter:brightness(.92)}
+.adm-del-note{display:block;margin-top:8px}
+
 /* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
 
 /* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------

@@ -28,9 +28,12 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/curriculum.php';
-require __DIR__ . '/lib/mail.php';
-require __DIR__ . '/lib/letters.php';
 require __DIR__ . '/lib/chrome.php';
+/* lib/mail.php and lib/letters.php are NOT loaded here on purpose. With them
+   loaded, learner_enrol_user() sends the welcome email inside the request, and
+   on 10 Nov 2026 a slow mail server held a sign-up past the gateway's limit:
+   the account was made but the person saw "504 Gateway Timeout". The email is
+   now sent after the response has gone — see the end of the POST branch. */
 
 app_session_start();
 
@@ -148,7 +151,33 @@ if (is_post()) {
             foreach ($old['courses'] as $slug) {
                 db_optional(fn() => learner_enrol_user($uid, $slug));
             }
-            redirect('my?welcome=1');
+
+            /* Answer first, email second. The learner is signed in and enrolled
+               already; the browser gets its redirect now, and the welcome
+               letter is written after the connection is handed back, so a slow
+               mail server can never turn a finished sign-up into a timeout. */
+            session_write_close();
+            header('Location: my?welcome=1', true, 303);
+            header('Content-Length: 0');
+            header('Connection: close');
+            ignore_user_abort(true);
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } else {
+                while (ob_get_level() > 0) ob_end_flush();
+                flush();
+            }
+            try {
+                require_once __DIR__ . '/lib/mail.php';
+                require_once __DIR__ . '/lib/letters.php';
+                @set_time_limit(60);
+                foreach ($old['courses'] as $slug) {
+                    letter_send_welcome($user, $slug, learner_course_title($slug), null);
+                }
+            } catch (Throwable $e) {
+                app_log('SIGNUP WELCOME LETTER FAILED (user ' . $uid . '): ' . $e->getMessage());
+            }
+            exit;
         }
     }
 }
@@ -176,7 +205,7 @@ $err = static fn(string $k): string =>
       <p class="auth-lede">Choose your course, set a password, and start straight away.
         Already have an account? <a href="login">Sign in</a>.</p>
 
-      <form class="form" method="POST" novalidate>
+      <form class="form" method="POST" novalidate id="su-form">
         <?= csrf_field() ?>
         <?php if (isset($errors['form'])): ?>
           <p class="form-err" role="alert"><?= e($errors['form']) ?></p>
@@ -232,7 +261,8 @@ $err = static fn(string $k): string =>
           <?= $err('consent') ?>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width:100%">Create my account and start</button>
+        <p class="form-err" id="su-err" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary" style="width:100%" id="su-go">Create my account and start</button>
       </form>
     </div>
   </div>
@@ -241,4 +271,39 @@ $err = static fn(string $k): string =>
 <?php chrome_footer('slim'); ?>
 <script src="<?= e(asset('site.js')) ?>"></script>
 <script src="<?= e(asset('password-toggle.js')) ?>"></script>
+<script>
+/* Checks before the form is sent (10 Nov 2026): the same rules the server
+   applies, shown at once. The server still checks everything — this only saves
+   a round trip. Then one press only, so a slow answer cannot become two
+   accounts or a "this email already exists" for somebody who is already in. */
+(function () {
+  var f = document.getElementById('su-form'); if (!f) return;
+  var box = document.getElementById('su-err'), go = document.getElementById('su-go');
+  var MIN = <?= (int) PASSWORD_MIN_LENGTH ?>;
+  f.addEventListener('submit', function (e) {
+    var v = function (n) { var el = f.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
+    var problems = [];
+    if (!f.querySelector('input[name="courses[]"]:checked')) problems.push('Choose at least one course.');
+    if (!v('first_name')) problems.push('Enter your first name.');
+    if (!v('last_name')) problems.push('Enter your surname.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) problems.push('Enter a valid email address.');
+    var p = f.querySelector('[name="password"]').value, c = f.querySelector('[name="confirm"]').value;
+    if (p.length < MIN) problems.push('Your password needs at least ' + MIN + ' characters.');
+    else if (p !== c) problems.push('The two passwords do not match.');
+    if (!f.querySelector('[name="consent"]').checked) problems.push('Tick the box to confirm you have read the privacy notice.');
+    if (problems.length) {
+      e.preventDefault();
+      box.innerHTML = '<strong>Please fix this first:</strong><br>' + problems.map(function (t) {
+        return '· ' + t.replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; });
+      }).join('<br>');
+      box.hidden = false;
+      box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
+    box.hidden = true;
+    go.disabled = true;
+    go.textContent = 'Creating your account…';
+  });
+})();
+</script>
 </body></html>
