@@ -201,7 +201,7 @@ function chrome_nav(string $variant, array $o = []): void
            . '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
            . '</svg></span><span class="np-label">Profile</span></a>' . "\n";
         }
-        echo '      <a href="contact" class="nav-cta">Upskill Yourself</a>' . "\n";
+        echo '      <a href="' . (brand_has('self_signup') ? 'signup' : 'contact') . '" class="nav-cta">Upskill Yourself</a>' . "\n";
         echo '    </div>' . "\n";
         echo '    ' . chrome_nav_toggle() . "\n";
 
