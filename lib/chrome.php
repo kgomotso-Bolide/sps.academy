@@ -192,11 +192,15 @@ function chrome_nav(string $variant, array $o = []): void
                . e((string) $label) . '</a>' . "\n";
         }
         echo '      <a href="contact" data-nav="contact"' . $on('contact') . '>Contact</a>' . "\n";
+        /* The browser-only Profile is not offered where learners make real
+           accounts (self_signup, SPS since 10 Nov 2026): the account holds it. */
+        if (!brand_has('self_signup')) {
         echo '      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile">'
            . '<span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" '
            . 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
            . '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
            . '</svg></span><span class="np-label">Profile</span></a>' . "\n";
+        }
         echo '      <a href="contact" class="nav-cta">Upskill Yourself</a>' . "\n";
         echo '    </div>' . "\n";
         echo '    ' . chrome_nav_toggle() . "\n";
@@ -362,8 +366,9 @@ function chrome_footer(string $variant, array $o = []): void
             'courses'      => 'Courses',
             'trainers'     => 'Trainers',
             'graduates'    => e(chrome_graduates_label()),
-        ] + brand_list('nav_extra') + [
+        ] + brand_list('nav_extra') + (brand_has('self_signup') ? [] : [
             'profile'      => 'Profile',
+        ]) + [
             'contact'      => 'Contact',
             'privacy'      => 'Privacy',
         ] as $href => $label) {
