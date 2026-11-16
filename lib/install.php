@@ -232,6 +232,9 @@ function install_seed_tenants(?string $contact = null): int
            (aiandu.africa) is Centenary Networks' own coding and AI literacy
            brand, and this is its academy. Seeded here on the day it was cloned. */
         ['aiandu',             'AI & U',               'AI & U Academy'],
+        /* New GX Capital, the twelfth, cloned 16 Nov 2026 from Inhance at
+           Sibusiso's request. Seeded here on the day it was cloned. */
+        ['newgx',              'New GX Capital',       'New GX Academy'],
     ];
 
     $added = 0;
