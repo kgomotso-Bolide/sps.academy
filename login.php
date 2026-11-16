@@ -42,7 +42,8 @@ function safe_next(?string $raw, string $fallback): string
    Neither wants the marketing homepage they just came from. */
 function home_for(array $u): string
 {
-    return $u['role'] === 'admin' ? 'admin' : 'my';
+    /* With the app frame (brand 'app_shell', 16 Nov 2026) a learner starts on Home. */
+    return $u['role'] === 'admin' ? 'admin' : (brand_has('app_shell') ? 'dashboard' : 'my');
 }
 
 $user = current_user();

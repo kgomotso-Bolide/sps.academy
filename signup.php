@@ -157,7 +157,7 @@ if (is_post()) {
                letter is written after the connection is handed back, so a slow
                mail server can never turn a finished sign-up into a timeout. */
             session_write_close();
-            header('Location: my?welcome=1', true, 303);
+            header('Location: ' . (brand_has('app_shell') ? 'dashboard' : 'my') . '?welcome=1', true, 303);
             header('Content-Length: 0');
             header('Connection: close');
             ignore_user_abort(true);

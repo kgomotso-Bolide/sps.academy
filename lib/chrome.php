@@ -149,6 +149,148 @@ function chrome_signout(string $label = 'Sign out'): string
 }
 
 /**
+ * The signed-in app frame (16 Nov 2026, from the sps-newui prototype; Sibusiso:
+ * "only implement the signed-in app UI into our current live academies and
+ * everything else remains the same", for learners AND staff).
+ *
+ * A fixed left sidebar and a slim top bar in place of the top nav, on every
+ * page that calls chrome_nav('learner') or chrome_nav('admin'), where the
+ * site's lib/brand.php sets 'app_shell'. The public pages, sign-in and the
+ * static course pages keep the ordinary nav (learner-nav.js gives a signed-in
+ * learner the study links there).
+ *
+ * The sidebar is #navLinks and the menu button #navToggle, so site.js's existing
+ * toggle opens it on a phone with no new script. The menu is a div with
+ * role=navigation, not a <nav>: styles.css styles every nav element as the
+ * fixed public top bar.
+ *
+ * @param list<array{0:string,1:string,2:string,3:string}|string> $items
+ *        [href, key, label, icon-path], or a string for a group heading.
+ *        An href starting "http" opens in a new tab.
+ */
+function chrome_shell_frame(array $items, string $here, string $home, array $foot,
+                            string $bell, string $avHref, string $label): void
+{
+    $u = function_exists('current_user') ? current_user() : null;
+    $ini = $u ? mb_strtoupper(mb_substr((string) $u['first_name'], 0, 1) . mb_substr((string) $u['last_name'], 0, 1)) : '';
+    $svg = static fn(string $p): string => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+        . 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $p . '</svg>';
+
+    echo '<link rel="stylesheet" href="' . e(asset('app.css')) . '">' . "\n";
+    echo '<aside class="app-side" id="navLinks">' . "\n";
+    echo '  <a href="' . e($home) . '" class="app-logo"><img src="' . e(brand('logo')) . '" alt="' . e(brand('logo_alt')) . '"></a>' . "\n";
+    echo '  <div class="app-menu" role="navigation" aria-label="' . e($label) . '">' . "\n";
+    foreach ($items as $it) {
+        if (is_string($it)) {
+            echo '    <span class="app-group">' . e($it) . '</span>' . "\n";
+            continue;
+        }
+        [$href, $key, $text, $path] = $it;
+        $ext = str_starts_with($href, 'http');
+        echo '    <a href="' . e($href) . '"'
+           . ($ext ? ' target="_blank" rel="noopener"' : '')
+           . ($here === $key ? ' class="on" aria-current="page"' : '') . '>'
+           . $svg($path) . '<span>' . e($text) . ($ext ? ' &#8599;' : '') . '</span></a>' . "\n";
+    }
+    echo '  </div>' . "\n";
+    echo '  <div class="app-side-foot">' . "\n";
+    foreach ($foot as $href => $text) {
+        echo '    <a href="' . e((string) $href) . '">' . e((string) $text) . '</a>' . "\n";
+    }
+    echo '    ' . chrome_signout() . "\n";
+    echo '  </div>' . "\n";
+    /* profile.js adds a "Sign in" link to #navLinks unless one is already
+       there. Never wanted inside the signed-in frame. */
+    echo '  <span class="nav-signin" hidden></span>' . "\n";
+    echo '</aside>' . "\n";
+    echo '<header class="app-top" id="nav">' . "\n";
+    echo '  <button class="app-burger" id="navToggle" aria-label="Menu">' . $svg('<path d="M3 6h18M3 12h18M3 18h18"/>') . '</button>' . "\n";
+    echo '  <a href="' . e($home) . '" class="app-top-logo"><img src="' . e(brand('logo')) . '" alt=""></a>' . "\n";
+    echo '  <span class="app-top-gap"></span>' . "\n";
+    echo '  <a href="' . e($bell) . '" class="app-bell" title="Notice board">' . $svg('<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>') . '</a>' . "\n";
+    $who = $u ? trim((string) $u['first_name'] . ' ' . (string) $u['last_name']) : '';
+    echo $avHref !== ''
+        ? '  <a href="' . e($avHref) . '" class="app-av" title="' . e($who) . '">' . e($ini) . '</a>' . "\n"
+        : '  <span class="app-av" title="' . e($who) . '">' . e($ini) . '</span>' . "\n";
+    echo '</header>' . "\n";
+}
+
+/** The learner's sidebar: Home, Skills, My files, Account. */
+function chrome_app_shell(array $o): void
+{
+    $here = (string) ($o['active'] ?? 'my');
+    /* The study pages that left the menu light up the item they now sit under. */
+    $here = ['my' => 'skills', 'logbook' => 'skills', 'submit' => 'skills', 'prior-learning' => 'skills',
+             'notices' => 'home'][$here] ?? $here;
+    $foot = [];
+    /* Staff who open a learner page keep a way back to their own side. */
+    if (!empty($o['admin']))       $foot['admin'] = 'Administration';
+    elseif (!empty($o['trainer'])) $foot['trainer'] = 'My learners';
+    $foot['contact'] = 'Contact the academy';
+    chrome_shell_frame([
+        ['dashboard', 'home',    'Home',     '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
+        ['skills',    'skills',  'Skills',   '<path d="M12 3l3 6H9zM12 9l4 7H8zM12 16v5M8 21h8"/>'],
+        ['files',     'files',   'My files', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6"/>'],
+        ['me',        'account', 'Account',  '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'],
+    ], $here, 'dashboard', $foot, 'notices', 'me', 'Your learning');
+}
+
+/**
+ * The staff sidebar: the same links as the admin top nav below, grouped, for
+ * an administrator or a trainer. Keep the two in step — which links a trainer
+ * is offered is argued for there, and the pages enforce it themselves.
+ */
+function chrome_staff_shell(array $o): void
+{
+    $on = (string) ($o['active'] ?? '');
+    $staff = function_exists('is_trainer') && is_trainer();
+    $i = [
+        'inbox' => '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/>',
+        'chart' => '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+        'users' => '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
+        'cert'  => '<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/>',
+        'file'  => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6"/>',
+        'book'  => '<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM8 7h7"/>',
+        'check' => '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+        'cal'   => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+        'box'   => '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+        'bell'  => '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
+        'clip'  => '<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 11h6M9 15h6"/>',
+        'score' => '<path d="M12 3l2.6 5.6L20 9.3l-4 4.1 1 5.6-5-2.8-5 2.8 1-5.6-4-4.1 5.4-.7z"/>',
+        'tool'  => '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/>',
+    ];
+    $items = [];
+    if (!$staff) {
+        $items[] = 'Learners';
+        $items[] = ['admin',          'admin',          'Registrations', $i['inbox']];
+        $items[] = ['admin-progress', 'admin-progress', 'Progress',      $i['chart']];
+        $items[] = ['admin-users',    'admin-users',    'Accounts',      $i['users']];
+        $items[] = ['admin-rpl',      'rpl',            'RPL',           $i['cert']];
+    } else {
+        $items[] = 'Learners';
+        $items[] = ['trainer', 'trainer', 'My learners', $i['users']];
+    }
+    $items[] = 'Teaching';
+    $items[] = ['admin-materials', 'admin-materials', 'Material', $i['file']];
+    $items[] = ['admin-lessons',   'admin-lessons',   'Reading',  $i['book']];
+    $items[] = ['admin-quizzes',   'admin-quizzes',   'Quizzes',  $i['check']];
+    $items[] = ['admin-classes',   'classes',         'Classes',  $i['cal']];
+    $items[] = ['admin-poe',       'poe',             'Files',    $i['box']];
+    $items[] = ['admin-notices',   'notices',         'Notices',  $i['bell']];
+    if (!$staff) {
+        $items[] = 'B-BBEE';
+        $items[] = ['admin-evidence', 'evidence', 'Evidence', $i['clip']];
+        if (is_file(__DIR__ . '/../scorecard.php')) {
+            $items[] = ['scorecard', 'scorecard', 'B-BBEE', $i['score']];
+        }
+        $items[] = ['https://centenarynetworks.com/beetool/', '', 'BEE Tool', $i['tool']];
+    }
+    $home = $staff ? 'trainer' : 'admin';
+    chrome_shell_frame($items, $on, $home, ['./' => 'View the site'], 'admin-notices', '',
+                       $staff ? 'Training' : 'Administration');
+}
+
+/**
  * The navigation bar.
  *
  * Four shapes, because there are four kinds of page and they want different
@@ -163,6 +305,10 @@ function chrome_signout(string $label = 'Sign out'): string
  */
 function chrome_nav(string $variant, array $o = []): void
 {
+    /* The signed-in app frame replaces the bar for learners and staff alike. */
+    if (brand_has('app_shell') && $variant === 'learner') { chrome_app_shell($o); return; }
+    if (brand_has('app_shell') && $variant === 'admin')   { chrome_staff_shell($o); return; }
+
     $active = (string) ($o['active'] ?? '');
     $on = static fn(string $k): string => $active === $k ? ' class="active"' : '';
 

@@ -103,6 +103,12 @@ $shared = [
     // where lib/brand.php has 'self_signup' (SPS only).
     'files.php', 'signup.php', 'module-info.js', 'learner-nav.js',
 
+    // The signed-in app frame, 16 Nov 2026. lib/chrome.php (synced) prints it
+    // wherever a site's lib/brand.php has 'app_shell', loading app.css and
+    // linking Home, Skills and Account; journey.php is hard-required by all three.
+    // Without the flag the pages send a learner to /my, so shipping them is harmless.
+    'app.css', 'dashboard.php', 'skills.php', 'me.php', 'lib/journey.php',
+
     // In-person classes, 11 Sep 2026. admin-classes.php is linked from the
     // admin nav in lib/chrome.php — which IS synced — so a site without it gets
     // an "In-person" link to a 404; register.php is linked from every row of

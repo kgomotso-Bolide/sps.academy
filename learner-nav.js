@@ -27,7 +27,15 @@
     if (!links) return;
 
     var page = location.pathname.replace(/\/+$/, '').split('/').pop().replace(/\.(php|html)$/, '');
-    var items = [
+    /* Where the site has the app frame (s.shell, from brand 'app_shell', 16 Nov
+       2026) the same four sections as its sidebar — chrome_app_shell(). */
+    var items = s.shell ? [
+      ['dashboard', 'Home', 'dashboard'],
+      ['skills',    'Skills', 'skills'],
+      ['files',     'My files', 'files'],
+      ['me',        'Account', 'me'],
+      ['contact',   'Contact', 'contact']
+    ] : [
       ['my#account', 'My account', ''],
       ['my',         'My learning', 'my'],
       ['files',      'My files', 'files'],
@@ -44,7 +52,7 @@
       '<button type="submit" class="linkish">Sign out</button></form>';
 
     var logo = document.querySelector('#nav .brand');
-    if (logo) logo.setAttribute('href', 'my');
+    if (logo) logo.setAttribute('href', s.shell ? 'dashboard' : 'my');
   }
 
   if (window.SPSAccount && window.SPSAccount.ready) {

@@ -118,6 +118,8 @@ if (!is_post()) {
         'initials' => mb_strtoupper(mb_substr($me['first_name'], 0, 1) . mb_substr($me['last_name'], 0, 1)),
         'role'     => (string) $me['role'],
         'admin'    => $me['role'] === 'admin',
+        /* learner-nav.js gives the static pages the app frame's links (16 Nov 2026). */
+        'shell'    => (string) ((require __DIR__ . '/lib/brand.php')['app_shell'] ?? '') !== '',
         'courses'  => $courses,
         'progress' => (object) $progress,
         'rpl'      => (object) $rpl,
