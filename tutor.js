@@ -48,7 +48,10 @@
     '.tt-mark{border-radius:10px;padding:9px 12px;font-size:13.5px;background:var(--bg-soft,#f7f6f4);border:1px solid var(--line,#ddd)}' +
     '.tt-mark b{display:block;margin-bottom:3px}.tt-mark .hit{color:var(--green-deep,#2a7);font-weight:700}.tt-mark .miss{color:var(--orange-deep);font-weight:700}' +
     '@media(max-width:520px){.tt-cmp{grid-template-columns:1fr}}' +
-    '.tt-dots{align-self:flex-start;color:var(--ink-soft,#777);font-size:20px;letter-spacing:2px;padding:0 6px}' +
+    '.tt-dots{align-self:flex-start;color:var(--ink-soft,#777);font-size:18px;letter-spacing:2px;padding:0 6px}' +
+    '.tt-think{font-size:13px;letter-spacing:0;font-weight:600;margin-right:2px}' +
+    '.tt-caret{color:var(--orange);font-weight:400;margin-left:1px}' +
+    '.tt-out{display:flex;flex-direction:column;gap:10px;margin-top:10px}' +
     '.tt-foot{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line,#ddd);background:#fff}' +
     '.tt-foot input{flex:1;min-width:0;border:1px solid var(--line,#ddd);border-radius:10px;padding:11px 13px;font:inherit;font-size:14.5px}' +
     '.tt-foot input:focus{outline:2px solid var(--orange);outline-offset:0}' +
@@ -162,6 +165,7 @@
           rv.textContent = 'Show what the material says';
           rv.addEventListener('click', function () {
             rv.remove(); ta.readOnly = true;
+            var out = el('div', 'tt-out'); n.appendChild(out);
             /* Marked here, in the browser: the answer is never sent anywhere. */
             var mine = terms(ta.value), keys = b.keys || [];
             if (mine.length && keys.length) {
@@ -180,13 +184,13 @@
                 mk.appendChild(l2);
               }
               mk.appendChild(el('div', 'tt-note', 'This counts key words, not meaning. Read the material below to be sure you have the idea right.'));
-              n.appendChild(mk);
+              out.appendChild(mk);
             }
             var a = el('div', 'tt-q ans'); a.appendChild(el('div', '', b.reveal));
             var s3 = sourceLink(b.source); if (s3) a.appendChild(s3);
-            n.appendChild(a);
-            if (!mine.length) n.appendChild(el('p', 'tt-check', 'Did you cover the main idea? If not, open the topic and read it again, then try another one.'));
-            scroll();
+            out.appendChild(a);
+            if (!mine.length) out.appendChild(el('p', 'tt-check', 'Did you cover the main idea? If not, open the topic and read it again, then try another one.'));
+            typeOut(out);
           });
           n.appendChild(rv); return n;
         case 'next':
@@ -195,11 +199,88 @@
       return null;
     }
 
+    /* ---- Writing it out live (16 Nov 2026, Sibusiso: "we must see it writing
+       the answers"). The answer is already complete when it arrives; this
+       writes it into the bubble word by word, block after block, with a cursor.
+       Source links, buttons and the suggestion chips appear once their part is
+       written. A long answer still finishes in about four seconds, a click
+       (or the next question) finishes it at once, and anyone whose device asks
+       for reduced motion gets it whole. Screen readers hear it once, when it is
+       done: the log is aria-busy while it is being written. ---------------- */
+    var typing = null;
+    function reducedMotion() {
+      try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+    }
+    function typeOut(root, after) {
+      if (typing) typing.finish();
+      var LATE = '.tt-src,button,textarea,input';
+      var parts = [], total = 0;
+      Array.prototype.forEach.call(root.children, function (bl) {
+        var late = Array.prototype.slice.call(bl.querySelectorAll(LATE));
+        var texts = [];
+        var w = document.createTreeWalker(bl, NodeFilter.SHOW_TEXT, null);
+        for (var t = w.nextNode(); t; t = w.nextNode()) {
+          if (late.some(function (l) { return l.contains(t); }) || !t.nodeValue.trim()) continue;
+          texts.push({ node: t, full: t.nodeValue }); total += t.nodeValue.length;
+        }
+        parts.push({ el: bl, late: late, texts: texts });
+      });
+      if (reducedMotion() || !total) { if (after) after(); scroll(); return; }
+      parts.forEach(function (p) {
+        p.el.style.display = 'none';
+        p.late.forEach(function (l) { l.style.display = 'none'; });
+        p.texts.forEach(function (x) { x.node.nodeValue = ''; });
+      });
+      var caret = el('span', 'tt-caret', '▍'); caret.setAttribute('aria-hidden', 'true');
+      log.setAttribute('aria-busy', 'true');
+      var cps = Math.max(70, Math.min(700, total / 4));       // characters a second
+      var pi = 0, ti = 0, pos = 0, last = 0, budget = 0, done = false;
+      function showPart(p) { p.el.style.display = ''; }
+      function endPart(p) { p.late.forEach(function (l) { l.style.display = ''; }); }
+      function finish() {
+        if (done) return; done = true;
+        parts.forEach(function (p) { showPart(p); endPart(p); p.texts.forEach(function (x) { x.node.nodeValue = x.full; }); });
+        caret.remove(); log.removeAttribute('aria-busy'); typing = null;
+        if (after) after();
+        scroll();
+      }
+      function frame(now) {
+        if (done) return;
+        var stick = log.scrollHeight - log.scrollTop - log.clientHeight < 90;
+        budget += last ? (now - last) * cps / 1000 : 2; last = now;
+        while (budget >= 1 && pi < parts.length) {
+          var p = parts[pi];
+          if (ti === 0 && pos === 0) showPart(p);
+          var x = p.texts[ti];
+          if (!x) { endPart(p); pi++; ti = 0; pos = 0; continue; }
+          /* A word at a time: run on to the next space so words never break. */
+          var next = Math.min(x.full.length, pos + Math.max(1, Math.floor(budget)));
+          while (next < x.full.length && !/\s/.test(x.full.charAt(next))) next++;
+          budget -= (next - pos); pos = next;
+          x.node.nodeValue = x.full.slice(0, pos);
+          x.node.parentNode.insertBefore(caret, x.node.nextSibling);
+          if (pos >= x.full.length) { ti++; pos = 0; }
+        }
+        if (stick) log.scrollTop = log.scrollHeight;
+        if (pi >= parts.length) finish(); else requestAnimationFrame(frame);
+      }
+      typing = { finish: finish };
+      requestAnimationFrame(frame);
+    }
+    /* Browsers pause animation in a background tab; finish rather than wait. */
+    document.addEventListener('visibilitychange', function () { if (document.hidden && typing) typing.finish(); });
+    log.addEventListener('click', function (e) {
+      /* A click on the answer being written finishes it; a click on a link or button still works. */
+      if (typing && !e.target.closest('a,button,textarea')) typing.finish();
+    });
+
     function bot(reply) {
       var m = el('div', 'tt-m bot');
       (reply.blocks || []).forEach(function (b) { var n = block(b); if (n) m.appendChild(n); });
       log.appendChild(m);
-      if (reply.chips && reply.chips.length) {
+      scroll();
+      typeOut(m, function () {
+        if (!reply.chips || !reply.chips.length) return;
         var c = el('div', 'tt-chips');
         reply.chips.forEach(function (t) {
           var b = el('button', 'tt-chip', t); b.type = 'button';
@@ -207,16 +288,16 @@
           c.appendChild(b);
         });
         log.appendChild(c);
-      }
-      scroll();
+      });
     }
 
     function ask(q) {
       q = String(q || '').trim();
       if (!q || state.busy) return;
+      if (typing) typing.finish();
       state.busy = true; send.disabled = true;
       log.appendChild(el('div', 'tt-m me', q));
-      var dots = el('div', 'tt-dots', '•••'); log.appendChild(dots); scroll();
+      var dots = el('div', 'tt-dots'); dots.appendChild(el('span', 'tt-think', 'Thinking')); dots.appendChild(document.createTextNode(' •••')); log.appendChild(dots); scroll();
       var body = new URLSearchParams();
       body.set('q', q); body.set('course', opts.course); body.set('module', opts.module || state.module || '');
       body.set('topic', topicNow()); body.set('_token', opts.token());
