@@ -747,7 +747,15 @@ function tutor_reply_compare(array $ctx): array
         $hits = tutor_find($slug, $x, ['module' => $ctx['module'], 'kind' => 'reading', 'limit' => 3]);
         $def = tutor_definition($slug, $x, $hits);
         if ($def) return ['name' => $x, 'text' => $def['text'], 'source' => tutor_source($def['p'])];
-        if (!$hits || $hits[0]['score'] < 1.2) return null;
+        if (!$hits || $hits[0]['score'] < 1.2) {
+            /* No Reading on it: say where it is taught, from the outline. */
+            $o = tutor_find($slug, $x, ['module' => $ctx['module'], 'kind' => 'outline', 'limit' => 1]);
+            if (!$o || $o[0]['score'] < 1.2) return null;
+            $line = tutor_outline($slug)[$o[0]['p']['topic']] ?? ['covers' => [], 'key' => ''];
+            $txt = $line['key'] !== '' ? mb_strimwidth($line['key'], 0, 300, '…')
+                 : 'Taught in "' . $o[0]['p']['title'] . '": ' . implode('; ', array_slice($line['covers'], 0, 3)) . '.';
+            return ['name' => $x, 'text' => $txt, 'source' => tutor_source($o[0]['p'])];
+        }
         return ['name' => $x, 'text' => tutor_excerpt($hits[0]['p']['text'], $x, 380), 'source' => tutor_source($hits[0]['p'])];
     };
     $L = $side($a); $R = $side($b);
