@@ -391,3 +391,9 @@ a.obj:hover{border-color:var(--orange);box-shadow:0 12px 26px -18px rgba(0,0,0,.
 .app-menu a{padding:9px 14px}
 /* The back-office pages are wide tables: let them use the room the sidebar leaves. */
 body:has(> .app-side) .app-top ~ section .wrap,body:has(> .app-side) .app-top ~ main .wrap{max-width:min(1320px,100%)}
+/* Phones: the "Continue" link goes under the text rather than squeezing it. */
+@media(max-width:560px){
+  .obj{flex-wrap:wrap;gap:14px;padding:16px 18px}
+  .obj-body{flex:1 1 calc(100% - 70px)}
+  .obj-go{margin-left:66px}
+}
