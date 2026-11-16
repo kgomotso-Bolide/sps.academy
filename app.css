@@ -406,3 +406,105 @@ body:has(> .app-side) .app-top ~ section .wrap,body:has(> .app-side) .app-top ~ 
 .tutor-inline > .tt{flex:1}
 .tutor-note{margin-top:12px;font-size:13px;color:var(--app-muted)}
 @media(max-width:560px){.tutor-scope select{min-width:0;width:100%}.tutor-scope label{flex:1 1 100%}.tutor-inline{height:calc(100vh - 220px)}}
+
+/* ==== Modern controls, signed-in area only (16 Nov 2026, Sibusiso: "btn,
+   search, dropdowns etc must be looking modern and fresh and easy to see and
+   work with"). Everything below is scoped to body:has(> .app-side), so the
+   public site keeps its own controls.
+
+   Colours stay the site's: the primary button keeps whatever background and
+   text colour styles.css gives it (Tracker's yellow keeps its dark text);
+   only shape, size, focus and feel change here. Text ON the primary colour
+   elsewhere is var(--tutor-on, #fff), which Tracker sets dark. ============== */
+body:has(> .app-side){
+  --c-line:color-mix(in srgb,var(--app-ink) 14%,#fff);
+  --c-line-hi:color-mix(in srgb,var(--app-ink) 30%,#fff);
+  --c-ring:0 0 0 4px color-mix(in srgb,var(--orange) 22%,transparent);
+  --c-r:12px; --c-h:46px;
+}
+
+/* Buttons */
+body:has(> .app-side) .btn{border-radius:var(--c-r);padding:0 20px;min-height:var(--c-h);font-size:14.5px;font-weight:650;letter-spacing:.005em;
+  gap:8px;line-height:1.2;transition:background .15s,border-color .15s,box-shadow .15s,transform .12s,color .15s}
+body:has(> .app-side) .btn:hover{transform:translateY(-1px)}
+body:has(> .app-side) .btn:active{transform:translateY(0) scale(.98)}
+body:has(> .app-side) .btn:focus-visible{outline:0;box-shadow:var(--c-ring)}
+body:has(> .app-side) .btn-primary{box-shadow:0 6px 16px -8px color-mix(in srgb,var(--orange) 80%,transparent),inset 0 -1px 0 rgba(0,0,0,.08)}
+body:has(> .app-side) .btn-primary:hover{box-shadow:0 10px 22px -10px color-mix(in srgb,var(--orange) 90%,transparent)}
+body:has(> .app-side) .btn-ghost{background:#fff;color:var(--app-ink);border:1.5px solid var(--c-line)}
+body:has(> .app-side) .btn-ghost:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 6%,#fff);color:var(--orange-deep)}
+body:has(> .app-side) .btn-sm,body:has(> .app-side) .adm-act .btn,body:has(> .app-side) td .btn{min-height:36px;padding:0 14px;font-size:13px;border-radius:10px}
+body:has(> .app-side) .btn[disabled],body:has(> .app-side) .btn.is-locked{opacity:.5;transform:none;box-shadow:none;cursor:not-allowed}
+body:has(> .app-side) .adm-del-btn{background:#fff;color:var(--err,#b3261e);border:1.5px solid color-mix(in srgb,var(--err,#b3261e) 35%,#fff)}
+body:has(> .app-side) .adm-del-btn:hover{background:color-mix(in srgb,var(--err,#b3261e) 7%,#fff);border-color:var(--err,#b3261e)}
+
+/* Text boxes, dropdowns, text areas */
+body:has(> .app-side) :is(input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],
+  input[type=tel],input[type=url],input[type=date],input[type=time],input[type=datetime-local],input:not([type]),select,textarea){
+  font:inherit;font-size:15px;color:var(--app-ink);background-color:#fff;border:1.5px solid var(--c-line);border-radius:var(--c-r);
+  padding:0 14px;min-height:var(--c-h);box-sizing:border-box;
+  transition:border-color .15s,box-shadow .15s,background-color .15s}
+body:has(> .app-side) textarea{padding:12px 14px;min-height:110px;line-height:1.55;resize:vertical}
+body:has(> .app-side) :is(input,select,textarea):hover{border-color:var(--c-line-hi)}
+body:has(> .app-side) :is(input,select,textarea):focus{outline:0;border-color:var(--orange);box-shadow:var(--c-ring);background-color:#fff}
+body:has(> .app-side) :is(input,select,textarea)::placeholder{color:color-mix(in srgb,var(--app-muted) 85%,#fff)}
+body:has(> .app-side) :is(input,select,textarea):disabled{background-color:var(--app-bg);color:var(--app-muted);cursor:not-allowed}
+/* Dropdowns: one clear chevron, room for it, no browser grey box. */
+body:has(> .app-side) :is(select,select[data-weight]){appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:42px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d6872' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;background-size:18px}
+body:has(> .app-side) select[multiple]{background-image:none;padding:8px;min-height:120px}
+/* The small dropdowns inside table rows (status, course, role). */
+body:has(> .app-side) :is(td select,.adm-rolepick select,.adm-enrol select,select[data-weight][data-weight]){
+  min-height:36px;font-size:13.5px;border-radius:10px;padding:0 30px 0 10px;background-position:right 9px center;background-size:14px;max-width:210px}
+/* Search: a magnifier inside the box. */
+body:has(> .app-side) input[type=search]{padding-left:44px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d6872' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:15px center;background-size:18px}
+body:has(> .app-side) input[type=search]::-webkit-search-cancel-button{cursor:pointer}
+body:has(> .app-side) .adm-search{gap:10px;background:#fff;border:1.5px solid var(--c-line);border-radius:16px;padding:8px;align-items:center}
+body:has(> .app-side) .adm-search:focus-within{border-color:var(--orange);box-shadow:var(--c-ring)}
+body:has(> .app-side) .adm-search input[type=search]{border:0;box-shadow:none;background-color:transparent;min-width:200px}
+body:has(> .app-side) .adm-search input[type=search]:focus{box-shadow:none}
+body:has(> .app-side) .adm-search .btn{min-height:42px}
+body:has(> .app-side) .adm-clear{font-size:13.5px;font-weight:650;color:var(--app-muted);padding:0 8px}
+body:has(> .app-side) .adm-clear:hover{color:var(--orange-deep)}
+/* Ticks, radios, sliders, file pickers: in the site's colour and big enough to hit. */
+body:has(> .app-side) :is(input[type=checkbox],input[type=radio]){accent-color:var(--orange);width:18px;height:18px;cursor:pointer;vertical-align:-3px;min-height:0}
+body:has(> .app-side) input[type=range]{accent-color:var(--orange)}
+body:has(> .app-side) input[type=file]{font:inherit;font-size:14px;color:var(--app-muted);max-width:100%}
+body:has(> .app-side) input[type=file]::file-selector-button{font:inherit;font-size:13.5px;font-weight:650;margin-right:12px;cursor:pointer;
+  padding:9px 16px;border-radius:10px;border:1.5px solid var(--c-line);background:#fff;color:var(--app-ink);transition:border-color .15s,background .15s}
+body:has(> .app-side) input[type=file]::file-selector-button:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 6%,#fff)}
+/* Labels: clear, and close to their box. */
+body:has(> .app-side) .field > label{display:block;font-size:13.5px;font-weight:650;color:var(--app-ink);margin-bottom:7px}
+body:has(> .app-side) .field :is(input:not([type=checkbox]):not([type=radio]),select,textarea){width:100%}
+body:has(> .app-side) .field-hint{color:var(--app-muted)}
+
+/* Filter tabs (Registrations: All / New / Contacted ...): one segmented bar. */
+body:has(> .app-side) .adm-tabs{display:inline-flex;flex-wrap:wrap;gap:4px;padding:5px;background:#fff;border:1.5px solid var(--c-line);border-radius:14px}
+body:has(> .app-side) .adm-tabs a{border:0;border-radius:10px;padding:8px 14px;font-size:13.5px;font-weight:650;color:var(--app-muted);background:transparent}
+body:has(> .app-side) .adm-tabs a:hover{background:var(--app-bg);color:var(--app-ink)}
+body:has(> .app-side) .adm-tabs a.on{background:var(--orange);color:var(--tutor-on,#fff);box-shadow:0 6px 14px -8px var(--orange)}
+body:has(> .app-side) .adm-tabs a span{display:inline-block;min-width:20px;text-align:center;margin-left:6px;padding:1px 6px;border-radius:999px;
+  font-size:11.5px;background:color-mix(in srgb,currentColor 12%,transparent);opacity:1}
+
+/* Tables: easier to read across. */
+body:has(> .app-side) .adm-scroll{border:1px solid var(--app-line);border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+body:has(> .app-side) .adm-table th{background:var(--app-bg);color:var(--app-muted);font-weight:700;padding:13px 14px;border-bottom:1px solid var(--app-line)}
+body:has(> .app-side) .adm-table td{border-bottom-color:var(--app-line)}
+body:has(> .app-side) .adm-table tbody tr:hover td{background:color-mix(in srgb,var(--orange) 3%,#fff)}
+
+/* Messages: rounder, calmer. */
+body:has(> .app-side) :is(.form-err,.adm-notice){border-radius:12px;padding:12px 16px}
+
+/* Phones: full-width controls, still a thumb's height. */
+@media(max-width:560px){
+  body:has(> .app-side) .adm-search{flex-direction:column;align-items:stretch}
+  body:has(> .app-side) .adm-search .btn{width:100%}
+  body:has(> .app-side) .adm-tabs{display:flex}
+}
+/* The notice form borrows .reg-radio, whose real input is hidden behind a dot it
+   draws. That form has no dot, so the tick box was invisible. Show it there. */
+body:has(> .app-side) label.reg-radio:not(:has(.reg-dot)){justify-content:flex-start;gap:10px;font-weight:650;color:var(--app-ink)}
+body:has(> .app-side) label.reg-radio:not(:has(.reg-dot)) input{position:static;opacity:1;width:18px;height:18px}
