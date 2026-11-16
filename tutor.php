@@ -56,8 +56,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $j(['ok' => false, 'error' => 'enrol', 'message' => "You're not on this course yet. Add it on Home first."], 403);
     }
 
+    /* The conversation so far, as the browser holds it: the last question (for
+       "tell me more"), passages already shown, quiz points already asked. */
+    $ints = static fn(string $k): array => array_slice(array_values(array_filter(array_map('intval',
+        explode(',', (string) ($_POST[$k] ?? ''))), fn($n) => $n >= 0)), 0, 200);
     $r = tutor_answer(['q' => $q, 'course' => $course, 'module' => $module, 'topic' => $topic,
-                       'uid' => (int) $me['id'], 'first' => (string) $me['first_name']]);
+                       'uid' => (int) $me['id'], 'first' => (string) $me['first_name'],
+                       'lastq' => mb_substr(trim((string) ($_POST['lastq'] ?? '')), 0, TUTOR_MAX_Q),
+                       'seen' => $ints('seen'), 'avoid' => $ints('avoid')]);
     /* What was asked about, never the words. */
     audit('tutor.asked', 'users', (int) $me['id'], $r['intent'] . ' · ' . $course . ($module !== '' ? ' ' . $module : ''));
     $j(['ok' => true] + $r);

@@ -20,8 +20,23 @@ declare(strict_types=1);
  *     the material says so they can mark themselves.
  *   - Refuses assessment answers, like all of them. The 80% topic checks
  *     count towards the record (2 tries, facilitator reset), the workbooks are
- *     evidence for the portfolio, and the EISA is external. The tutor does not
- *     read the quiz tables at all, so it cannot leak them even by accident.
+ *     evidence for the portfolio, and the EISA is external. The tutor never
+ *     reads quiz_questions or quiz_choices, so it cannot leak a question or
+ *     an answer even by accident. It reads only the learner's own SCORES
+ *     (quiz_attempts), to find weak spots: tutor_weak_modules().
+ *
+ * WHAT MAKES IT SMARTER THAN A KEYWORD SEARCH (16 Nov 2026, second pass)
+ *   - Abbreviations the course spells out ("Work Breakdown Structure (WBS)")
+ *     are learnt from the material and searched both ways; a short synonym
+ *     list; British/American spelling; misspellings read as the nearest word
+ *     the course uses, and the learner is told ("I read X as Y").
+ *   - "What is X?" leads with the sentence that defines X.
+ *   - Follow-ups carry on the last question: "tell me more" (passages not yet
+ *     shown), "give me an example", "simpler". The browser holds that state.
+ *   - "Difference between A and B" puts the two side by side.
+ *   - "Quiz me" does not repeat a point in the same session, starts on the
+ *     learner's weakest module, and the learner's typed answer is marked in
+ *     the browser against the key words of the material's own explanation.
  *
  * WHERE THE ANSWERS COME FROM
  *   1. The Reading (topic_sections), published rows only. That is the
@@ -160,6 +175,8 @@ function tutor_terms(string $s): array
 /** A light stemmer: enough that "risks", "risk" and "risky" meet. */
 function tutor_stem(string $w): string
 {
+    /* British and American spellings meet: organisation / organization. */
+    $w = (string) preg_replace('/is(ation|ations|e|ed|es|ing)$/u', 'iz$1', $w);
     foreach (['ational' => 'ate', 'ization' => 'ize', 'ments' => 'ment', 'ness' => '', 'ings' => '', 'ing' => '', 'ies' => 'y',
               'ied' => 'y', 'ed' => '', 'es' => '', 's' => ''] as $suf => $rep) {
         if (mb_strlen($w) > mb_strlen($suf) + 3 && str_ends_with($w, $suf)) return mb_substr($w, 0, -mb_strlen($suf)) . $rep;
@@ -167,40 +184,141 @@ function tutor_stem(string $w): string
     return $w;
 }
 
-/**
- * @param list<array<string,string>> $passages
- * @return list<array{p:array<string,string>, score:float}> best first
- */
-function tutor_search(string $q, array $passages, string $module = '', string $topic = '', int $limit = 3): array
+/* Words that mean the same thing in these courses, as stems. Small on purpose:
+   each pair is one a learner plausibly types for the word the guide uses. */
+const TUTOR_SYN = [
+    'timeline' => ['schedule'], 'deadline' => ['schedule'], 'budget' => ['cost'], 'cost' => ['budget'],
+    'vendor' => ['supplier'], 'supplier' => ['vendor'], 'bid' => ['tender'], 'tender' => ['bid'],
+    'startup' => ['venture'], 'company' => ['business', 'organization'], 'firm' => ['business'],
+    'boss' => ['manager'], 'client' => ['customer'], 'customer' => ['client'], 'goal' => ['objective'],
+    'objective' => ['goal'], 'problem' => ['issue', 'risk'], 'buy' => ['purchase', 'procure'],
+    'purchase' => ['procure', 'buy'], 'stock' => ['inventory'], 'inventory' => ['stock'],
+    'profit' => ['income'], 'money' => ['finance', 'capital'], 'staff' => ['employee', 'team'],
+    'program' => ['programme'], 'programme' => ['program'],
+];
+
+/** The search index for one course, built once per request. */
+function tutor_index(string $slug): array
 {
-    $terms = array_values(array_unique(tutor_terms($q)));
-    if (!$terms || !$passages) return [];
-    $N = count($passages); $df = []; $docs = []; $len = 0;
-    foreach ($passages as $i => $p) {
+    static $cache = [];
+    if (isset($cache[$slug])) return $cache[$slug];
+    $P = tutor_passages($slug);
+    $docs = []; $dl = []; $df = []; $len = 0;
+    foreach ($P as $i => $p) {
         $tf = array_count_values(tutor_terms($p['title'] . ' ' . $p['text']));
-        $docs[$i] = $tf; $len += array_sum($tf);
-        foreach ($terms as $t) if (isset($tf[$t])) $df[$t] = ($df[$t] ?? 0) + 1;
+        $docs[$i] = $tf; $dl[$i] = array_sum($tf); $len += $dl[$i];
+        foreach ($tf as $t => $_) $df[$t] = ($df[$t] ?? 0) + 1;
     }
-    $avg = max(1, $len / $N); $k1 = 1.4; $b = 0.75;
-    $hits = [];
-    foreach ($docs as $i => $tf) {
-        $dl = array_sum($tf); $s = 0.0; $matched = 0;
+    return $cache[$slug] = ['P' => $P, 'docs' => $docs, 'dl' => $dl, 'df' => $df,
+                            'N' => max(1, count($P)), 'avg' => max(1, $len / max(1, count($P)))];
+}
+
+/**
+ * Abbreviations the course itself spells out, e.g. "Work Breakdown Structure
+ * (WBS)": abbreviation (lower case) => the words. Read from the material, so
+ * each academy's own terms are learnt without a list to keep up.
+ *
+ * @return array<string,string>
+ */
+function tutor_acronyms(string $slug): array
+{
+    static $cache = [];
+    if (isset($cache[$slug])) return $cache[$slug];
+    $out = [];
+    $skip = ['of', 'and', 'the', 'to', 'for', 'in', 'on', 'a', '&'];
+    foreach (tutor_passages($slug) as $p) {
+        if (!preg_match_all('/((?:[\p{L}][\p{L}\-]*\s+){1,7})\(([A-Z][A-Za-z&]{1,7})\)/u', $p['text'], $m, PREG_SET_ORDER)) continue;
+        foreach ($m as $hit) {
+            $letters = strtolower(preg_replace('/[^A-Z]/', '', $hit[2]) ?? '');
+            if (strlen($letters) < 2 || isset($out[$letters])) continue;
+            $words = array_values(array_filter(preg_split('/[\s\-]+/u', trim($hit[1])) ?: [],
+                fn($w) => $w !== '' && !in_array(mb_strtolower($w), $skip, true)));
+            $take = array_slice($words, -strlen($letters));
+            $ini = implode('', array_map(fn($w) => mb_strtolower(mb_substr($w, 0, 1)), $take));
+            if ($ini === $letters) $out[$letters] = implode(' ', $take);
+        }
+    }
+    return $cache[$slug] = $out;
+}
+
+/**
+ * The question's search terms, widened: abbreviations both ways, the synonym
+ * pairs, and a misspelt word read as the nearest word the course uses.
+ *
+ * @return array{terms:list<string>, fixed:array<string,string>}
+ */
+function tutor_expand(string $slug, string $q): array
+{
+    static $memo = [];
+    $mk = $slug . "\0" . $q;
+    if (isset($memo[$mk])) return $memo[$mk];
+    return $memo[$mk] = tutor_expand_uncached($slug, $q);
+}
+
+function tutor_expand_uncached(string $slug, string $q): array
+{
+    $idx = tutor_index($slug); $acr = tutor_acronyms($slug);
+    $terms = tutor_terms($q); $fixed = [];
+    preg_match_all('/[\p{L}\p{N}]+/u', mb_strtolower($q), $raw);
+    foreach ($raw[0] as $w) if (isset($acr[$w])) foreach (tutor_terms($acr[$w]) as $t) $terms[] = $t;
+    foreach ($acr as $a => $phrase) {
+        $pt = tutor_terms($phrase);
+        if ($pt && !array_diff($pt, $terms)) $terms[] = tutor_stem($a);
+    }
+    foreach ($terms as $i => $t) {
+        if (isset($idx['df'][$t]) || mb_strlen($t) < 5 || ctype_digit($t)) continue;
+        $best = ''; $bestDf = 0; $lim = mb_strlen($t) >= 8 ? 2 : 1;
+        foreach ($idx['df'] as $v => $n) {
+            /* PHP turns numeric words ("2026") into integer keys. */
+            if (!is_string($v) || $v[0] !== $t[0] || abs(strlen($v) - strlen($t)) > $lim || $n <= $bestDf) continue;
+            if (levenshtein($t, $v) <= $lim) { $best = $v; $bestDf = $n; }
+        }
+        if ($best !== '') { $fixed[$t] = $best; $terms[$i] = $best; }
+    }
+    foreach ($terms as $t) foreach (TUTOR_SYN[$t] ?? [] as $s) $terms[] = tutor_stem($s);
+    return ['terms' => array_values(array_unique($terms)), 'fixed' => $fixed];
+}
+
+/**
+ * BM25 over one course, with a lift for the module and topic in view.
+ *
+ * $o: module, topic, limit (3), kind ('reading'|'outline'|''), only_topic,
+ *     exclude (passage ids already shown), per_topic (true: one passage a topic)
+ *
+ * @return list<array{p:array<string,mixed>, score:float}> best first
+ */
+function tutor_find(string $slug, string $q, array $o = []): array
+{
+    $idx = tutor_index($slug);
+    $ex = tutor_expand($slug, $q);
+    $terms = $ex['terms'];
+    if (!$terms) return [];
+    $module = (string) ($o['module'] ?? ''); $topic = (string) ($o['topic'] ?? '');
+    $kind = (string) ($o['kind'] ?? ''); $only = (string) ($o['only_topic'] ?? '');
+    $exclude = array_flip(array_map('intval', (array) ($o['exclude'] ?? [])));
+    $k1 = 1.4; $b = 0.75; $hits = [];
+    foreach ($idx['docs'] as $i => $tf) {
+        $p = $idx['P'][$i];
+        if (isset($exclude[$i]) || ($kind !== '' && $p['kind'] !== $kind) || ($only !== '' && $p['topic'] !== $only)) continue;
+        $s = 0.0; $matched = 0;
         foreach ($terms as $t) {
             if (!isset($tf[$t])) continue;
             $matched++;
-            $idf = log(1 + ($N - $df[$t] + 0.5) / ($df[$t] + 0.5));
-            $s += $idf * ($tf[$t] * ($k1 + 1)) / ($tf[$t] + $k1 * (1 - $b + $b * $dl / $avg));
+            $df = $idx['df'][$t];
+            $s += log(1 + ($idx['N'] - $df + 0.5) / ($df + 0.5))
+                * ($tf[$t] * ($k1 + 1)) / ($tf[$t] + $k1 * (1 - $b + $b * $idx['dl'][$i] / $idx['avg']));
         }
         if ($s <= 0) continue;
-        $p = $passages[$i];
         $s *= 0.6 + 0.4 * ($matched / count($terms));          // all the words, not one of them many times
         /* A run of headings from the guide matches every word and explains nothing. */
         $s *= (float) ($p['prose'] ?? 1.0);
         if ($topic !== '' && $p['topic'] === $topic) $s *= 1.5;
         elseif ($module !== '' && $p['module'] === $module) $s *= 1.25;
-        $hits[] = ['p' => $p, 'score' => $s];
+        $hits[] = ['p' => $p + ['id' => $i], 'score' => $s];
     }
     usort($hits, fn($a, $b) => $b['score'] <=> $a['score']);
+    $limit = (int) ($o['limit'] ?? 3);
+    if (($o['per_topic'] ?? true) === false) return array_slice($hits, 0, $limit);
     /* One passage per topic, so three answers are three different places. */
     $seen = []; $out = [];
     foreach ($hits as $h) {
@@ -210,6 +328,12 @@ function tutor_search(string $q, array $passages, string $module = '', string $t
         if (count($out) >= $limit) break;
     }
     return $out;
+}
+
+/** Kept for the callers that pass a module and topic positionally. */
+function tutor_search(string $q, string $slug, string $module = '', string $topic = '', int $limit = 3): array
+{
+    return tutor_find($slug, $q, ['module' => $module, 'topic' => $topic, 'limit' => $limit]);
 }
 
 /** The two or three sentences of a passage that carry the question's words. */
@@ -259,9 +383,15 @@ function tutor_intent(string $q): string
     if (preg_match('/^(hi|hello|hey|hallo|sawubona|good (morning|afternoon|evening)|howzit)\b/u', $s)) return 'greet';
     if (preg_match('/^(thanks|thank you|ok thanks|cool|great)\b/u', $s)) return 'thanks';
     if (preg_match('/^(help|what can you do|how do (i|you) use)/u', $s)) return 'help';
+    if (preg_match('/\b(weak|struggl|bad at|what (should|do) i (revise|go over)|where am i (going wrong|weak)|need (more )?practi[cs]e)/u', $s)) return 'weak';
     if (preg_match('/\b(quiz me|test me|question me|ask me|practi[cs]e|flash ?cards?|revise|revision)\b/u', $s)) return 'quiz';
     if (preg_match('/\b(summar|overview|key points|recap|outline|main ideas)|what(\'s| is) (this|the) (topic|module) about/u', $s)) return 'summary';
     if (preg_match('/\bwhat(\'s| is)? next\b|where (do|should) i (start|go)|what should i (do|study|work on)|my progress|how am i doing/u', $s)) return 'next';
+    /* Follow-ups: they lean on the last question and the topic in focus. */
+    if (preg_match('/^(an? )?(example|examples)\b|\b(give|show) me an? example|\bfor (example|instance)\??$|\bin practi[cs]e\??$|real[- ]life|real world/u', $s)) return 'example';
+    if (preg_match('/\b(simpler|simple terms|simply|plain (english|words)|eli5|dumb it down|in short|i (still )?don\'?t (get|understand)|confus)/u', $s)) return 'simpler';
+    if (preg_match('/^(tell me )?more\b|\b(tell me more|explain more|more detail|go on|continue|elaborate|expand on|go deeper|anything else)\b/u', $s)) return 'more';
+    if (preg_match('/\b(difference|differences|differ)\b.*\b(between|from)\b|\bcompare\b|\b(vs\.?|versus)\b/u', $s)) return 'compare';
     return 'explain';
 }
 
@@ -270,12 +400,22 @@ function tutor_intent(string $q): string
  * ------------------------------------------------------------------------- */
 
 /**
- * @param array{q:string, course:string, module:string, topic:string, uid:int, first:string} $ctx
+ * @param array{q:string, course:string, module:string, topic:string, uid:int, first:string,
+ *              lastq?:string, seen?:list<int>, avoid?:list<int>} $ctx
  * @return array{intent:string, blocks:list<array<string,mixed>>, chips:list<string>, provider:string}
  */
 function tutor_answer(array $ctx): array
 {
+    $ctx += ['lastq' => '', 'seen' => [], 'avoid' => []];
+    /* "Summarise KM-04", "quiz me on SP1-02": a module named in the question wins. */
+    $mods = curriculum_modules($ctx['course']);
+    if (preg_match('/\b([A-Z]{1,3}\d?-\d{2})\b/i', $ctx['q'], $mm) && isset($mods[strtoupper($mm[1])])
+        && strtoupper($mm[1]) !== $ctx['module']) {
+        $ctx['module'] = strtoupper($mm[1]); $ctx['topic'] = '';
+    }
     $intent = tutor_intent($ctx['q']);
+    /* A follow-up with nothing to follow is just a question. */
+    if (in_array($intent, ['more', 'example', 'simpler'], true) && $ctx['lastq'] === '' && $ctx['topic'] === '') $intent = 'explain';
     $reply = tutor_provider_reply($intent, $ctx);
     return $reply + ['intent' => $intent];
 }
@@ -284,9 +424,10 @@ function tutor_answer(array $ctx): array
 function tutor_provider_reply(string $intent, array $ctx): array
 {
     $provider = (string) (app_config_safe('tutor_provider') ?? 'static');
-    // When a model is connected: retrieve with tutor_search() exactly as the
-    // static tutor does, send those passages with the question, return the
-    // same {blocks, chips} shape. Until then, every provider is static.
+    // When a model is connected: retrieve with tutor_find() exactly as the
+    // static tutor does, send those passages with the question (and lastq for
+    // follow-ups), return the same {blocks, chips} shape. Until then, every
+    // provider is static.
     return tutor_static_reply($intent, $ctx) + ['provider' => 'static'];
 }
 
@@ -295,6 +436,116 @@ function tutor_source(array $p): array
     $q = $p['course'] === 'project-management' ? '' : '&c=' . rawurlencode($p['course']);
     return ['label' => $p['module'] . ' · ' . $p['title'],
             'href'  => 'module?m=' . rawurlencode($p['module']) . $q . '#' . rawurlencode($p['topic'])];
+}
+
+/** "what is a project charter?" -> "project charter". '' when it is not a what-is question. */
+function tutor_subject(string $q): string
+{
+    $s = trim(mb_strtolower($q), " ?.!");
+    if (!preg_match('/^(?:what(?:\'s| is| are| does| do)|define|meaning of|explain|tell me about|describe)\s+(?:an?\s+|the\s+)?(.+?)(?:\s+(?:mean|means|stand for|is))?$/u', $s, $m)) return '';
+    $sub = trim(preg_replace('/^(?:an?|the)\s+/u', '', $m[1]) ?? '');
+    return mb_strlen($sub) >= 2 && mb_strlen($sub) <= 60 ? $sub : '';
+}
+
+/**
+ * The sentence in the material that defines $subject, if there is one:
+ * "A project charter is ...", "WBS refers to ...".
+ */
+function tutor_definition(string $slug, string $subject, array $hits): ?array
+{
+    if ($subject === '') return null;
+    $acr = tutor_acronyms($slug);
+    $names = [$subject];
+    if (isset($acr[$subject])) $names[] = $acr[$subject];
+    foreach ($acr as $a => $phrase) if (mb_strtolower($phrase) === $subject) $names[] = $a;
+    $alt = implode('|', array_map(fn($n) => preg_quote($n, '/'), $names)) . '|' . preg_quote(str_replace('program', 'programme', $subject), '/');
+    $verb = '(?:is|are|refers to|means|can be defined as|is defined as|describes|is known as)\s+[^.]{12,}';
+    /* Best: the sentence STARTS with the term ("A project charter is ...").
+       Next best: the term anywhere, then the defining verb. */
+    $start = '/^\s*(?:an?\s+|the\s+)?(?:' . $alt . ')s?\b(?:\s*\([^)]{1,12}\))?\s+' . $verb . '/iu';
+    $any   = '/(?:^|[\s(])(?:an?\s+|the\s+)?(?:' . $alt . ')s?\b(?:\s*\([^)]{1,12}\))?\s+' . $verb . '/iu';
+    /* The best few passages first, then the rest of the course. */
+    $pool = array_map(fn($h) => $h['p'], $hits);
+    foreach (tutor_find($slug, $subject, ['kind' => 'reading', 'limit' => 10, 'per_topic' => false]) as $h) $pool[] = $h['p'];
+    $fallback = null;
+    foreach ($pool as $p) {
+        if (($p['kind'] ?? '') !== 'reading') continue;
+        foreach (preg_split('/(?<=[.!?])\s+|\n/u', $p['text']) ?: [] as $sent) {
+            $sent = trim($sent);
+            if (mb_strlen($sent) < 25 || mb_strlen($sent) > 420) continue;
+            /* "Work Breakdown Structure (WBS) A work ... is": drop a heading glued on the front. */
+            $clean = (string) preg_replace('/^(?:[\p{Lu}][\p{L}\-]*\s*(?:\([A-Z]{2,7}\)\s*)?){1,6}(?=\b(?:An?|The)\s)/u', '', $sent);
+            if (preg_match($start, $clean)) return ['text' => $clean, 'p' => $p];
+            if ($fallback === null && preg_match($any, ' ' . $clean) && !preg_match('/characteristic|another|one of/iu', $clean)) $fallback = ['text' => $clean, 'p' => $p];
+        }
+    }
+    return $fallback;
+}
+
+/** Sentences in a set of passages that give an example. */
+function tutor_examples(array $passages, string $q, int $max = 2): array
+{
+    $terms = tutor_terms($q); $found = [];
+    foreach ($passages as $p) {
+        $sents = preg_split('/(?<=[.!?])\s+|\n/u', $p['text']) ?: [];
+        foreach ($sents as $i => $s) {
+            if (!preg_match('/\b(for example|for instance|e\.g\.|such as|an example|example of|consider|imagine|suppose|case study)\b/iu', $s)) continue;
+            $txt = trim($s);
+            /* "For example:" or "such as:" ending the line: the example is what follows. */
+            for ($k = 1; $k <= 3 && (mb_strlen($txt) < 90 || str_ends_with($txt, ':')) && isset($sents[$i + $k]); $k++) $txt .= ' ' . trim($sents[$i + $k]);
+            if (mb_strlen($txt) < 80 || str_ends_with($txt, ':')) continue;
+            $score = count(array_intersect($terms, tutor_terms($txt))) + 0.5;
+            $found[] = ['text' => mb_strimwidth($txt, 0, 480, '…'), 'p' => $p, 'score' => $score];
+        }
+    }
+    usort($found, fn($a, $b) => $b['score'] <=> $a['score']);
+    return array_slice($found, 0, $max);
+}
+
+/** The words a good answer to a quiz prompt would use: [shown word, stem]. */
+function tutor_keywords(string $slug, string $text, string $prompt, int $max = 7): array
+{
+    $idx = tutor_index($slug);
+    $idf = static fn(string $st): float => log(1 + $idx['N'] / ($idx['df'][$st] ?? 1));
+    /* "Risk identification tools (Document reviews, Checklist analysis, SWOT
+       analysis, ...)": when the point lists its parts, the parts ARE the key
+       ideas. Each is matched on its most telling word. */
+    if (preg_match('/\((.{6,})\)\s*\)?\s*$/su', $prompt, $pm)) {
+        $flat = str_replace(['(', ')'], ',', $pm[1]);
+        $out = []; $seen = [];
+        foreach (preg_split('/\s*,\s*|\s+and\s+/u', $flat) ?: [] as $item) {
+            $item = trim($item);
+            if ($item === '' || mb_strlen($item) > 60) continue;
+            $best = ''; $bi = -1.0;
+            foreach (tutor_terms($item) as $st) if ($idf($st) > $bi) { $bi = $idf($st); $best = $st; }
+            if ($best === '' || isset($seen[$best])) continue;
+            $seen[$best] = true; $out[] = [mb_strtolower($item), $best];
+            if (count($out) >= 8) break;
+        }
+        if (count($out) >= 2) return $out;
+    }
+    /* From the material's explanation only, and not the question's own words:
+       repeating "risk" back is not knowing the answer. */
+    $inPrompt = array_flip(tutor_terms($prompt));
+    $filler = ['explained', 'runs', 'relies', 'method', 'thought', 'source', 'application', 'concepts', 'concept', 'within',
+               'should', 'which', 'these', 'those', 'their', 'being', 'other', 'makes', 'using', 'often', 'order', 'various'];
+    preg_match_all('/[\p{L}][\p{L}\-]{4,}/u', $text, $m);
+    $best = [];
+    foreach ($m[0] as $w) {
+        $lw = mb_strtolower($w);
+        if (in_array($lw, TUTOR_STOP, true) || in_array($lw, $filler, true) || str_contains($lw, '-')) continue;
+        $st = tutor_stem($lw);
+        if (isset($inPrompt[$st]) || !isset($idx['df'][$st])) continue;
+        if (isset($best[$st])) { $best[$st]['n']++; continue; }
+        $df = $idx['df'][$st] ?? 1;
+        $best[$st] = ['w' => $lw, 'n' => 1, 'idf' => log(1 + $idx['N'] / $df)];
+    }
+    /* Common words (in most passages) say nothing about this point. */
+    $best = array_filter($best, fn($b) => $b['idf'] > 1.1);
+    uasort($best, fn($a, $b) => ($b['n'] * $b['idf']) <=> ($a['n'] * $a['idf']));
+    $out = [];
+    foreach (array_slice($best, 0, $max, true) as $st => $b) $out[] = [$b['w'], $st];
+    return $out;
 }
 
 /** @return array{blocks:list<array<string,mixed>>, chips:list<string>} */
@@ -313,12 +564,13 @@ function tutor_static_reply(string $intent, array $ctx): array
                . learner_course_title($slug) . ($here !== '' ? ", and I can see you're on $here." : '.')),
             ['type' => 'list', 'items' => [
                 'Ask me about anything in your course, like "what is a project charter?"',
-                'Say "summarise this topic" for the main points',
-                'Say "quiz me" to practise explaining it yourself',
-                'Ask "what should I do next?" and I\'ll look at your progress',
+                'Follow up with "give me an example", "simpler" or "tell me more"',
+                'Ask me to compare two ideas, like "difference between a project and operations"',
+                'Say "quiz me" to practise, and I\'ll mark what you write',
+                'Ask "where am I weak?" or "what should I do next?"',
             ]],
             $P("I answer from your course material and show you where it came from. I won't give answers to your topic checks or workbooks, because those are your own work."),
-        ], 'chips' => ['Summarise this topic', 'Quiz me', 'What should I do next?']];
+        ], 'chips' => ['Summarise this topic', 'Quiz me', 'Where am I weak?']];
 
     case 'thanks':
         return ['blocks' => [$P("You're welcome. Keep going. When you can explain it in your own words, you know it.")],
@@ -330,31 +582,59 @@ function tutor_static_reply(string $intent, array $ctx): array
             $P("What I can do is help you understand the topic well enough to answer them yourself. Tell me which idea you're stuck on, or let me quiz you on it."),
         ], 'chips' => ['Summarise this topic', 'Quiz me']];
 
-    case 'next':
-        return tutor_reply_next($ctx);
+    case 'next':    return tutor_reply_next($ctx);
+    case 'weak':    return tutor_reply_weak($ctx);
+    case 'summary': return tutor_reply_summary($slug, $mid, $tc);
+    case 'quiz':    return tutor_reply_quiz($ctx);
+    case 'compare': return tutor_reply_compare($ctx);
+    case 'more':
+    case 'example':
+    case 'simpler': return tutor_reply_follow($intent, $ctx);
+    }
+    return tutor_reply_explain($ctx);
+}
 
-    case 'summary':
-        return tutor_reply_summary($slug, $mid, $tc);
+function tutor_not_found(string $slug): array
+{
+    return ['blocks' => [
+        ['type' => 'p', 'text' => "I couldn't find that in your " . learner_course_title($slug) . " material."],
+        ['type' => 'p', 'text' => 'Try different words, or the name of the idea as it appears in the topic. If it isn\'t part of this course, your facilitator is the best person to ask. Use "Contact the academy" in the menu.'],
+    ], 'chips' => ['Summarise this topic', 'Help']];
+}
 
-    case 'quiz':
-        return tutor_reply_quiz($slug, $mid, $tc, $ctx['q']);
+/** "(I read “riks” as “risk”.)" when a word was corrected. */
+function tutor_fixed_note(string $slug, string $q): ?array
+{
+    $fx = tutor_expand($slug, $q)['fixed'];
+    if (!$fx) return null;
+    $bits = [];
+    foreach ($fx as $from => $to) $bits[] = '"' . $from . '" as "' . $to . '"';
+    return ['type' => 'note', 'text' => 'I read ' . implode(', ', $bits) . '.'];
+}
+
+function tutor_reply_explain(array $ctx): array
+{
+    $slug = $ctx['course']; $mid = $ctx['module']; $tc = $ctx['topic']; $q = $ctx['q'];
+    $P = static fn(string $t): array => ['type' => 'p', 'text' => $t];
+    /* "Why is it important?": too few words of its own, so it borrows the last question's. */
+    $own = tutor_terms($q);
+    $search = count($own) < 2 && $ctx['lastq'] !== '' ? $q . ' ' . $ctx['lastq'] : $q;
+    $hits = tutor_find($slug, $search, ['module' => $mid, 'topic' => $tc, 'limit' => 3]);
+    if (!$hits || $hits[0]['score'] < 1.2) return tutor_not_found($slug);
+    /* An outline tops the list easily (it is short and all keywords). Where the
+       Reading also answers it reasonably well, the Reading is the better answer. */
+    if ($hits[0]['p']['kind'] === 'outline') {
+        $read = tutor_find($slug, $search, ['module' => $mid, 'topic' => $tc, 'limit' => 3, 'kind' => 'reading']);
+        if ($read && $read[0]['score'] >= $hits[0]['score'] * 0.45) $hits = $read;
     }
 
-    /* explain */
-    $hits = tutor_search($ctx['q'], tutor_passages($slug), $mid, $tc, 2);
-    if (!$hits || $hits[0]['score'] < 1.2) {
-        return ['blocks' => [
-            $P("I couldn't find that in your " . learner_course_title($slug) . " material."),
-            $P('Try different words, or the name of the idea as it appears in the topic. If it isn\'t part of this course, your facilitator is the best person to ask. Use "Contact the academy" in the menu.'),
-        ], 'chips' => ['Summarise this topic', 'Help']];
-    }
     /* Where no Reading is loaded the best match is only an outline. That says
        WHERE the idea is taught, not what it is, and the reply says so. */
     if ($hits[0]['p']['kind'] === 'outline') {
         $outl = tutor_outline($slug);
-        $blocks = [$P('Your course covers this here:')];
+        $blocks = array_values(array_filter([tutor_fixed_note($slug, $q), $P('Your course covers this here:')]));
         foreach ($hits as $i => $h) {
-            if ($i > 0 && ($h['score'] < $hits[0]['score'] * 0.55 || $h['p']['kind'] !== 'outline')) break;
+            if ($i > 1 || ($i > 0 && ($h['score'] < $hits[0]['score'] * 0.55 || $h['p']['kind'] !== 'outline'))) break;
             $o = $outl[$h['p']['topic']] ?? ['covers' => [], 'key' => ''];
             $blocks[] = ['type' => 'topic', 'title' => $h['p']['module'] . ' · ' . $h['p']['title'], 'items' => $o['covers'],
                          'key' => $o['key'] !== '' ? mb_strimwidth($o['key'], 0, 320, '…') : '', 'source' => tutor_source($h['p'])];
@@ -362,30 +642,133 @@ function tutor_static_reply(string $intent, array $ctx): array
         $blocks[] = $P('Open the topic and your learner guide for the full explanation. The written Reading for this course is not on the site yet, so I can point you to the right place but not quote it.');
         $top = $hits[0]['p'];
         return ['blocks' => $blocks, 'chips' => ['Quiz me on ' . $top['title'], 'What should I do next?'],
-                'focus' => ['module' => $top['module'], 'topic' => $top['topic']]];
+                'focus' => ['module' => $top['module'], 'topic' => $top['topic']], 'lastq' => $search];
     }
-    $blocks = [$P('Here is what your course material says:')];
+
+    $blocks = array_values(array_filter([tutor_fixed_note($slug, $q)]));
+    $shown = [];
+    /* A what-is question gets the definition first, in the course's own words. */
+    $def = tutor_definition($slug, tutor_subject($q), $hits);
+    if ($def) {
+        $blocks[] = ['type' => 'define', 'text' => $def['text'], 'source' => tutor_source($def['p'])];
+        $blocks[] = $P('More from your material:');
+    } else {
+        $blocks[] = $P('Here is what your course material says:');
+    }
+    $n = 0;
     foreach ($hits as $i => $h) {
         if ($i > 0 && $h['score'] < $hits[0]['score'] * 0.55) break;
-        if ($h['p']['kind'] !== 'reading') continue;
-        $blocks[] = ['type' => 'quote', 'text' => tutor_excerpt($h['p']['text'], $ctx['q']), 'source' => tutor_source($h['p'])];
+        if ($h['p']['kind'] !== 'reading' || $n >= 2) continue;
+        $text = $h['p']['text'];
+        /* Not the definition twice: quote what the passage says after it. */
+        if ($def && str_contains($text, $def['text'])) $text = trim(str_replace($def['text'], '', $text));
+        if (mb_strlen($text) < 60) continue;
+        $ex = tutor_excerpt($text, $search);
+        if ($def && str_contains($ex, mb_substr($def['text'], 0, 50))) continue;
+        $blocks[] = ['type' => 'quote', 'text' => $ex, 'source' => tutor_source($h['p'])];
+        $shown[] = $h['p']['id']; $n++;
     }
-    /* Explain, then check: one question that makes them use it. */
     $top = $hits[0]['p'];
+    /* Explain, then check: one question that makes them use it. */
     $blocks[] = ['type' => 'check', 'text' => 'Check yourself: how would you explain this to a colleague in one or two sentences, using an example from your own work?'];
-    return ['blocks' => $blocks, 'chips' => ['Quiz me on ' . $top['title'], 'Summarise this topic', 'What should I do next?'],
-            'focus' => ['module' => $top['module'], 'topic' => $top['topic']]];
+    return ['blocks' => $blocks, 'chips' => ['Give me an example', 'Simpler', 'Tell me more', 'Quiz me on ' . $top['title']],
+            'focus' => ['module' => $top['module'], 'topic' => $top['topic']], 'shown' => $shown, 'lastq' => $search];
+}
+
+/** "Tell me more", "give me an example", "simpler": the last question, carried on. */
+function tutor_reply_follow(string $intent, array $ctx): array
+{
+    $slug = $ctx['course']; $tc = $ctx['topic']; $mid = $ctx['module'];
+    $mods = curriculum_modules($slug);
+    if ($tc !== '' && $mid === '') $mid = curriculum_module_of($tc, $slug);
+    $title = $tc !== '' ? (string) ($mods[$mid]['topics'][$tc] ?? '') : '';
+    $about = trim($ctx['lastq'] !== '' ? $ctx['lastq'] : $title);
+    $label = $title !== '' ? $title : $about;
+    $P = static fn(string $t): array => ['type' => 'p', 'text' => $t];
+
+    if ($intent === 'example') {
+        $pool = array_map(fn($h) => $h['p'], tutor_find($slug, $about, ['kind' => 'reading', 'only_topic' => $tc, 'limit' => 12, 'per_topic' => false]));
+        if (!$pool) $pool = array_map(fn($h) => $h['p'], tutor_find($slug, $about, ['kind' => 'reading', 'module' => $mid, 'limit' => 12, 'per_topic' => false]));
+        $ex = tutor_examples($pool, $about);
+        if (!$ex) {
+            return ['blocks' => [$P("Your material doesn't give a worked example for this one."),
+                    ['type' => 'check', 'text' => 'Try making your own: think of a project or task at work this year. Where would "' . $label . '" show up in it, and what would it look like?']],
+                    'chips' => ['Simpler', 'Quiz me']];
+        }
+        $blocks = [$P('An example from your material:')];
+        foreach ($ex as $e) $blocks[] = ['type' => 'quote', 'text' => $e['text'], 'source' => tutor_source($e['p'])];
+        $blocks[] = ['type' => 'check', 'text' => 'Now one of your own: where have you seen this at work?'];
+        return ['blocks' => $blocks, 'chips' => ['Tell me more', 'Quiz me'], 'lastq' => $about];
+    }
+
+    if ($intent === 'simpler') {
+        $def = tutor_definition($slug, tutor_subject('what is ' . preg_replace('/^(what(\'s| is| are)|define|explain)\s+/iu', '', $about)), []);
+        $outl = tutor_outline($slug)[$tc] ?? ['covers' => [], 'key' => ''];
+        $blocks = [];
+        if ($def) $blocks[] = ['type' => 'define', 'text' => $def['text'], 'source' => tutor_source($def['p'])];
+        if ($outl['key'] !== '') $blocks[] = ['type' => 'quote', 'text' => 'The key idea of this topic: ' . mb_strimwidth($outl['key'], 0, 300, '…'),
+                                              'source' => tutor_source(['course' => $slug, 'module' => $mid, 'topic' => $tc, 'title' => $title])];
+        if ($outl['covers']) $blocks[] = ['type' => 'list', 'items' => array_slice($outl['covers'], 0, 4)];
+        if (!$blocks) return tutor_reply_explain(['q' => $about] + $ctx);
+        array_unshift($blocks, $P('In short:'));
+        $blocks[] = ['type' => 'check', 'text' => 'Which part is still unclear? Ask me about just that word or step.'];
+        return ['blocks' => $blocks, 'chips' => ['Give me an example', 'Quiz me'], 'lastq' => $about];
+    }
+
+    /* more */
+    $hits = tutor_find($slug, $about, ['kind' => 'reading', 'topic' => $tc, 'module' => $mid, 'exclude' => $ctx['seen'], 'limit' => 2, 'per_topic' => false]);
+    if (!$hits || $hits[0]['score'] < 1.0) {
+        return ['blocks' => [$P("That's everything your material says about it that I haven't shown you."),
+                $P('The best next step is to test yourself on it.')], 'chips' => ['Quiz me', 'Give me an example']];
+    }
+    $blocks = [$P('More from your material:')]; $shown = [];
+    foreach ($hits as $h) {
+        $blocks[] = ['type' => 'quote', 'text' => tutor_excerpt($h['p']['text'], $about, 700), 'source' => tutor_source($h['p'])];
+        $shown[] = $h['p']['id'];
+    }
+    return ['blocks' => $blocks, 'chips' => ['Tell me more', 'Give me an example', 'Quiz me'], 'shown' => $shown, 'lastq' => $about,
+            'focus' => ['module' => $hits[0]['p']['module'], 'topic' => $hits[0]['p']['topic']]];
+}
+
+/** "Difference between A and B": the two side by side, then a question. */
+function tutor_reply_compare(array $ctx): array
+{
+    $slug = $ctx['course'];
+    $s = trim(mb_strtolower($ctx['q']), ' ?.');
+    $a = $b = '';
+    if (preg_match('/(?:difference|differences)\s+between\s+(?:an?\s+|the\s+)?(.+?)\s+(?:and|&|vs\.?|versus)\s+(?:an?\s+|the\s+)?(.+)$/u', $s, $m)
+        || preg_match('/compare\s+(?:an?\s+|the\s+)?(.+?)\s+(?:and|with|to|vs\.?|versus)\s+(?:an?\s+|the\s+)?(.+)$/u', $s, $m)
+        || preg_match('/^(?:an?\s+|the\s+)?(.+?)\s+(?:vs\.?|versus)\s+(?:an?\s+|the\s+)?(.+)$/u', $s, $m)
+        || preg_match('/how (?:does|do|is|are)\s+(?:an?\s+|the\s+)?(.+?)\s+differ(?:ent)? from\s+(?:an?\s+|the\s+)?(.+)$/u', $s, $m)) {
+        $a = trim($m[1]); $b = trim($m[2]);
+    }
+    if ($a === '' || $b === '') return tutor_reply_explain($ctx);
+    $side = function (string $x) use ($slug, $ctx): ?array {
+        $hits = tutor_find($slug, $x, ['module' => $ctx['module'], 'kind' => 'reading', 'limit' => 3]);
+        $def = tutor_definition($slug, $x, $hits);
+        if ($def) return ['name' => $x, 'text' => $def['text'], 'source' => tutor_source($def['p'])];
+        if (!$hits || $hits[0]['score'] < 1.2) return null;
+        return ['name' => $x, 'text' => tutor_excerpt($hits[0]['p']['text'], $x, 380), 'source' => tutor_source($hits[0]['p'])];
+    };
+    $L = $side($a); $R = $side($b);
+    if (!$L && !$R) return tutor_not_found($slug);
+    $blocks = [['type' => 'p', 'text' => 'Side by side, from your material:']];
+    $blocks[] = ['type' => 'compare', 'items' => array_values(array_filter([$L, $R]))];
+    if (!$L || !$R) $blocks[] = ['type' => 'p', 'text' => 'I could only find "' . ($L ? $b : $a) . '" by its own name in a few places. Try the exact term your guide uses.'];
+    $blocks[] = ['type' => 'check', 'text' => 'In one sentence: what is the main difference, and when would you use each?'];
+    return ['blocks' => $blocks, 'chips' => ['Give me an example', 'Quiz me'], 'lastq' => $a . ' ' . $b];
 }
 
 function tutor_reply_summary(string $slug, string $mid, string $tc): array
 {
     $mods = curriculum_modules($slug); $out = tutor_outline($slug);
+    if ($mid === '' && $tc !== '') $mid = curriculum_module_of($tc, $slug);
     if ($mid === '' || !isset($mods[$mid])) {
         $items = [];
         foreach ($mods as $id => $m) $items[] = $id . ' · ' . $m['title'];
         return ['blocks' => [['type' => 'p', 'text' => learner_course_title($slug) . ' has ' . count($mods) . ' modules:'],
                              ['type' => 'list', 'items' => $items],
-                             ['type' => 'p', 'text' => 'Open a module and ask me again, and I\'ll summarise it topic by topic.']],
+                             ['type' => 'p', 'text' => 'Choose a module above (or open one) and ask me again, and I\'ll summarise it topic by topic.']],
                 'chips' => ['What should I do next?']];
     }
     $topics = $tc !== '' && isset($mods[$mid]['topics'][$tc]) ? [$tc => $mods[$mid]['topics'][$tc]] : $mods[$mid]['topics'];
@@ -400,42 +783,112 @@ function tutor_reply_summary(string $slug, string $mid, string $tc): array
 }
 
 /**
- * Retrieval practice: one point from the outline to explain unprompted, with
- * the material's own words held back until the learner asks to see them.
+ * Modules worth going back to: a topic check below its pass mark (best try),
+ * or started and left part-way. Scores only; the questions are never read.
+ *
+ * @return list<array{module:string, title:string, why:string, pct:?int}>
  */
-function tutor_reply_quiz(string $slug, string $mid, string $tc, string $q): array
+function tutor_weak_modules(int $uid, string $slug): array
 {
+    $mods = curriculum_modules($slug); $out = [];
+    $rows = db_optional(fn() => db_all('SELECT q.module_code, q.pass_pct, MAX(a.score_count * 100 / CASE WHEN a.question_count > 0 THEN a.question_count ELSE 1 END) AS best
+              FROM quiz_attempts a JOIN quizzes q ON q.id = a.quiz_id
+             WHERE a.tenant_id = ? AND a.user_id = ? AND q.course_slug = ? AND a.submitted_at IS NOT NULL
+             GROUP BY q.module_code, q.pass_pct', [tenant_id(), $uid, $slug]), []) ?: [];
+    foreach ($rows as $r) {
+        $m = (string) $r['module_code']; $pass = (int) ($r['pass_pct'] ?? 80) ?: 80; $best = (int) $r['best'];
+        if (isset($mods[$m]) && $best < $pass) $out[$m] = ['module' => $m, 'title' => $mods[$m]['title'], 'pct' => $best,
+                                                           'why' => 'Your best topic check: ' . $best . '% (pass mark ' . $pass . '%)'];
+    }
+    $tree = db_optional(fn() => learner_progress_tree($uid, $slug), []) ?: [];
+    foreach ($mods as $id => $m) {
+        if (isset($out[$id])) continue;
+        $total = count($m['topics']); $done = 0;
+        foreach (array_keys($m['topics']) as $code) if (!empty($tree[$id]['topics'][$code])) $done++;
+        if ($done > 0 && $done < $total) $out[$id] = ['module' => $id, 'title' => $m['title'], 'pct' => null,
+                                                    'why' => $done . ' of ' . $total . ' topics done'];
+    }
+    usort($out, fn($a, $b) => ($a['pct'] ?? 101) <=> ($b['pct'] ?? 101));
+    return array_values($out);
+}
+
+function tutor_reply_weak(array $ctx): array
+{
+    $slug = $ctx['course'];
+    $weak = tutor_weak_modules($ctx['uid'], $slug);
+    if (!$weak) {
+        return ['blocks' => [['type' => 'p', 'text' => "Nothing stands out. You haven't missed a topic check, and every module you've started is finished."],
+                ['type' => 'p', 'text' => 'Keep it that way by testing yourself on a module before you move on.']],
+                'chips' => ['Quiz me', 'What should I do next?']];
+    }
+    $q = $slug === 'project-management' ? '' : '&c=' . rawurlencode($slug);
+    $blocks = [['type' => 'p', 'text' => 'Worth going back to:']];
+    foreach (array_slice($weak, 0, 4) as $w) {
+        $blocks[] = ['type' => 'next', 'title' => $w['module'] . ' · ' . $w['title'], 'sub' => $w['why'],
+                     'href' => 'module?m=' . rawurlencode($w['module']) . $q];
+    }
+    $blocks[] = ['type' => 'p', 'text' => 'I can quiz you on the first one now. A few rounds of explaining it in your own words is the fastest way to fix a weak spot.'];
+    return ['blocks' => $blocks, 'chips' => ['Quiz me on ' . $weak[0]['module'], 'Summarise ' . $weak[0]['module']],
+            'focus' => ['module' => $weak[0]['module'], 'topic' => '']];
+}
+
+/**
+ * Retrieval practice: one point from the outline to explain unprompted, with
+ * the material's own words held back until the learner asks to see them. The
+ * reveal carries the words a good answer would use, so tutor.js can mark the
+ * learner's attempt in the browser. Their answer is never sent here.
+ */
+function tutor_reply_quiz(array $ctx): array
+{
+    $slug = $ctx['course']; $mid = $ctx['module']; $tc = $ctx['topic']; $q = $ctx['q'];
     $mods = curriculum_modules($slug); $out = tutor_outline($slug);
-    /* "Quiz me on <topic name>": find that topic. Otherwise the topic in view, then the module, then the course. */
-    $pool = [];
     $named = trim((string) preg_replace('/^.*?\b(quiz me|test me|practi[cs]e)\b( on)?/iu', '', $q));
-    if ($named !== '') {
-        foreach (tutor_search($named, array_values(array_filter(tutor_passages($slug), fn($p) => $p['kind'] === 'outline')), $mid, $tc, 1) as $h) {
+    if ($named !== '' && preg_match('/^[A-Z]{1,3}\d?-?\d{2}$/i', $named) && isset($mods[strtoupper($named)])) {
+        $mid = strtoupper($named); $tc = '';                         // "quiz me on KM-04"
+    } elseif ($named !== '') {
+        foreach (tutor_find($slug, $named, ['kind' => 'outline', 'module' => $mid, 'limit' => 1]) as $h) {
             $tc = $h['p']['topic']; $mid = $h['p']['module'];
         }
+    } elseif ($mid === '' && $tc === '') {
+        /* Nothing chosen: the weakest module first. */
+        $weak = tutor_weak_modules($ctx['uid'], $slug);
+        if ($weak) $mid = $weak[0]['module'];
     }
+    $pool = [];
+    $avoid = array_flip(array_map('intval', $ctx['avoid']));
     foreach ($mods as $id => $m) {
         if ($mid !== '' && $id !== $mid) continue;
         foreach ($m['topics'] as $code => $name) {
             if ($tc !== '' && $code !== $tc) continue;
-            foreach (($out[$code]['covers'] ?? []) as $item) $pool[] = [$id, $code, $name, $item];
+            foreach (($out[$code]['covers'] ?? []) as $item) {
+                $qid = crc32($code . '|' . $item) & 0x7fffffff;
+                if (!isset($avoid[$qid])) $pool[] = [$id, $code, $name, $item, $qid];
+            }
         }
     }
-    if (!$pool) return ['blocks' => [['type' => 'p', 'text' => "There's no outline for me to quiz you from here yet. Open a module and try again."]], 'chips' => ['Help']];
-    [$id, $code, $name, $item] = $pool[random_int(0, count($pool) - 1)];
+    if (!$pool && $avoid) {
+        return ['blocks' => [['type' => 'p', 'text' => "You've been through every point here. Well done."],
+                ['type' => 'p', 'text' => 'Choose another module, or start the round again tomorrow. Spacing it out helps it stick.']],
+                'chips' => ['Where am I weak?', 'What should I do next?'], 'reset_avoid' => true];
+    }
+    if (!$pool) return ['blocks' => [['type' => 'p', 'text' => "There's no outline for me to quiz you from here yet. Choose a module and try again."]], 'chips' => ['Help']];
+    [$id, $code, $name, $item, $qid] = $pool[random_int(0, count($pool) - 1)];
 
     $p = ['course' => $slug, 'module' => $id, 'topic' => $code, 'title' => $name];
-    $hit = tutor_search($item, array_values(array_filter(tutor_passages($slug), fn($x) => $x['topic'] === $code && $x['kind'] === 'reading')), $id, $code, 1);
+    $hit = tutor_find($slug, $item, ['kind' => 'reading', 'only_topic' => $code, 'limit' => 1]);
     $reveal = $hit ? tutor_excerpt($hit[0]['p']['text'], $item, 640)
                    : (($out[$code]['key'] ?? '') !== '' ? mb_strimwidth($out[$code]['key'], 0, 640, '…') : '');
+    $left = count($pool) - 1;
     return ['blocks' => [
         ['type' => 'p', 'text' => 'From ' . $id . ' · ' . $name . '. Without looking it up, explain this in your own words:'],
         ['type' => 'practice', 'prompt' => $item,
          'reveal' => $reveal !== '' ? $reveal : 'Open the topic and compare what you said with the reading.',
+         'keys' => $reveal !== '' ? tutor_keywords($slug, $reveal, $item) : [],
          'source' => tutor_source($p)],
-        ['type' => 'p', 'text' => 'Say it out loud or type it in the box below, then press "Show what the material says" and mark yourself.'],
-    ], 'chips' => ['Another one', 'Summarise this topic', 'What should I do next?'],
-       'focus' => ['module' => $id, 'topic' => $code]];
+        ['type' => 'p', 'text' => 'Type your answer in the box, then press "Check my answer". I\'ll show what the material says and which key ideas you covered.'
+                                 . ($left > 0 ? ' (' . $left . ' more point' . ($left === 1 ? '' : 's') . ' in this round.)' : '')],
+    ], 'chips' => ['Another one', 'Summarise this topic', 'Where am I weak?'],
+       'focus' => ['module' => $id, 'topic' => $tc !== '' ? $code : ''], 'asked' => $qid];
 }
 
 function tutor_reply_next(array $ctx): array
@@ -452,7 +905,9 @@ function tutor_reply_next(array $ctx): array
                ['type' => 'next', 'title' => ($n['code'] === 'WM' ? $n['title'] : $n['code'] . ' · ' . $n['title']),
                 'sub' => !empty($n['next']) ? 'Up next: ' . $n['next'] : (string) $n['sub'], 'href' => (string) $n['href']]];
     if ($j['streak'] > 0) $blocks[] = ['type' => 'p', 'text' => 'You\'re on a ' . $j['streak'] . '-day streak. Do one topic today to keep it.'];
-    return ['blocks' => $blocks, 'chips' => ['Summarise this topic', 'Quiz me']];
+    $weak = tutor_weak_modules($ctx['uid'], $ctx['course']);
+    if ($weak && $weak[0]['pct'] !== null) $blocks[] = ['type' => 'p', 'text' => 'Also worth a look: ' . $weak[0]['module'] . ', where your best topic check is ' . $weak[0]['pct'] . '%.'];
+    return ['blocks' => $blocks, 'chips' => ['Summarise this topic', 'Quiz me', 'Where am I weak?']];
 }
 
 /* ---------------------------------------------------------------------------

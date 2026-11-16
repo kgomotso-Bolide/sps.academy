@@ -40,6 +40,14 @@
     '.tt-chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:96%}' +
     '.tt-chip,.tt-btn{background:#fff;border:1px solid var(--line,#ddd);border-radius:30px;padding:7px 12px;font:600 12.5px/1.2 inherit;font-family:inherit;color:var(--ink,#222);cursor:pointer}' +
     '.tt-chip:hover,.tt-btn:hover{border-color:var(--orange);color:var(--orange-deep)}' +
+    '.tt-def{border-left:4px solid var(--green-deep,#2a7);background:var(--green-tint,#eaf4e8);border-radius:0 10px 10px 0;padding:10px 12px;font-size:14.5px;font-weight:600}' +
+    '.tt-note{font-size:12.5px;color:var(--ink-soft,#666);font-style:italic}' +
+    '.tt-cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
+    '.tt-cmp > div{border:1px solid var(--line,#ddd);border-radius:10px;padding:9px 11px;font-size:13.5px}' +
+    '.tt-cmp b{display:block;text-transform:capitalize;margin-bottom:4px;color:var(--orange-deep)}' +
+    '.tt-mark{border-radius:10px;padding:9px 12px;font-size:13.5px;background:var(--bg-soft,#f7f6f4);border:1px solid var(--line,#ddd)}' +
+    '.tt-mark b{display:block;margin-bottom:3px}.tt-mark .hit{color:var(--green-deep,#2a7);font-weight:700}.tt-mark .miss{color:var(--orange-deep);font-weight:700}' +
+    '@media(max-width:520px){.tt-cmp{grid-template-columns:1fr}}' +
     '.tt-dots{align-self:flex-start;color:var(--ink-soft,#777);font-size:20px;letter-spacing:2px;padding:0 6px}' +
     '.tt-foot{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line,#ddd);background:#fff}' +
     '.tt-foot input{flex:1;min-width:0;border:1px solid var(--line,#ddd);border-radius:10px;padding:11px 13px;font:inherit;font-size:14.5px}' +
@@ -78,10 +86,32 @@
     return a;
   }
 
+  /* The same stop words and stemmer as tutor_terms() in lib/tutor.php, so the
+     marking of a quiz answer here agrees with the server's key words. */
+  var STOP = ('a an the and or of to in on for is are was be it this that what which how why when who do does did i me my you your ' +
+    'we with as at by from can could should would about explain tell mean means meaning define definition please some any there ' +
+    'their them into its also not but if so than then more most give show help understand between difference').split(' ');
+  function stem(w) {
+    w = w.replace(/is(ation|ations|e|ed|es|ing)$/, 'iz$1');
+    var R = [['ational', 'ate'], ['ization', 'ize'], ['ments', 'ment'], ['ness', ''], ['ings', ''], ['ing', ''], ['ies', 'y'],
+             ['ied', 'y'], ['ed', ''], ['es', ''], ['s', '']];
+    for (var i = 0; i < R.length; i++) {
+      var s = R[i][0];
+      if (w.length > s.length + 3 && w.slice(-s.length) === s) return w.slice(0, -s.length) + R[i][1];
+    }
+    return w;
+  }
+  function terms(s) {
+    return (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || [])
+      .filter(function (w) { return w.length >= 2 && STOP.indexOf(w) < 0; }).map(stem);
+  }
+
   /** One conversation. opts: course, module, topic(fn or string), token(fn), first */
   function Chat(host, opts) {
     addCss();
-    var state = { topic: '', busy: false };
+    /* What the conversation remembers, in this browser tab only: the last real
+       question (for "tell me more"), passages already shown, quiz points asked. */
+    var state = { topic: '', module: '', lastq: '', seen: [], avoid: [], busy: false };
     var box = el('div', 'tt');
     var log = el('div', 'tt-log'); log.setAttribute('aria-live', 'polite');
     var form = el('form', 'tt-foot');
@@ -107,6 +137,17 @@
           n = el('div', 'tt-q'); n.appendChild(el('div', '', b.text));
           var s = sourceLink(b.source); if (s) n.appendChild(s); return n;
         case 'check': return el('div', 'tt-check', b.text);
+        case 'note': return el('div', 'tt-note', b.text);
+        case 'define':
+          n = el('div', 'tt-def'); n.appendChild(el('div', '', b.text));
+          var sd = sourceLink(b.source); if (sd) n.appendChild(sd); return n;
+        case 'compare':
+          n = el('div', 'tt-cmp');
+          (b.items || []).forEach(function (it) {
+            var c = el('div'); c.appendChild(el('b', '', it.name)); c.appendChild(el('div', '', it.text));
+            var sc = sourceLink(it.source); if (sc) c.appendChild(sc); n.appendChild(c);
+          });
+          return n;
         case 'topic':
           n = el('div', 'tt-topic'); n.appendChild(el('b', '', b.title));
           if (b.items && b.items.length) { var u = el('ul'); b.items.forEach(function (i) { u.appendChild(el('li', '', i)); }); n.appendChild(u); }
@@ -116,13 +157,35 @@
           n = el('div', 'tt-prac'); n.appendChild(el('strong', '', b.prompt));
           var ta = el('textarea'); ta.placeholder = 'Your answer, in your own words (stays on this screen)';
           ta.setAttribute('aria-label', 'Your answer'); n.appendChild(ta);
-          var rv = el('button', 'tt-btn rv', 'Show what the material says'); rv.type = 'button';
+          var rv = el('button', 'tt-btn rv', 'Check my answer'); rv.type = 'button';
+          ta.addEventListener('input', function () { rv.textContent = ta.value.trim() ? 'Check my answer' : 'Show what the material says'; });
+          rv.textContent = 'Show what the material says';
           rv.addEventListener('click', function () {
-            rv.remove();
+            rv.remove(); ta.readOnly = true;
+            /* Marked here, in the browser: the answer is never sent anywhere. */
+            var mine = terms(ta.value), keys = b.keys || [];
+            if (mine.length && keys.length) {
+              var hit = [], miss = [];
+              keys.forEach(function (k) { (mine.indexOf(k[1]) > -1 ? hit : miss).push(k[0]); });
+              var mk = el('div', 'tt-mark');
+              var score = hit.length / keys.length;
+              mk.appendChild(el('b', '', score >= 0.6 ? 'Strong answer.' : score >= 0.3 ? 'Good start.' : 'Have another look at this one.'));
+              var line = el('div');
+              line.appendChild(document.createTextNode('You used ' + hit.length + ' of ' + keys.length + ' key ideas'));
+              if (hit.length) { line.appendChild(document.createTextNode(': ')); line.appendChild(el('span', 'hit', hit.join(', '))); }
+              line.appendChild(document.createTextNode('.'));
+              mk.appendChild(line);
+              if (miss.length) {
+                var l2 = el('div'); l2.appendChild(document.createTextNode('Not mentioned: ')); l2.appendChild(el('span', 'miss', miss.join(', ')));
+                mk.appendChild(l2);
+              }
+              mk.appendChild(el('div', 'tt-note', 'This counts key words, not meaning. Read the material below to be sure you have the idea right.'));
+              n.appendChild(mk);
+            }
             var a = el('div', 'tt-q ans'); a.appendChild(el('div', '', b.reveal));
             var s3 = sourceLink(b.source); if (s3) a.appendChild(s3);
             n.appendChild(a);
-            n.appendChild(el('p', 'tt-check', 'Did you cover the main idea? If not, open the topic and read it again, then try another one.'));
+            if (!mine.length) n.appendChild(el('p', 'tt-check', 'Did you cover the main idea? If not, open the topic and read it again, then try another one.'));
             scroll();
           });
           n.appendChild(rv); return n;
@@ -155,14 +218,22 @@
       log.appendChild(el('div', 'tt-m me', q));
       var dots = el('div', 'tt-dots', '•••'); log.appendChild(dots); scroll();
       var body = new URLSearchParams();
-      body.set('q', q); body.set('course', opts.course); body.set('module', opts.module || '');
+      body.set('q', q); body.set('course', opts.course); body.set('module', opts.module || state.module || '');
       body.set('topic', topicNow()); body.set('_token', opts.token());
+      body.set('lastq', state.lastq); body.set('seen', state.seen.join(',')); body.set('avoid', state.avoid.join(','));
       fetch('tutor.php', { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' }, body: body })
         .then(function (r) { return r.json().catch(function () { return { ok: false, message: 'Something went wrong. Try again.' }; }); })
         .then(function (j) {
           dots.remove();
           if (!j.ok) { bot({ blocks: [{ type: 'p', text: j.message || 'Something went wrong. Try again.' }] }); return; }
-          if (j.focus && j.focus.topic && (!opts.module || j.focus.module === opts.module)) state.topic = j.focus.topic;
+          if (j.focus && (!opts.module || j.focus.module === opts.module)) {
+            if (!opts.module && j.focus.module) state.module = j.focus.module;
+            state.topic = j.focus.topic || '';
+          }
+          if (j.lastq) state.lastq = j.lastq;
+          if (j.shown) state.seen = state.seen.concat(j.shown).slice(-200);
+          if (j.asked != null) state.avoid = state.avoid.concat([j.asked]).slice(-200);
+          if (j.reset_avoid) state.avoid = [];
           bot(j);
         })
         .catch(function () { dots.remove(); bot({ blocks: [{ type: 'p', text: "I couldn't reach the academy. Check your connection and try again." }] }); })
