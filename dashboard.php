@@ -134,6 +134,18 @@ audit('learner.dashboard_viewed', 'users', $uid, 'home · ' . count($j['courses'
         </a>
       <?php endif; ?>
 
+      <?php if ($j['courses'] && brand_has('tutor')): ?>
+        <a class="obj" href="tutor">
+          <span class="obj-ico o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5M12 16.5h.01"/></svg></span>
+          <span class="obj-body">
+            <small>Study tutor</small>
+            <strong>Stuck on something?</strong>
+            <span>Ask about any idea in your course, get a summary, or let the tutor quiz you.</span>
+          </span>
+          <span class="obj-go">Ask <?= journey_svg('chev') ?></span>
+        </a>
+      <?php endif; ?>
+
       <?php if (!$j['courses']): ?>
         <p class="dash-muted">Choose a course below to get your first step.</p>
       <?php endif; ?>

@@ -120,6 +120,8 @@ if (!is_post()) {
         'admin'    => $me['role'] === 'admin',
         /* learner-nav.js gives the static pages the app frame's links (16 Nov 2026). */
         'shell'    => (string) ((require __DIR__ . '/lib/brand.php')['app_shell'] ?? '') !== '',
+        /* The study tutor (16 Nov 2026): learner-nav.js adds its panel to module pages. */
+        'tutor'    => (string) ((require __DIR__ . '/lib/brand.php')['tutor'] ?? '') !== '',
         'courses'  => $courses,
         'progress' => (object) $progress,
         'rpl'      => (object) $rpl,

@@ -44,6 +44,19 @@
       ['notices',    'Notice board', 'notices'],
       ['contact',    'Contact', 'contact']
     ];
+    /* The study tutor (s.tutor, brand 'tutor', 16 Nov 2026): a menu item, and on
+       a module page its "Ask your tutor" panel (tutor.js, same version as this). */
+    if (s.tutor) {
+      items.splice(s.shell ? 3 : 2, 0, ['tutor', 'Tutor', 'tutor']);
+      if (page === 'module' && !window.SPSTutor) {
+        var me = document.querySelector('script[src*="learner-nav.js"]');
+        var v = me ? (me.getAttribute('src').split('?')[1] || '') : '';
+        var t = document.createElement('script');
+        t.src = 'tutor.js' + (v ? '?' + v : '');
+        t.onload = function () { if (window.SPSTutor) window.SPSTutor.floating(s); };
+        document.body.appendChild(t);
+      }
+    }
     links.innerHTML = items.map(function (i) {
       return '<a href="' + i[0] + '"' + (i[2] && i[2] === page ? ' class="active"' : '') + '>' + esc(i[1]) + '</a>';
     }).join('') +

@@ -77,7 +77,7 @@ return [
 
   /* Bumped on any release that changes styles.css or a .js file.
      See asset() in lib/chrome.php for why this is not optional. */
-  'asset_version' => '20261116',
+  'asset_version' => '20261116t',
 
   /* Self sign-up (10 Nov 2026, Kgomotso): a person creates their own account on
      signup.php and puts themselves on a course, with no HR step. ON FOR SPS ONLY.
@@ -93,4 +93,9 @@ return [
      admin links, grouped), in place of the top nav on the signed-in pages.
      The public site is unchanged. See chrome_app_shell() in lib/chrome.php. */
   'app_shell' => '1',
+
+  /* The study tutor (16 Nov 2026, Kgomotso): answers from the course material,
+     static until a model is connected. Sidebar item, a Home card, and an
+     "Ask your tutor" panel on module pages. See lib/tutor.php. */
+  'tutor' => '1',
 ];

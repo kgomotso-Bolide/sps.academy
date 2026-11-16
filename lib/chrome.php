@@ -227,12 +227,18 @@ function chrome_app_shell(array $o): void
     if (!empty($o['admin']))       $foot['admin'] = 'Administration';
     elseif (!empty($o['trainer'])) $foot['trainer'] = 'My learners';
     $foot['contact'] = 'Contact the academy';
-    chrome_shell_frame([
+    $items = [
         ['dashboard', 'home',    'Home',     '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
         ['skills',    'skills',  'Skills',   '<path d="M12 3l3 6H9zM12 9l4 7H8zM12 16v5M8 21h8"/>'],
         ['files',     'files',   'My files', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6"/>'],
         ['me',        'account', 'Account',  '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'],
-    ], $here, 'dashboard', $foot, 'notices', 'me', 'Your learning');
+    ];
+    /* The study tutor, where 'tutor' is on (16 Nov 2026). See lib/tutor.php. */
+    if (brand_has('tutor')) {
+        array_splice($items, 3, 0, [['tutor', 'tutor', 'Tutor',
+            '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5M12 16.5h.01"/>']]);
+    }
+    chrome_shell_frame($items, $here, 'dashboard', $foot, 'notices', 'me', 'Your learning');
 }
 
 /**

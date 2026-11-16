@@ -109,6 +109,10 @@ $shared = [
     // Without the flag the pages send a learner to /my, so shipping them is harmless.
     'app.css', 'dashboard.php', 'skills.php', 'me.php', 'lib/journey.php',
 
+    // The study tutor, 16 Nov 2026. lib/chrome.php links tutor.php where
+    // lib/brand.php has 'tutor'; learner-nav.js loads tutor.js on module pages.
+    'tutor.php', 'tutor.js', 'lib/tutor.php',
+
     // In-person classes, 11 Sep 2026. admin-classes.php is linked from the
     // admin nav in lib/chrome.php — which IS synced — so a site without it gets
     // an "In-person" link to a 404; register.php is linked from every row of
