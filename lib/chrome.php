@@ -169,8 +169,10 @@ function chrome_signout(string $label = 'Sign out'): string
  *        An href starting "http" opens in a new tab.
  */
 function chrome_shell_frame(array $items, string $here, string $home, array $foot,
-                            string $bell, string $avHref, string $label): void
+                            string $bell, string $avHref, string $label, string $tour = ''): void
 {
+    /* The guided tour (18 Nov 2026): tour.js, where lib/brand.php sets 'tour'. */
+    $tour = brand_has('tour') ? $tour : '';
     $u = function_exists('current_user') ? current_user() : null;
     $ini = $u ? mb_strtoupper(mb_substr((string) $u['first_name'], 0, 1) . mb_substr((string) $u['last_name'], 0, 1)) : '';
     $svg = static fn(string $p): string => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
@@ -197,6 +199,9 @@ function chrome_shell_frame(array $items, string $here, string $home, array $foo
     foreach ($foot as $href => $text) {
         echo '    <a href="' . e((string) $href) . '">' . e((string) $text) . '</a>' . "\n";
     }
+    if ($tour !== '') {
+        echo '    <button type="button" class="linkish" data-tour-start>Take the tour</button>' . "\n";
+    }
     echo '    ' . chrome_signout() . "\n";
     echo '  </div>' . "\n";
     /* profile.js adds a "Sign in" link to #navLinks unless one is already
@@ -213,6 +218,10 @@ function chrome_shell_frame(array $items, string $here, string $home, array $foo
         ? '  <a href="' . e($avHref) . '" class="app-av" title="' . e($who) . '">' . e($ini) . '</a>' . "\n"
         : '  <span class="app-av" title="' . e($who) . '">' . e($ini) . '</span>' . "\n";
     echo '</header>' . "\n";
+    if ($tour !== '') {
+        echo '<script src="' . e(asset('tour.js')) . '" defer data-tour="' . e($tour) . '" data-uid="'
+           . (int) ($u['id'] ?? 0) . '" data-academy="' . e(brand('academy')) . '"></script>' . "\n";
+    }
 }
 
 /** The learner's sidebar: Home, Skills, My files, Account. */
@@ -238,7 +247,7 @@ function chrome_app_shell(array $o): void
         array_splice($items, 3, 0, [['tutor', 'tutor', 'Tutor',
             '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5M12 16.5h.01"/>']]);
     }
-    chrome_shell_frame($items, $here, 'dashboard', $foot, 'notices', 'me', 'Your learning');
+    chrome_shell_frame($items, $here, 'dashboard', $foot, 'notices', 'me', 'Your learning', 'learner');
 }
 
 /**
@@ -293,7 +302,7 @@ function chrome_staff_shell(array $o): void
     }
     $home = $staff ? 'trainer' : 'admin';
     chrome_shell_frame($items, $on, $home, ['./' => 'View the site'], 'admin-notices', '',
-                       $staff ? 'Training' : 'Administration');
+                       $staff ? 'Training' : 'Administration', $staff ? 'trainer' : 'admin');
 }
 
 /**

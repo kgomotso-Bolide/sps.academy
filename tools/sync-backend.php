@@ -112,6 +112,8 @@ $shared = [
     // The study tutor, 16 Nov 2026. lib/chrome.php links tutor.php where
     // lib/brand.php has 'tutor'; learner-nav.js loads tutor.js on module pages.
     'tutor.php', 'tutor.js', 'lib/tutor.php',
+    // 18 Nov 2026: the guided tour. Loaded by lib/chrome.php only where brand 'tour' is set.
+    'tour.js',
 
     // In-person classes, 11 Sep 2026. admin-classes.php is linked from the
     // admin nav in lib/chrome.php — which IS synced — so a site without it gets

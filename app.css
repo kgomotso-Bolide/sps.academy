@@ -508,3 +508,24 @@ body:has(> .app-side) :is(.form-err,.adm-notice){border-radius:12px;padding:12px
    draws. That form has no dot, so the tick box was invisible. Show it there. */
 body:has(> .app-side) label.reg-radio:not(:has(.reg-dot)){justify-content:flex-start;gap:10px;font-weight:650;color:var(--app-ink)}
 body:has(> .app-side) label.reg-radio:not(:has(.reg-dot)) input{position:static;opacity:1;width:18px;height:18px}
+
+/* The guided tour (tour.js, 18 Nov 2026). No transitions, on purpose: no
+   animation on the sites. The spotlight's huge shadow is the dimmed backdrop;
+   .tour-block underneath only stops clicks reaching the page. */
+.tour-block{position:fixed;inset:0;z-index:900;background:transparent}
+.tour-block.dim{background:rgba(20,18,24,.55)}
+.tour-spot{position:fixed;z-index:901;border-radius:12px;pointer-events:none;
+  box-shadow:0 0 0 3px var(--orange),0 0 0 9999px rgba(20,18,24,.55)}
+.tour-card{position:fixed;z-index:902;background:#fff;color:var(--app-ink);border-radius:16px;padding:20px 20px 16px;
+  box-shadow:0 18px 50px rgba(0,0,0,.25);border-top:4px solid var(--orange)}
+.tour-card h2{font-size:18px;margin:4px 0 6px;color:var(--app-ink)}
+.tour-card p{font-size:14.5px;line-height:1.55;margin:0 0 16px;color:var(--app-muted)}
+.tour-count{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--orange)}
+.tour-row{display:flex;align-items:center;gap:8px}
+.tour-gap{flex:1}
+.tour-card button{font:inherit;font-size:14px;font-weight:650;border-radius:10px;min-height:40px;padding:0 16px;cursor:pointer}
+.tour-card button:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 45%,#fff);outline-offset:2px}
+.tour-skip{background:none;border:0;color:var(--app-muted);padding:0 4px!important;text-decoration:underline}
+.tour-back{background:#fff;border:1.5px solid var(--app-line);color:var(--app-ink)}
+.tour-next{background:var(--orange);border:1.5px solid var(--orange);color:var(--tutor-on,#fff)}
+.tour-card button[hidden]{display:none}

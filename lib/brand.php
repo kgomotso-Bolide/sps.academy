@@ -77,7 +77,7 @@ return [
 
   /* Bumped on any release that changes styles.css or a .js file.
      See asset() in lib/chrome.php for why this is not optional. */
-  'asset_version' => '20261116w',
+  'asset_version' => '20261118t',
 
   /* Self sign-up (10 Nov 2026, Kgomotso): a person creates their own account on
      signup.php and puts themselves on a course, with no HR step. ON FOR SPS ONLY.
@@ -98,4 +98,7 @@ return [
      static until a model is connected. Sidebar item, a Home card, and an
      "Ask your tutor" panel on module pages. See lib/tutor.php. */
   'tutor' => '1',
+  /* The guided tour of the signed-in area (18 Nov 2026): Skip tour / Back / Next,
+     once on first arrival, replayed from "Take the tour". See tour.js. */
+  'tour' => '1',
 ];
