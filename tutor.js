@@ -67,7 +67,26 @@
     '.tt-head b{font-size:15px}.tt-head small{display:block;font-size:11.5px;opacity:.75;font-weight:500}' +
     '.tt-head button{margin-left:auto;background:none;border:0;color:#fff;opacity:.8;font-size:22px;line-height:1;cursor:pointer}' +
     'body.tt-has-fab .aiw-btn{display:none!important}' +
-    '@media(max-width:480px){.tt-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}.tt-fab{right:14px;bottom:14px}}';
+    '@media(max-width:480px){.tt-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}.tt-fab{right:14px;bottom:14px}}' +
+    /* Voice (19 Nov 2026). No animation: states are colour and words, not pulses. */
+    '.tt-foot .tt-mic{flex:0 0 46px;padding:0;display:grid;place-items:center;background:#fff;color:var(--ink,#222);border:1.5px solid var(--line,#ddd)}' +
+    '.tt-foot .tt-mic:hover{background:#fff;border-color:var(--orange);color:var(--orange-deep)}' +
+    '.tt-foot .tt-mic.on{background:#c62828;border-color:#c62828;color:#fff}' +
+    '.tt-mic svg,.tt-talk svg,.tt-say svg{width:19px;height:19px}' +
+    '.tt-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border-top:1px solid var(--line,#ddd);background:#fff}' +
+    '.tt-talk{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--orange);background:#fff;color:var(--orange-deep);border-radius:30px;padding:7px 14px;font:700 13.5px/1.2 inherit;font-family:inherit;cursor:pointer}' +
+    '.tt-talk:hover{background:color-mix(in srgb,var(--orange) 8%,#fff)}' +
+    '.tt-talk.on{background:var(--orange);color:var(--tutor-on,#fff)}' +
+    '.tt-aloud{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink-soft,#555);cursor:pointer;margin-left:auto}' +
+    '.tt-aloud input{width:16px;height:16px;margin:0;accent-color:var(--orange)}' +
+    '.tt-status{flex:1 1 100%;font-size:13px;font-weight:700;color:var(--ink,#222)}.tt-status:empty{display:none}' +
+    '.tt-status.listen{color:#c62828}.tt-status.speak{color:var(--green-deep,#2a7)}' +
+    '.tt-say{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;margin-top:2px;background:none;border:0;padding:4px 0;color:var(--orange-deep);font:700 12.5px/1 inherit;font-family:inherit;cursor:pointer}' +
+    '.tt-say:hover{text-decoration:underline}' +
+    '.tt-consent{align-self:stretch;border:1px solid var(--line,#ddd);background:var(--bg-soft,#f7f6f4);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5}' +
+    '.tt-consent p{margin:0 0 10px}.tt-consent div{display:flex;gap:8px;flex-wrap:wrap}' +
+    '.tt-consent .tt-yes{background:var(--orange);color:var(--tutor-on,#fff);border-color:var(--orange)}' +
+    '.tt-m.me.voice::before{content:"\\1F399  ";}';
 
   function addCss() {
     if (document.getElementById('tt-css')) return;
@@ -80,6 +99,132 @@
     if (cls) n.className = cls;
     if (text != null) n.textContent = String(text);
     return n;
+  }
+
+  /* ---- Voice helpers (19 Nov 2026) ----------------------------------------- */
+
+  function store(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; }
+    return null;
+  }
+  var ICON = {
+    mic:     '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
+    talk:    '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/>',
+    stop:    '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+    speaker: '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'
+  };
+  function icon(p) {
+    var t = document.createElement('template');
+    t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+    return t.content.firstChild;
+  }
+
+  /* What an answer says out loud: its text, without source links, buttons or
+     a quiz's hidden answer (that is only built when the learner reveals it). */
+  /* Listening to every extra passage is too long, so after "More from your
+     material" the passages stay on screen only (with one spoken pointer to
+     them), and the closing "Check yourself" question is still read. */
+  function spoken(m) {
+    var skip = '.tt-src,button,textarea,input,.tt-say,.tt-note';
+    var out = [], more = false, allow = 0;
+    Array.prototype.forEach.call(m.children, function (b) {
+      if (b.matches(skip)) return;
+      if (/^More from your material/i.test((b.textContent || '').trim())) {
+        more = true;
+        /* Nothing said yet: read the first passage. Otherwise point to the screen. */
+        allow = out.length ? 0 : 1;
+        out.push(out.length ? 'There is more from your material on screen.' : 'Here is what your material says.');
+        return;
+      }
+      if (more && b.matches('.tt-q')) {
+        if (allow < 1) return;
+        allow--;
+      } else if (more) {
+        more = false;
+      }
+      var w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT, null), bits = [];
+      for (var t = w.nextNode(); t; t = w.nextNode()) {
+        if (t.parentNode.closest(skip)) continue;
+        if (t.nodeValue.trim()) bits.push(t.nodeValue.trim());
+      }
+      if (bits.length) out.push(bits.join(' '));
+    });
+    return out.join('. ').replace(/\s-\s/g, ', ').replace(/([.!?:])\s*\./g, '$1').replace(/\s+/g, ' ').trim();
+  }
+
+  /* One voice for the page: the tutor and the topic reader never talk over
+     each other. lessons.js exposes window.SPSReadAloud for the same reason. */
+  var VOICE = null;
+  function voice() {
+    if (VOICE) return VOICE;
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var synth = window.speechSynthesis;
+    var canSpeak = !!(synth && window.SpeechSynthesisUtterance);
+    var picked = null, run = 0;
+    function pick() {
+      var vs = (synth.getVoices() || []).filter(function (v) { return /^en/i.test(v.lang); });
+      var rank = function (v) {
+        var s = 0;
+        if (/en[-_]ZA/i.test(v.lang)) s += 40; else if (/en[-_]GB/i.test(v.lang)) s += 30; else if (/en[-_]US/i.test(v.lang)) s += 15;
+        if (/natural|online|neural|google/i.test(v.name)) s += 25;
+        return s;
+      };
+      vs.sort(function (a, b) { return rank(b) - rank(a); });
+      return vs[0] || null;
+    }
+    if (canSpeak && synth.onvoiceschanged !== undefined) {
+      synth.addEventListener('voiceschanged', function () { picked = pick(); });
+    }
+    VOICE = {
+      hear: !!SR,
+      speak: canSpeak,
+      recognizer: function () {
+        var r = new SR();
+        r.lang = 'en-ZA';
+        r.interimResults = true;
+        r.continuous = false;
+        r.maxAlternatives = 1;
+        return r;
+      },
+      /* iOS only lets a page speak after a tap; a silent utterance on the tap opens it. */
+      unlock: function () {
+        if (!canSpeak) return;
+        try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {}
+      },
+      hush: function () {
+        run++;
+        if (canSpeak) synth.cancel();
+      },
+      /* Sentence chunks of ~220 characters: long utterances stall in some browsers. */
+      say: function (text, done) {
+        if (!canSpeak || !text) { if (done) done(); return; }
+        if (window.SPSReadAloud) window.SPSReadAloud.stop();
+        this.hush();
+        var my = run;
+        var s = text.match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [text], chunks = [], cur = '';
+        s.forEach(function (x) { if ((cur + x).length > 220 && cur) { chunks.push(cur.trim()); cur = ''; } cur += x; });
+        if (cur.trim()) chunks.push(cur.trim());
+        if (!picked) picked = pick();
+        var i = 0;
+        (function next() {
+          if (my !== run) return;
+          if (i >= chunks.length) { if (done) done(); return; }
+          var u = new SpeechSynthesisUtterance(chunks[i++]);
+          if (picked) { u.voice = picked; u.lang = picked.lang; } else u.lang = 'en-ZA';
+          u.rate = +(store('read:rate') || 1) || 1;
+          u.onend = function () { if (my === run) setTimeout(next, 0); };
+          u.onerror = function (e) {
+            if (my !== run || e.error === 'interrupted' || e.error === 'canceled') return;
+            run++; if (done) done();          // cannot speak here: carry on silently with the text
+          };
+          synth.speak(u);
+        })();
+      }
+    };
+    window.SPSTutorVoice = { stop: function () { VOICE.hush(); } };
+    window.addEventListener('pagehide', function () { if (canSpeak) synth.cancel(); });
+    return VOICE;
   }
 
   function sourceLink(src) {
@@ -121,8 +266,38 @@
     var input = el('input'); input.type = 'text'; input.maxLength = 600;
     input.placeholder = 'Ask about your course…'; input.setAttribute('aria-label', 'Ask your tutor');
     var send = el('button', '', 'Ask'); send.type = 'submit';
+    var V = voice();
+    var mic = null, tools = null, talkBtn = null, aloud = null, status = null;
+    if (V.hear) {
+      mic = el('button', 'tt-mic'); mic.type = 'button';
+      mic.setAttribute('aria-label', 'Ask by voice'); mic.title = 'Ask by voice';
+      mic.appendChild(icon(ICON.mic));
+      form.appendChild(mic);
+    }
     form.appendChild(input); form.appendChild(send);
-    box.appendChild(log); box.appendChild(form); host.appendChild(box);
+    if (V.hear || V.speak) {
+      tools = el('div', 'tt-tools');
+      if (V.hear) {
+        talkBtn = el('button', 'tt-talk'); talkBtn.type = 'button';
+        tools.appendChild(talkBtn);
+      }
+      if (V.speak) {
+        var al = el('label', 'tt-aloud');
+        aloud = el('input'); aloud.type = 'checkbox';
+        aloud.checked = store('tutor:aloud') === '1';
+        aloud.addEventListener('change', function () {
+          store('tutor:aloud', aloud.checked ? '1' : '0');
+          if (!aloud.checked && !talking) V.hush();
+        });
+        al.appendChild(aloud); al.appendChild(document.createTextNode('Read answers aloud'));
+        tools.appendChild(al);
+      }
+      status = el('div', 'tt-status'); status.setAttribute('role', 'status');
+      tools.appendChild(status);
+    }
+    box.appendChild(log);
+    if (tools) box.appendChild(tools);
+    box.appendChild(form); host.appendChild(box);
 
     function topicNow() {
       var t = typeof opts.topic === 'function' ? opts.topic() : (opts.topic || '');
@@ -274,11 +449,27 @@
       if (typing && !e.target.closest('a,button,textarea')) typing.finish();
     });
 
-    function bot(reply) {
+    function bot(reply, opt) {
+      opt = opt || {};
       var m = el('div', 'tt-m bot');
       (reply.blocks || []).forEach(function (b) { var n = block(b); if (n) m.appendChild(n); });
+      /* Read before typeOut blanks the text it is about to write out. */
+      var said = V.speak ? spoken(m) : '';
+      if (said && !opt.quiet) {
+        var sb = el('button', 'tt-say'); sb.type = 'button';
+        sb.appendChild(icon(ICON.speaker)); sb.appendChild(el('span', '', 'Listen'));
+        sb.addEventListener('click', function () { stopListening(); say(said); });
+        m.appendChild(sb);
+      }
       log.appendChild(m);
       scroll();
+      /* Spoken aloud when it was asked aloud, when talking, or when the learner
+         has switched on "Read answers aloud". Always written out as well. */
+      if (said && !opt.quiet && (opt.voice || talking || (aloud && aloud.checked))) {
+        say(said, talking ? function () { if (talking) listen(); } : null);
+      } else if (talking && !opt.quiet) {
+        listen();
+      }
       typeOut(m, function () {
         if (!reply.chips || !reply.chips.length) return;
         var c = el('div', 'tt-chips');
@@ -291,12 +482,14 @@
       });
     }
 
-    function ask(q) {
-      q = String(q || '').trim();
+    function ask(q, byVoice) {
+      q = String(q || '').trim().slice(0, 600);
       if (!q || state.busy) return;
       if (typing) typing.finish();
+      V.hush();
       state.busy = true; send.disabled = true;
-      log.appendChild(el('div', 'tt-m me', q));
+      log.appendChild(el('div', 'tt-m me' + (byVoice ? ' voice' : ''), q));
+      if (talking) setStatus('Thinking…', '');
       var dots = el('div', 'tt-dots'); dots.appendChild(el('span', 'tt-think', 'Thinking')); dots.appendChild(document.createTextNode(' •••')); log.appendChild(dots); scroll();
       var body = new URLSearchParams();
       body.set('q', q); body.set('course', opts.course); body.set('module', opts.module || state.module || '');
@@ -306,7 +499,7 @@
         .then(function (r) { return r.json().catch(function () { return { ok: false, message: 'Something went wrong. Try again.' }; }); })
         .then(function (j) {
           dots.remove();
-          if (!j.ok) { bot({ blocks: [{ type: 'p', text: j.message || 'Something went wrong. Try again.' }] }); return; }
+          if (!j.ok) { bot({ blocks: [{ type: 'p', text: j.message || 'Something went wrong. Try again.' }] }, { voice: byVoice }); return; }
           if (j.focus && (!opts.module || j.focus.module === opts.module)) {
             if (!opts.module && j.focus.module) state.module = j.focus.module;
             state.topic = j.focus.topic || '';
@@ -315,14 +508,142 @@
           if (j.shown) state.seen = state.seen.concat(j.shown).slice(-200);
           if (j.asked != null) state.avoid = state.avoid.concat([j.asked]).slice(-200);
           if (j.reset_avoid) state.avoid = [];
-          bot(j);
+          bot(j, { voice: byVoice, quiet: q === 'hello' && !byVoice });
         })
-        .catch(function () { dots.remove(); bot({ blocks: [{ type: 'p', text: "I couldn't reach the academy. Check your connection and try again." }] }); })
+        .catch(function () { dots.remove(); bot({ blocks: [{ type: 'p', text: "I couldn't reach the academy. Check your connection and try again." }] }, { voice: byVoice }); })
         .then(function () { state.busy = false; send.disabled = false; });
     }
 
     form.addEventListener('submit', function (e) { e.preventDefault(); var q = input.value; input.value = ''; ask(q); });
-    return { ask: ask, input: input, greet: function () { ask('hello'); } };
+
+    /* ---- Voice: speak a question, hear the answer, talk back and forth -----
+       Hearing uses the browser's speech recognition. In Chrome that is Google's
+       service, in Edge Microsoft's, in Safari Apple's: the audio goes to them to
+       be turned into words, and only the words come here — the academy never
+       receives or keeps a recording. That is said plainly the first time the
+       microphone is used, and nothing listens until the learner agrees.
+       Speaking uses the device's own voice and sends nothing anywhere. */
+    var talking = false, rec = null, misses = 0;
+
+    function setStatus(text, kind) {
+      if (!status) return;
+      status.textContent = text || '';
+      status.className = 'tt-status' + (kind ? ' ' + kind : '');
+    }
+    function paintTalk() {
+      if (!talkBtn) return;
+      talkBtn.textContent = '';
+      talkBtn.appendChild(icon(talking ? ICON.stop : ICON.talk));
+      talkBtn.appendChild(el('span', '', talking ? 'End conversation' : 'Talk with your tutor'));
+      talkBtn.classList.toggle('on', talking);
+      talkBtn.setAttribute('aria-pressed', talking ? 'true' : 'false');
+    }
+    paintTalk();
+
+    function say(text, after) {
+      setStatus(talking ? 'Speaking… tap the microphone to interrupt' : '', 'speak');
+      V.say(text, function () {
+        if (!talking) setStatus('', '');
+        if (after) after();
+      });
+    }
+
+    function consent(go) {
+      if (store('tutor:voice-ok') === '1') { go(); return; }
+      if (log.querySelector('.tt-consent')) return;
+      var c = el('div', 'tt-consent');
+      c.appendChild(el('p', '', 'To understand you, your browser sends your voice to its speech service ' +
+        '(Google in Chrome, Microsoft in Edge, Apple in Safari), which turns it into words. Only the words ' +
+        'come to the academy, the same as if you had typed them. Nothing is recorded or kept here.'));
+      var row = el('div');
+      var yes = el('button', 'tt-btn tt-yes', 'Use my microphone'); yes.type = 'button';
+      var no = el('button', 'tt-btn', 'Not now'); no.type = 'button';
+      yes.addEventListener('click', function () { store('tutor:voice-ok', '1'); c.remove(); go(); });
+      no.addEventListener('click', function () { c.remove(); });
+      row.appendChild(yes); row.appendChild(no); c.appendChild(row);
+      log.appendChild(c); scroll();
+    }
+
+    function stopListening() {
+      if (rec) { try { rec.abort(); } catch (e) {} rec = null; }
+      if (mic) { mic.classList.remove('on'); mic.setAttribute('aria-label', 'Ask by voice'); }
+    }
+
+    function listen() {
+      if (!V.hear || state.busy) return;
+      V.hush();
+      stopListening();
+      var r = V.recognizer();
+      rec = r;
+      mic.classList.add('on'); mic.setAttribute('aria-label', 'Stop listening');
+      input.value = '';
+      input.placeholder = 'Listening… speak now';
+      setStatus(talking ? 'Listening… speak now' : 'Listening…', 'listen');
+      /* The words appear in the box as they are heard, so the learner can see
+         what was understood; the question is sent when they stop speaking. */
+      r.onresult = function (e) {
+        var txt = '';
+        for (var i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+        input.value = txt.trim();
+      };
+      r.onerror = function (e) {
+        if (rec !== r) return;
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          endTalk();
+          bot({ blocks: [{ type: 'p', text: 'The microphone is blocked for this site. Allow it in your browser’s site settings, then try again — or type your question.' }] }, { quiet: true });
+        } else if (e.error === 'network') {
+          endTalk();
+          bot({ blocks: [{ type: 'p', text: 'Voice needs an internet connection to understand you. You can still type your question.' }] }, { quiet: true });
+        } else if (e.error === 'audio-capture') {
+          endTalk();
+          bot({ blocks: [{ type: 'p', text: 'No microphone was found on this device. You can type your question instead.' }] }, { quiet: true });
+        }
+        /* no-speech and aborted are handled in onend. */
+      };
+      r.onend = function () {
+        if (rec !== r) return;
+        rec = null;
+        mic.classList.remove('on'); mic.setAttribute('aria-label', 'Ask by voice');
+        input.placeholder = 'Ask about your course…';
+        var q = (input.value || '').trim();
+        if (q) {
+          misses = 0;
+          input.value = '';
+          if (talking && /^(stop|end|goodbye|good bye|bye|that'?s all|no more|thank you,? (bye|goodbye))\b/i.test(q)) {
+            endTalk(); say('Goodbye. Good luck with your studies.');
+            return;
+          }
+          ask(q, true);
+          return;
+        }
+        if (talking && ++misses < 2) { listen(); return; }
+        if (talking) { endTalk(); setStatus('Conversation ended — I didn’t hear anything.', ''); return; }
+        setStatus('', '');
+      };
+      try { r.start(); } catch (e) { stopListening(); setStatus('', ''); }
+    }
+
+    function endTalk() {
+      talking = false; misses = 0;
+      stopListening(); V.hush();
+      paintTalk(); setStatus('', '');
+      input.placeholder = 'Ask about your course…';
+    }
+
+    if (mic) mic.addEventListener('click', function () {
+      if (rec) { try { rec.stop(); } catch (e) {} return; }      // stop now; what was heard is sent
+      consent(function () { V.hush(); listen(); });
+    });
+    if (talkBtn) talkBtn.addEventListener('click', function () {
+      if (talking) { endTalk(); return; }
+      consent(function () {
+        talking = true; misses = 0; paintTalk();
+        V.unlock();
+        say('I’m listening. Ask me anything about your course.', function () { if (talking) listen(); });
+      });
+    });
+
+    return { ask: ask, input: input, greet: function () { ask('hello'); }, end: endTalk };
   }
 
   var SPSTutor = {
@@ -366,7 +687,10 @@
         }
         chat.input.focus();
       });
-      x.addEventListener('click', function () { panel.classList.remove('open'); fab.style.display = ''; });
+      x.addEventListener('click', function () {
+        if (chat) chat.end();                 // closing the panel ends any conversation
+        panel.classList.remove('open'); fab.style.display = '';
+      });
     }
   };
   window.SPSTutor = SPSTutor;

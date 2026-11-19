@@ -422,6 +422,7 @@
     },
 
     start: function (reader, mode) {
+      if (window.SPSTutorVoice) window.SPSTutorVoice.stop();
       this.stop(true);
       this.reader = reader;
       this.mode = mode || 'topic';
@@ -638,6 +639,9 @@
     modBtn.appendChild(el('span', '', on ? 'Pause' : (paused ? 'Carry on' : 'Listen')));
     modBtn.classList.toggle('on', !!on);
   }
+
+  /* The study tutor's voice stops this, and this stops the tutor's (tutor.js). */
+  window.SPSReadAloud = { stop: function () { if (Speaker.reader) Speaker.stop(); } };
 
   if (Speaker.ok) {
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
