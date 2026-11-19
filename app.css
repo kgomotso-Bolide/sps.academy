@@ -529,3 +529,10 @@ body:has(> .app-side) label.reg-radio:not(:has(.reg-dot)) input{position:static;
 .tour-back{background:#fff;border:1.5px solid var(--app-line);color:var(--app-ink)}
 .tour-next{background:var(--orange);border:1.5px solid var(--orange);color:var(--tutor-on,#fff)}
 .tour-card button[hidden]{display:none}
+
+/* Course and module pages inside the frame (19 Nov 2026): learner-nav.js gives
+   the static pages the sidebar, and their dark banner becomes a rounded panel
+   in the content area instead of a full-bleed band under a fixed nav. */
+.app-top ~ .chero{padding:40px 0 44px;margin:6px 34px 0;border-radius:24px}
+.app-top ~ .chero .wrap{max-width:1180px}
+@media(max-width:900px){.app-top ~ .chero{margin:6px 14px 0;padding:30px 0 34px;border-radius:18px}}

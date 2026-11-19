@@ -179,6 +179,8 @@ $shared = [
     // academy.
     'profile.js', 'profile-page.js', 'pm-progress.js', 'materials.js',
     'quiz-widget.js', 'lessons.js',
+    // 19 Nov 2026: the topic reader and read-aloud; lessons.js loads it at its own version.
+    'reader.css',
 
     // password-toggle.js joined on 28 Oct 2026: login, reset, invite, my and
     // setup load it by name, so a site without it has a broken script tag.

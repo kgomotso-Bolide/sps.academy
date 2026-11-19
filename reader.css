@@ -1,0 +1,138 @@
+/* The topic reader and read-aloud on the module page (lessons.js, 19 Nov 2026).
+
+   SHARED: synced verbatim to every academy, loaded by lessons.js at its own
+   version. No colours of its own: everything comes from the site's --orange /
+   --green / --ink variables in styles.css, so it re-skins with the site. Text
+   on the primary colour uses --tutor-on (dark on Tracker's yellow).
+   No transitions or animation, on purpose (Kgomotso, 3 Sep 2026). */
+
+:root{--rd-size:17.5px}
+
+/* The row that opens the reading */
+.read-open{display:flex;align-items:center;gap:14px;width:100%;margin:0;padding:16px 22px;border:0;border-top:1px solid var(--line);
+  background:color-mix(in srgb,var(--orange) 6%,#fff);cursor:pointer;font:inherit;text-align:left;color:var(--ink)}
+.read-open:hover{background:color-mix(in srgb,var(--orange) 11%,#fff)}
+.read-open:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 45%,#fff);outline-offset:-3px}
+.read-open[hidden]{display:none}
+.rd-ico{flex:0 0 44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--orange);color:var(--tutor-on,#fff)}
+.rd-ico svg{width:22px;height:22px}
+.rd-open-txt{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rd-open-txt .read-label{font-size:16px;font-weight:700;color:var(--ink)}
+.rd-open-txt .read-meta{font-size:13px;font-weight:500;color:var(--ink-soft)}
+.rd-resume{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--orange-deep,var(--orange))}
+.rd-resume:empty{display:none}
+.rd-open-go{flex:0 0 auto;color:var(--ink-soft)}
+.rd-open-go svg{width:20px;height:20px;display:block}
+
+/* The reader */
+.reader{border-top:1px solid var(--line);background:color-mix(in srgb,var(--ink) 3%,#fff)}
+.reader[hidden]{display:none}
+.rd-bar{position:sticky;top:78px;z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 18px;
+  background:#fff;border-bottom:1px solid var(--line)}
+body:has(> .app-side) .rd-bar{top:68px}
+.rd-gap{flex:1}
+.rd-count{font-size:13.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.01em}
+.rd-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:10px;
+  border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:650;cursor:pointer}
+.rd-btn:hover:not(:disabled){border-color:color-mix(in srgb,var(--orange) 55%,var(--line));background:color-mix(in srgb,var(--orange) 6%,#fff)}
+.rd-btn:disabled{opacity:.4;cursor:default}
+.rd-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 45%,#fff);outline-offset:1px}
+.rd-btn svg{width:17px;height:17px;flex:0 0 auto}
+.rd-listen{background:var(--orange);border-color:var(--orange);color:var(--tutor-on,#fff)}
+.rd-listen:hover:not(:disabled){background:var(--orange-deep,var(--orange));border-color:var(--orange-deep,var(--orange));color:var(--tutor-on,#fff)}
+.rd-listen.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.rd-listen svg{width:15px;height:15px;fill:currentColor}
+.rd-size{display:inline-flex;gap:6px}
+.rd-size .rd-btn{min-width:44px;padding:0 10px;font-weight:800}
+.rd-close{padding:0;width:40px}
+
+.rd-progress{height:4px;background:var(--line)}
+.rd-progress[hidden]{display:none}
+.rd-progress i{display:block;height:100%;background:var(--orange)}
+
+/* The page: white paper, a reading line length, bigger and darker text */
+.rd-page{max-width:760px;margin:22px auto;padding:34px 44px 30px;background:#fff;border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.25);font-size:var(--rd-size);line-height:1.8;color:var(--ink)}
+.rd-page:focus{outline:none}
+.rd-page > *{max-width:66ch}
+.rd-page p{margin:0 0 1.05em}
+.rd-page ul,.rd-page ol{margin:0 0 1.1em;padding-left:1.3em}
+.rd-page li{margin:0 0 .5em;padding-left:.2em}
+.rd-page li::marker{color:var(--orange)}
+.rd-page > :last-child{margin-bottom:0}
+.rd-h{font-size:1.18em;line-height:1.35;font-weight:750;color:var(--ink);margin:1.5em 0 .55em;padding-top:.2em}
+.rd-page > .rd-h:first-child{margin-top:0}
+.rd-page > .rd-h:first-child + p{font-size:1.04em}
+
+/* The paragraph being read aloud */
+.rd-say{background:color-mix(in srgb,var(--orange-light,var(--orange)) 22%,#fff);box-shadow:0 0 0 6px color-mix(in srgb,var(--orange-light,var(--orange)) 22%,#fff);border-radius:4px}
+
+/* Previous / pages / Next */
+.rd-foot{max-width:760px;margin:0 auto;padding:0 0 24px;display:flex;align-items:center;gap:12px}
+.rd-dots{flex:1;display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.rd-dot{width:11px;height:11px;border-radius:50%;padding:0;border:2px solid color-mix(in srgb,var(--ink) 25%,#fff);background:#fff;cursor:pointer}
+.rd-dot.on{background:var(--orange);border-color:var(--orange)}
+.rd-dot:focus-visible{outline:3px solid color-mix(in srgb,var(--orange) 45%,#fff);outline-offset:2px}
+.rd-next{background:var(--orange);border-color:var(--orange);color:var(--tutor-on,#fff)}
+.rd-next:hover:not(:disabled){background:var(--orange-deep,var(--orange));border-color:var(--orange-deep,var(--orange));color:var(--tutor-on,#fff)}
+.rd-next[hidden]{display:none}
+.rd-next.rd-done{background:var(--green-deep,var(--green));border-color:var(--green-deep,var(--green));color:#fff}
+.rd-prev{margin-right:auto}
+.rd-dots + .rd-next{margin-left:auto}
+
+/* "Listen to this module" */
+.rd-module{display:flex;align-items:center;gap:16px;margin:0 0 18px;padding:16px 20px;border-radius:16px;background:#fff;
+  border:1px solid var(--line);box-shadow:0 10px 30px -22px rgba(0,0,0,.3)}
+.rd-module-ico{flex:0 0 48px;height:48px;border-radius:50%;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--green) 14%,#fff);color:var(--green-deep,var(--green))}
+.rd-module-ico svg{width:24px;height:24px}
+.rd-module-txt{flex:1;display:flex;flex-direction:column;gap:2px}
+.rd-module-txt strong{font-size:16.5px;color:var(--ink)}
+.rd-module-txt span{font-size:13.5px;color:var(--ink-soft)}
+.rd-module-go{min-height:44px;padding:0 20px}
+
+/* The player along the bottom while something is read aloud */
+.rd-player{position:fixed;z-index:300;bottom:18px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));
+  display:flex;align-items:center;gap:12px;padding:10px 12px 10px 10px;background:var(--dark,#222);color:#fff;border-radius:16px;
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.45)}
+body:has(> .app-side) .rd-player{left:calc(50% + var(--app-side,0px) / 2)}
+.rd-pp{flex:0 0 46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;
+  background:var(--orange);color:var(--tutor-on,#fff)}
+.rd-pp svg{width:18px;height:18px;fill:currentColor}
+.rd-pinfo{flex:1;min-width:0;display:flex;flex-direction:column;color:#fff;text-decoration:none}
+.rd-pinfo strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-pinfo span{font-size:12.5px;color:rgba(255,255,255,.7)}
+.rd-rate{flex:0 0 auto;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;
+  font:inherit;font-size:13.5px;font-weight:700;padding:0 8px;cursor:pointer}
+.rd-rate option{color:#222}
+.rd-stop{flex:0 0 40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;
+  display:grid;place-items:center;cursor:pointer}
+.rd-stop svg{width:15px;height:15px;fill:currentColor}
+.rd-pp:focus-visible,.rd-stop:focus-visible,.rd-rate:focus-visible,.rd-pinfo:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+@media(max-width:900px){
+  body:has(> .app-side) .rd-player{left:50%}
+}
+@media(max-width:700px){
+  .rd-bar{padding:8px 10px;gap:6px}
+  .rd-count{order:5;width:100%;font-size:12.5px}
+  .rd-page{margin:12px 8px;padding:22px 18px 20px;border-radius:12px}
+  .rd-foot{padding:0 8px 18px}
+  .rd-prev span{display:none}
+  .rd-dots{display:none}
+  .rd-module{flex-wrap:wrap}
+  .rd-module-go{width:100%}
+  /* Clear of the floating "Ask your tutor" button. */
+  .rd-player{bottom:84px}
+  .read-open{padding:14px 16px}
+  .rd-resume{display:none}
+}
+@media print{.rd-bar,.rd-foot,.rd-player,.rd-module,.read-open{display:none!important}.reader{display:block!important}}
+.rd-note{flex:1 1 100%;order:6;font-size:13.5px;font-weight:600;color:#8a2a1a;background:#fdecea;border-radius:8px;padding:8px 12px}
+/* app.css styles every select in the signed-in area; the player's is its own. */
+html body .rd-player select.rd-rate{min-height:36px;height:36px;width:auto;max-width:none;padding:0 26px 0 10px;border-radius:9px;
+  background-color:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);box-shadow:none;font-size:13.5px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;background-size:13px;-webkit-appearance:none;appearance:none}
+/* Room under the last lines while the player is showing. */
+body:has(#rdPlayer){padding-bottom:96px}
