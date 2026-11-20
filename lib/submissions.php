@@ -49,13 +49,50 @@ const SUBMISSION_MAX_BYTES = 25 * 1024 * 1024;
    Officer's pack has none, and New Venture Creation pairs its guide with a
    Workplace Guide, which is a different document — add a course here only once
    somebody has said what its learners submit. */
-const SUBMISSION_WORKBOOK_COURSES = ['project-management'];
+const SUBMISSION_WORKBOOK_COURSES = ['project-management', 'software-developer', 'ai-software-developer'];
+/* The two Software Developer packs (20 Nov 2026) have a learner workbook per
+   knowledge module, completed in Word and handed in the same way as the
+   Project Manager's. They are admin-only until published. */
 
 /* The practical modules. They are not in pm-modules.js, which carries only the
    eleven knowledge modules, so they are listed here. Titles are the registered
    unit standard titles from the practical pack covers. */
 function submission_practicals(string $courseSlug): array
 {
+    /* Software Developer, SAQA 118707 (20 Nov 2026): SECTION 3B of curriculum
+       251201-005-00. Each has a Learner Practical Manual and a Learner Workbook. */
+    if ($courseSlug === 'software-developer') return [
+        'PM-01' => 'Use software to communicate and visualise information',
+        'PM-02' => 'Use and manage spreadsheets and workbooks',
+        'PM-03' => 'Use desktop applications to analyse, visualise and report on data',
+        'PM-04' => 'Use a visual analytics platform and visualisation tools to analyse, visualise and report on data',
+        'PM-05' => 'Query and massage data',
+        'PM-06' => 'Apply logical thinking and maths',
+        'PM-07' => 'Apply code to use a software toolkit or platform in the field of study or employment',
+        'PM-08' => 'Develop software using HTML5, open-source frameworks and libraries',
+        'PM-09' => 'Design and build web applications, desktop graphical user interfaces or mobile apps',
+        'PM-10' => 'Use a cloud automation platform to create solutions',
+        'PM-11' => 'Develop software using Python',
+        'PM-12' => 'Apply the development cycle when developing software',
+        'PM-13' => 'Participate in a design thinking for innovation workshop',
+        'PM-14' => 'Function ethically and effectively in a team',
+    ];
+    /* AI Software Developer, SAQA 118792 (20 Nov 2026): SECTION 3B of
+       curriculum 251201-002-00. This pack has ONE document per practical, the
+       learner's practical logbook, which goes in the workbook slot. */
+    if ($courseSlug === 'ai-software-developer') return [
+        'PM-01' => 'Mathematics and statistics for programming',
+        'PM-02' => 'Problem definition, analytical thinking and decision making',
+        'PM-03' => 'Access, analyse and visualise structured data using spreadsheets',
+        'PM-04' => 'Use SQL to communicate with a database',
+        'PM-05' => 'Build a simple AI solution using Python',
+        'PM-06' => 'Use Python data scraping to populate a database table in SQL',
+        'PM-07' => 'Use machine learning to build an AI solution in Python',
+        'PM-08' => 'Use deep learning to build an AI neural network architecture in Python',
+        'PM-09' => 'Use deep learning to build an AI neural network architecture in TensorFlow',
+        'PM-10' => 'Function ethically and effectively as a member of a multidisciplinary team',
+        'PM-11' => 'Participate in a design thinking for innovation workshop',
+    ];
     if ($courseSlug !== 'project-management') return [];
     return [
         'PM-01' => 'Initiate a project',

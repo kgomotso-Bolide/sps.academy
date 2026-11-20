@@ -433,6 +433,8 @@ function qs(array $over = []): string
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script>
 (function () {
   /* The curriculum for the course this page is showing. Two qualifications

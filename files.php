@@ -150,5 +150,7 @@ $fileIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script src="<?= e(asset('module-info.js')) ?>"></script>
 </body></html>

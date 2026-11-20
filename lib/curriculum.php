@@ -46,6 +46,10 @@ function curriculum_files(): array
         'project-management'   => 'pm-modules.js',
         'procurement-officer'  => 'po-modules.js',
         'new-venture-creation' => 'nvc-modules.js',
+        /* 20 Nov 2026: the two Software Developer occupational certificates,
+           admin-only until Kgomotso publishes them (see lib/learner.php). */
+        'software-developer'    => 'sd-modules.js',
+        'ai-software-developer' => 'aisd-modules.js',
     ];
 }
 

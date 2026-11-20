@@ -310,6 +310,29 @@ $uploadCapBytes = material_file_effective_upload_cap();
     <p class="mat-count"><strong><?= (int) $filled ?></strong> item<?= $filled === 1 ? '' : 's' ?>
       saved for <?= e((string) ($courses[$course]['title'] ?? $course)) ?>.</p>
 
+    <?php /* Many files at once (20 Nov 2026). A provider's pack is dozens of documents, and the
+             academies are a dozen sites: one file picker per slot was an afternoon per site.
+             This box only fills the SAME inputs the form below posts (files[MODULE][kind]),
+             in batches the server will take, so the write path above is unchanged and checks
+             every file exactly as it does a single one. Files are matched to slots by NAME —
+             "KM-03 Learner Guide.pdf", "PM-11 Practical Workbook.docx" — and anything that
+             names a facilitator guide, an assessment or a memo is refused before it is sent. */
+          $maxFiles = max(1, min(10, (int) (ini_get('max_file_uploads') ?: 20) - 1)); ?>
+    <div class="mat-intro" id="mat-bulk" hidden
+         data-max-files="<?= $maxFiles ?>"
+         data-file-cap="<?= $uploadCapBytes >= PHP_INT_MAX ? 0 : (int) $uploadCapBytes ?>">
+      <p><strong>Upload many files at once.</strong> Choose all of this course&rsquo;s files
+        together. Each one goes to its slot by its name, which must carry the module code
+        (<code>KM-03</code>, <code>PM-11</code>) and say what it is: <em>Learner Guide</em>,
+        <em>Workbook</em>, <em>Practical Manual</em> or <em>Practical Workbook</em> (a logbook
+        counts as a practical workbook). You see the list before anything is sent. Facilitator
+        guides, assessments and memos are refused.</p>
+      <p><input type="file" id="mat-bulk-input" multiple accept=".pdf,.doc,.docx,.ppt,.pptx"></p>
+      <div id="mat-bulk-list"></div>
+      <p><button type="button" class="btn btn-primary" id="mat-bulk-go" style="display:none">Upload</button></p>
+      <p id="mat-bulk-status" role="status"></p>
+    </div>
+
     <form method="POST" id="mat-form" enctype="multipart/form-data">
       <?= csrf_field() ?>
       <input type="hidden" name="course" value="<?= e($course) ?>">
@@ -326,6 +349,8 @@ $uploadCapBytes = material_file_effective_upload_cap();
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script>
 (function () {
   /* The curriculum for the course this page is showing. Two qualifications
@@ -438,6 +463,103 @@ $uploadCapBytes = material_file_effective_upload_cap();
             'with https://. Nothing has been saved — the fields are marked.');
     }
   });
+
+  /* ---- Many files at once (see the note on #mat-bulk) ---- */
+  var box = document.getElementById('mat-bulk');
+  if (box && window.fetch && window.FormData && window.DOMParser) {
+    box.hidden = false;
+    var input = document.getElementById('mat-bulk-input'),
+        list  = document.getElementById('mat-bulk-list'),
+        go    = document.getElementById('mat-bulk-go'),
+        stat  = document.getElementById('mat-bulk-status'),
+        form  = document.getElementById('mat-form');
+    var MAXN = +box.getAttribute('data-max-files') || 8,
+        CAP  = +box.getAttribute('data-file-cap') || 0;
+    var slotLabel = {};                           // "KM-03|guide" -> "KM-03 · Learner guide"
+    MODS.forEach(function (m) {
+      (m.practical ? PKINDS : KINDS).forEach(function (k) {
+        if (k[0] !== 'video') slotLabel[m.id + '|' + k[0]] = m.id + ' · ' + k[1];
+      });
+    });
+    var plan = [];
+
+    function match(name) {
+      var n = name.toLowerCase();
+      if (/facilitator|summative|assessment|memo/.test(n)) return { err: 'refused: not learner material' };
+      var c = n.match(/(?:^|[^a-z])(km|pm|wm)[\s_-]*0*(\d{1,2})(?!\d)/);
+      if (!c) return { err: 'no module code (KM-03, PM-11) in the name' };
+      var id = c[1].toUpperCase() + '-' + (c[2].length < 2 ? '0' : '') + c[2];
+      var kind = c[1] === 'pm'
+        ? (/workbook|logbook/.test(n) ? 'workbook' : /manual/.test(n) ? 'guide' : '')
+        : (/workbook|workplace guide/.test(n) ? 'workbook' : /guide/.test(n) ? 'guide' : '');
+      if (!kind) return { err: 'the name does not say Learner Guide, Workbook or Practical Manual' };
+      if (!slotLabel[id + '|' + kind]) return { err: id + ' has no ' + kind + ' slot on this course' };
+      return { id: id, kind: kind };
+    }
+
+    input.addEventListener('change', function () {
+      plan = []; var seen = {}, rows = [];
+      [].forEach.call(input.files, function (f) {
+        var r = match(f.name);
+        if (!r.err && CAP && f.size > CAP) r = { err: 'larger than this server accepts (' + fmtBytes(CAP) + ')' };
+        if (!r.err && seen[r.id + '|' + r.kind]) r = { err: 'a second file for ' + slotLabel[r.id + '|' + r.kind] };
+        if (!r.err) {
+          seen[r.id + '|' + r.kind] = true;
+          var had = (HAVE[r.id] || {})[r.kind];
+          plan.push({ f: f, id: r.id, kind: r.kind });
+          rows.push('<li>' + esc(f.name) + ' &rarr; <strong>' + esc(slotLabel[r.id + '|' + r.kind]) + '</strong>' +
+                    (had && (had.url || had.file) ? ' <em>(replaces what is there)</em>' : '') + '</li>');
+        } else {
+          rows.push('<li class="has-err">' + esc(f.name) + ' &mdash; <strong>not sent</strong>: ' + esc(r.err) + '</li>');
+        }
+      });
+      plan.sort(function (a, b) { return (a.id + a.kind).localeCompare(b.id + b.kind); });
+      list.innerHTML = rows.length ? '<ul>' + rows.join('') + '</ul>' : '';
+      go.style.display = plan.length ? "" : "none";
+      go.textContent = 'Upload ' + plan.length + ' file' + (plan.length === 1 ? '' : 's');
+      stat.textContent = '';
+    });
+
+    go.addEventListener('click', function () {
+      if (!plan.length) return;
+      go.disabled = true; input.disabled = true;
+      var token = (form.querySelector('[name=_token]') || {}).value || '';
+      var course = (form.querySelector('[name=course]') || {}).value || '';
+      var batches = [], cur = [], bytes = 0;
+      plan.forEach(function (p) {                  // by count, and by size: post_max_size is per request
+        if (cur.length && (cur.length >= MAXN || bytes + p.f.size > 40 * 1024 * 1024)) { batches.push(cur); cur = []; bytes = 0; }
+        cur.push(p); bytes += p.f.size;
+      });
+      if (cur.length) batches.push(cur);
+      var done = 0, problems = [];
+      (function next(i) {
+        if (i >= batches.length) {
+          stat.textContent = done + ' of ' + plan.length + ' uploaded.' +
+            (problems.length ? ' Problems: ' + problems.join(' · ') : ' Reloading…');
+          if (!problems.length) setTimeout(function () { location.href = location.pathname + '?course=' + encodeURIComponent(course); }, 900);
+          else { go.disabled = false; input.disabled = false; }
+          return;
+        }
+        stat.textContent = 'Uploading batch ' + (i + 1) + ' of ' + batches.length + '…';
+        var fd = new FormData();
+        fd.append('_token', token); fd.append('course', course);
+        batches[i].forEach(function (p) { fd.append('files[' + p.id + '][' + p.kind + ']', p.f, p.f.name); });
+        fetch(location.pathname + '?course=' + encodeURIComponent(course), { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(function (r) { return r.text(); })
+          .then(function (html) {
+            var d = new DOMParser().parseFromString(html, 'text/html');
+            var t = d.querySelector('#mat-form [name=_token]');
+            if (t) token = t.value;                // the token rotates after every save
+            var errs = [].map.call(d.querySelectorAll('.form-err[role=alert]'), function (e) { return e.textContent.trim(); });
+            if (errs.length) problems = problems.concat(errs);
+            done += batches[i].length - errs.length;
+            if (!t) { problems.push('the page did not answer as expected; stopped'); return next(batches.length); }
+            next(i + 1);
+          })
+          .catch(function () { problems.push('batch ' + (i + 1) + ' did not reach the server'); next(batches.length); });
+      })(0);
+    });
+  }
 })();
 </script>
 <script src="<?= e(asset('site.js')) ?>"></script>

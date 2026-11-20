@@ -227,6 +227,9 @@ $shared = [
     // "notional hours", "EISA". A stale copy of it would put the wrong words on
     // a page rather than merely an old module title, so it travels with them.
     'pm-modules.js', 'po-modules.js', 'nvc-modules.js',
+    // The two Software Developer certificates (20 Nov 2026), admin-only until
+    // published. The PHP pages that load them are on this list, so these must be.
+    'sd-modules.js', 'aisd-modules.js',
 
     // Server configuration and the tools.
     '.htaccess',
@@ -263,7 +266,9 @@ const CSS_END   = '/* <<< SHARED ACADEMY STYLES — END';
    deployed. Anglo American and ALT Capital Partners joined on 27 Oct 2026, late
    — both were cloned without being added, which is the drift described above. */
 $defaultTargets = ['../fungi', '../Maziv', '../Equinix', '../M-T', '../cricketsa', '../inhance',
-                   '../angloAmerican', '../altcapitalpartners', '../aiandu', '../newgx'];
+                   '../angloAmerican', '../altcapitalpartners', '../aiandu', '../newgx',
+                   /* Centenary Networks Academy, cloned from SPS 19 Nov 2026. */
+                   '../centenary'];
 $targets = $only ?: $defaultTargets;
 
 /* ---------------------------------------------------------------------------

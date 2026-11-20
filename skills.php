@@ -151,5 +151,7 @@ $nb  = $j['nextBadge'];
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script src="<?= e(asset('module-info.js')) ?>"></script>
 </body></html>

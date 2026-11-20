@@ -145,6 +145,36 @@ function learner_catalogue(): array
                        . 'Engineering Council of South Africa’s decision, on its own '
                        . 'assessment of your evidence.',
         ],
+        /* The two Software Developer occupational certificates, added 20 Nov
+           2026 when the provider's packs arrived (SAQA 118707 and 118792).
+           ACCREDITED, on Kgomotso's rule of 20 Nov 2026 (via Sibusiso): "the
+           ones we have material for are the accredited, the ones without
+           material are short courses for now". Procurement Officer and New
+           Venture Creation stay short courses all the same (Sibusiso, same day:
+           her 26 Oct decision stands until she says otherwise).
+           ADMIN-ONLY until the branded material is uploaded and checked: an
+           admin can put a learner on one, but they are not in
+           LEARNER_SELF_ENROL_COURSES and not on the public catalogue yet.
+           Module structure: sd-modules.js and aisd-modules.js.
+           NOT the same thing as 'ai-software-development' below, the short
+           professional programme. Told apart by slug everywhere. */
+        'software-developer' => [
+            'title'   => 'Occupational Certificate: Software Developer',
+            'note'    => 'NQF 5 · 220 credits · SAQA 118707',
+            'tracked' => true,
+            'admin_only' => true,
+            'assessed' => 'the qualification is awarded by the QCTO after the EISA',
+        ],
+        /* No NQF level in the note: the pack never states the qualification's
+           own level (NQF 4 is its entry requirement). Add it from the SAQA
+           record, not by inference from the modules. */
+        'ai-software-developer' => [
+            'title'   => 'Occupational Certificate: AI Software Developer',
+            'note'    => '209 credits · SAQA 118792',
+            'tracked' => true,
+            'admin_only' => true,
+            'assessed' => 'the qualification is awarded by the QCTO after the EISA',
+        ],
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
             'note'    => 'A professional programme, not an accredited qualification',

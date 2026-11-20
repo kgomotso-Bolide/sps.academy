@@ -516,6 +516,8 @@ function when_local(?string $utc): string
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script src="<?= e(asset('profile.js')) ?>"></script>
 <script src="<?= e(asset('pm-progress.js')) ?>"></script>
 <script src="<?= e(asset('module-info.js')) ?>"></script>

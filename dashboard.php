@@ -179,5 +179,7 @@ audit('learner.dashboard_viewed', 'users', $uid, 'home · ' . count($j['courses'
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('nvc-modules.js')) ?>"></script>
+<script src="<?= e(asset('sd-modules.js')) ?>"></script>
+<script src="<?= e(asset('aisd-modules.js')) ?>"></script>
 <script src="<?= e(asset('module-info.js')) ?>"></script>
 </body></html>
