@@ -4,7 +4,14 @@
 # printed, cut to 400 characters, and email addresses are masked.
 name: Read the error log (read-only)
 
+# Runs when THIS file is pushed on xneelo-backend (main, the default branch, must not
+# carry backend changes before cutover, and workflow_dispatch needs the file there).
+# To run it again, change the "requested" line below and push.
+#   requested: 2026-11-20 /skills 500 for an admin
 on:
+  push:
+    branches: [xneelo-backend]
+    paths: ['.github/workflows/read-error-log.yml']
   workflow_dispatch:
     inputs:
       match:
