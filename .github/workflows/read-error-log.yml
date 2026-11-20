@@ -1,0 +1,36 @@
+# READ-ONLY (20 Nov 2026): fetch the academies' application log over SFTP and print
+# its recent ERROR lines, so a "Something went wrong at our end" page can be traced to a
+# file and line. Uploads nothing, changes nothing. Only lines containing "ERROR" are
+# printed, cut to 400 characters, and email addresses are masked.
+name: Read the error log (read-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      match:
+        description: "Only lines containing this text (blank = all ERROR lines)"
+        type: string
+        default: ""
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install lftp and sshpass
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp sshpass
+      - name: Fetch and filter
+        env:
+          SSHPASS: ${{ secrets.SPS_FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.SPS_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.SPS_FTP_USERNAME }}
+          MATCH: ${{ inputs.match }}
+        run: |
+          set -euo pipefail
+          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '[:space:]')"
+          ssh-keygen -F "$FTP_SERVER" -f .github/known_hosts >/dev/null
+          f="app-$(date -u +%Y-%m).log"
+          lftp -c "set sftp:connect-program 'sshpass -e ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$GITHUB_WORKSPACE/.github/known_hosts'; open -u '$FTP_USERNAME','' sftp://$FTP_SERVER; get -O $RUNNER_TEMP private/logs/$f" || { echo "could not fetch private/logs/$f"; exit 1; }
+          echo "log size: $(wc -c < "$RUNNER_TEMP/$f") bytes"
+          grep 'ERROR' "$RUNNER_TEMP/$f" | { if [ -n "$MATCH" ]; then grep -F -- "$MATCH"; else cat; fi; } | tail -25 \
+            | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' | cut -c1-400
