@@ -359,8 +359,12 @@ function when_local(?string $utc): string
                        saying "go and speak to your facilitator", and without it
                        they would sit in front of a card with no button. */
                     $stuck = 0;
+                    /* (array): learner_progress_tree() keeps an empty stdClass here
+                       (so it serialises as {}) for a module marked complete with no
+                       topics ticked; indexing that as an array was a fatal error. */
+                    $tickedTopics = (array) ($tree[$mid]['topics'] ?? []);
                     foreach ($topics as $tc) {
-                        if (!empty($tree[$mid]['topics'][$tc])) $ticked++;
+                        if (!empty($tickedTopics[$tc])) $ticked++;
                         if (isset($quizSummary[$tc])) {
                             $withQuiz++;
                             if (!empty($quizSummary[$tc]['passed'])) $passed++;

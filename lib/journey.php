@@ -130,8 +130,12 @@ function journey_for(int $uid): array
         $partA = [];
         foreach (curriculum_modules($slug) as $mid => $m) {
             $total = count($m['topics']); $ticked = 0; $nextTopic = null;
+            /* (array): learner_progress_tree() keeps an empty stdClass here (so it
+               serialises as {}) for a module marked complete with no topics ticked.
+               Indexing that as an array was a fatal error on /skills (20 Nov 2026). */
+            $tickedTopics = (array) ($tree[$mid]['topics'] ?? []);
             foreach ($m['topics'] as $tc => $name) {
-                if (!empty($tree[$mid]['topics'][$tc])) $ticked++;
+                if (!empty($tickedTopics[$tc])) $ticked++;
                 elseif ($nextTopic === null) $nextTopic = (string) $name;
             }
             $rec = isset($rpl[$mid]);
