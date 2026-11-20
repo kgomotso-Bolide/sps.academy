@@ -338,6 +338,13 @@ function chrome_nav(string $variant, array $o = []): void
 
     if ($variant === 'site') {
         echo '    <div class="nav-links" id="navLinks">' . "\n";
+        /* 'home_site_url' / 'home_site_label' (19 Nov 2026): a way back to the
+           parent website, for an academy that is part of it rather than a
+           client's (Centenary Networks Academy). Absent everywhere else. */
+        if (brand_has('home_site_url')) {
+            echo '      <a href="' . e(brand('home_site_url')) . '" class="nav-home-site">&larr; '
+               . e(brand_has('home_site_label') ? brand('home_site_label') : 'Main site') . '</a>' . "\n";
+        }
         echo '      <a href="./" data-nav="home">Home</a>' . "\n";
         echo '      <a href="about" data-nav="about">About</a>' . "\n";
         echo '      <a href="courses" data-nav="courses">Courses</a>' . "\n";
@@ -507,12 +514,23 @@ function chrome_nav(string $variant, array $o = []): void
  */
 function chrome_disclaimer(string $extra = '', bool $employees = false): string
 {
-    $s = brand('academy') . ' is the in-house training academy of ' . brand('company');
-    if ($employees) $s .= ', for ' . brand('company_short') . ' employees';
-    $s .= '. ';
+    /* 'disclaimer_lead' and 'own_provider' (19 Nov 2026) are for Centenary
+       Networks Academy, which is Centenary's own platform rather than a
+       client's in-house academy: "in-house ... operates in association with
+       Centenary Networks" would be false there. Sites without the keys keep
+       the sentence they always had. */
+    if (brand_has('disclaimer_lead')) {
+        $s = rtrim(brand('disclaimer_lead'), '. ') . '. ';
+    } else {
+        $s = brand('academy') . ' is the in-house training academy of ' . brand('company');
+        if ($employees) $s .= ', for ' . brand('company_short') . ' employees';
+        $s .= '. ';
+    }
     if ($extra !== '') $s .= rtrim($extra) . ' ';
-    $s .= brand('academy') . ' operates in association with Centenary Networks. '
-        . '© 2026 ' . brand('company') . '. All rights reserved.';
+    if (!brand_has('own_provider')) {
+        $s .= brand('academy') . ' operates in association with Centenary Networks. ';
+    }
+    $s .= '© 2026 ' . brand('company') . '. All rights reserved.';
     return $s;
 }
 
@@ -529,7 +547,8 @@ function chrome_accred(): string
     return '<div class="foot-accred" style="max-width:none;border-bottom:1px solid '
          . 'rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">' . "\n"
          . '      <strong>Accreditation</strong>' . "\n"
-         . '      <span>Accredited qualifications are delivered in association with '
+         . '      <span>Accredited qualifications are delivered '
+         . (brand_has('own_provider') ? 'by ' : 'in association with ')
          . 'Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades '
          . 'and Occupations (QCTO) as a Skills Development Provider. Accreditation No. '
          . e(brand('accred_no')) . ', valid ' . e(brand('accred_valid')) . '.</span>' . "\n"

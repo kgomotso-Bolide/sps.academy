@@ -235,6 +235,10 @@ function install_seed_tenants(?string $contact = null): int
         /* New GX Capital, the twelfth, cloned 16 Nov 2026 from Inhance at
            Sibusiso's request. Seeded here on the day it was cloned. */
         ['newgx',              'New GX Capital',       'New GX Academy'],
+        /* Centenary Networks Academy, the thirteenth, cloned 19 Nov 2026 from
+           SPS at Kgomotso's request: Centenary's own corporate learning
+           platform, not a client. Seeded here on the day it was cloned. */
+        ['centenary',          'Centenary Networks (Pty) Ltd', 'Centenary Networks Academy'],
     ];
 
     $added = 0;

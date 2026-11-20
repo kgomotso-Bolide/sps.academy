@@ -128,7 +128,7 @@ DirectoryIndex index.html index.php
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Permissions-Policy "camera=(), microphone=(self), geolocation=()"
 
   # NO Strict-Transport-Security here, deliberately.
   #

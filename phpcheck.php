@@ -110,6 +110,10 @@ foreach ($need as $e) {
     if (!$ok) $missing[] = $e;
     printf("    %-12s %s\n", $e, $ok ? 'yes' : 'MISSING');
 }
+/* Optional (19 Nov 2026): a staging copy with no MySQL slot left runs on a
+   SQLite file in ~/private. Reported, never required. */
+printf("    %-12s %s\n", 'pdo_sqlite', extension_loaded('pdo_sqlite')
+    ? 'yes (optional)' : 'no (optional — only a SQLite config needs it)');
 
 echo "\n  paths as PHP resolves them:\n";
 printf("    this file          %s\n", $appRoot);
