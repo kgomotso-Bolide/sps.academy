@@ -46,7 +46,7 @@ $out  = dirname($root) . '/sps-deploy-' . date('Y-m-d-Hi') . '.zip';
  * create the tables. It is denied to the web by its own .htaccess. */
 $skipDirs = [
     '.git', '.github', '.vscode', '.claude', '.idea',
-    '_drafts', 'private', 'node_modules', 'tools',
+    '_drafts', 'private', 'node_modules', 'tools', 'staging',
     'Website-inspiration-latout',
     'SPS-AI-Micro-Learning-Onepager.files',
 ];

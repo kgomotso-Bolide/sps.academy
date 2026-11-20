@@ -23,6 +23,10 @@
 Options -Indexes
 DirectoryIndex index.html index.php
 
+# The app (19 Nov 2026). The web app manifest must be served with its own type
+# or Chrome — and so the Play Store app — will not treat the site as installable.
+AddType application/manifest+json .webmanifest
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
@@ -195,3 +199,12 @@ DirectoryIndex index.html index.php
 # No ErrorDocument. It takes a path from the document root, which would have to
 # be hardcoded as /sps/404.html and would then be wrong at the subdomain. The
 # server's default 404 is plain but correct in both places.
+
+# The service worker (19 Nov 2026) must never sit in a cache, or a fix to it
+# takes a day to reach phones. Kept LAST in this file on purpose: a later
+# "Header set" wins, so above the 5-minute .js rule it would be overridden.
+<IfModule mod_headers.c>
+  <Files "sw.js">
+    Header set Cache-Control "no-cache"
+  </Files>
+</IfModule>
